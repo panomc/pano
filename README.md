@@ -1,3 +1,3 @@
-# Pano Website Backend
+# Pano Web Platform
 
-Pano website backend project.
+Pano web platform project.
