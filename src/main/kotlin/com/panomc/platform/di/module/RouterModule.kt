@@ -3,6 +3,10 @@ package com.panomc.platform.di.module
 import com.panomc.platform.model.Route
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
+import com.panomc.platform.route.staticFolder.common.CommonCSSFolder
+import com.panomc.platform.route.staticFolder.common.CommonFontsFolder
+import com.panomc.platform.route.staticFolder.common.CommonImgFolder
+import com.panomc.platform.route.staticFolder.common.CommonJsFolder
 import com.panomc.platform.route.template.IndexTemplate
 import dagger.Module
 import dagger.Provides
@@ -28,7 +32,11 @@ class RouterModule(private val mVertx: Vertx) {
     }
 
     private val mStaticFolderRouteList by lazy {
-        arrayOf<Route>(
+        arrayOf(
+            CommonCSSFolder(),
+            CommonFontsFolder(),
+            CommonImgFolder(),
+            CommonJsFolder()
         )
     }
 
