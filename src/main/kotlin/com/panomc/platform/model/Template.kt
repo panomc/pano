@@ -1,5 +1,3 @@
 package com.panomc.platform.model
 
-abstract class Template : Route() {
-    val templateFolder = "src/main/resources"
-}
+abstract class Template : Route()

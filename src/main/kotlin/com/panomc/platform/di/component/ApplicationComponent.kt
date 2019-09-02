@@ -1,11 +1,8 @@
 package com.panomc.platform.di.component
 
 import com.panomc.platform.Main
-import com.panomc.platform.di.module.LoggerModule
-import com.panomc.platform.di.module.RecaptchaModule
-import com.panomc.platform.di.module.RouterModule
-import com.panomc.platform.di.module.VertxModule
-import com.panomc.platform.model.Route
+import com.panomc.platform.di.module.*
+import com.panomc.platform.route.template.IndexTemplate
 import dagger.Component
 import javax.inject.Singleton
 
@@ -15,10 +12,12 @@ import javax.inject.Singleton
         (RecaptchaModule::class),
         (VertxModule::class),
         (LoggerModule::class),
-        (RouterModule::class)
+        (RouterModule::class),
+        (TemplateEngineModule::class)
     ]
 )
 interface ApplicationComponent {
-    fun inject(route: Route)
     fun inject(main: Main)
+
+    fun inject(indexTemplate: IndexTemplate)
 }

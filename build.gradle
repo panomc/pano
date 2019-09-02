@@ -40,6 +40,7 @@ dependencies {
     compile "io.vertx:vertx-sql-common:$vertxVersionVariable"
     compile "io.vertx:vertx-mail-client:$vertxVersionVariable"
     compile "io.vertx:vertx-lang-kotlin:$vertxVersionVariable"
+    compile "io.vertx:vertx-web-templ-handlebars:$vertxVersionVariable"
 
     compile 'com.beust:klaxon:5.0.12'
     compile "org.slf4j:slf4j-simple:1.7.28"
