@@ -4,4 +4,4 @@
 build
 .directory
 
-view/common/node_modules
+view/common/node_modules/
