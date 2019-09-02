@@ -3,3 +3,5 @@
 .vertx
 build
 .directory
+
+view/common/node_modules

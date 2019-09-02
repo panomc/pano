@@ -1,0 +1,147 @@
+// Colors
+
+$primary: #1976d2;
+$lightprimary: rgba($primary, .075);
+$secondary: #66bb6a;
+$dark: #656D78;
+$gray: #CCD1D9;
+$light: #F5F7FA;
+$white: #fff;
+$black: #000;
+$glass: rgba($black, .1);
+$lightglass: rgba($white, .1);
+$mint: #48CFAD;
+$muted: #6c757d;
+$sunflower: #F6BB42;
+$bittersweet: #FC6E51;
+$aqua: #4FC1E9;
+
+$body-bg: $light;
+$body-color: $dark;
+
+$theme-colors: (
+        "primary": $primary,
+        "secondary": $secondary,
+        "dark": $dark,
+        "light": $light,
+        "gray": $gray,
+        "white": $white,
+        "black": $black,
+        "lightprimary": $lightprimary,
+        "mint": $mint,
+        "muted": $muted,
+        "sunflower": $sunflower,
+        "glass": $glass,
+        "bittersweet": $bittersweet,
+        "lightglass": $lightglass,
+        "aqua": $aqua,
+);
+
+// Settings
+
+$enable-shadows: true;
+$enable-rounded: true;
+
+// Grids
+
+$grid-gutter-width: 15px;
+
+// Fonts
+
+// $lead-font-size: 1.15rem;
+$font-weight-base: 500;
+$font-weight-normal: 400;
+$lead-font-weight: normal;
+$font-family-base: 'Quicksand', sans-serif;
+
+// Headings
+
+$headings-font-weight: bolder;
+
+// Borders
+
+$border-radius: .5rem;
+$border-radius-lg: .5rem;
+$border-radius-sm: .5rem;
+
+// Buttons
+
+$btn-padding-x-lg: 1rem;
+$btn-padding-x: 1rem;
+$btn-padding-x-sm: 1rem;
+$btn-font-weight: $font-weight-base !important;
+$btn-box-shadow: 0 4px 0 $glass;
+$btn-active-box-shadow: none;
+$btn-border-width: 2px;
+
+// Links
+
+$link-color: $primary;
+$link-hover-decoration: none;
+
+// Box Shadow
+
+$box-shadow: 0 5px 0 $glass;
+$box-shadow-sm: 0 3px 0 $glass;
+$box-shadow-lg: 0 10px 0 $glass;
+
+// Modals
+
+$modal-backdrop-opacity: .2;
+$modal-content-box-shadow-sm-up: 0 0 30px $glass;
+
+// Alerts
+
+$alert-color-level: 2;
+
+// Forms
+
+$form-group-margin-bottom: 1.5rem;
+
+// Inputs
+
+$input-box-shadow: 0 1.5px 0 $glass;
+$input-bg: $white;
+$input-font-weight: $font-weight-normal;
+
+// Dropdowns
+
+$dropdown-box-shadow: 0 5px 0 $glass;
+$dropdown-link-active-bg: $lightprimary;
+$dropdown-link-active-color: $primary;
+
+// Navbar
+
+$navbar-light-active-color: $primary;
+$navbar-light-disabled-color: $gray;
+$navbar-padding-y: 1rem;
+$navbar-padding-x: 1rem;
+$navbar-nav-link-padding-x: 1rem;
+$navbar-dark-color: rgba($white, .9);
+
+// Tables
+
+$table-color: $dark;
+
+// Navs
+
+$nav-tabs-border-width: 0;
+$nav-tabs-link-active-bg: $white;
+$nav-pills-link-active-color: $primary;
+$nav-pills-link-active-bg: $lightprimary;
+
+// List Group
+
+$list-group-item-padding-y: .5rem;
+$list-group-item-padding-x: .5rem;
+$list-group-hover-bg: $lightprimary;
+$list-group-active-bg: $white;
+$list-group-active-color: $primary;
+$list-group-disabled-color: $gray;
+$list-group-border-radius: 0;
+$list-group-border-width: 0;
+
+// Paginations
+
+$pagination-active-bg: $lightprimary;
+$pagination-active-color: $primary;

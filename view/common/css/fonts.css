@@ -1,0 +1,45 @@
+/* quicksand-300 - latin-ext_latin_vietnamese */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 300;
+    src: url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.eot");
+    /* IE9 Compat Modes */
+    src: local("Quicksand Light"), local("Quicksand-Light"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.eot?#iefix") format("embedded-opentype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.woff2") format("woff2"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.woff") format("woff"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.ttf") format("truetype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-300.svg#Quicksand") format("svg");
+    /* Legacy iOS */
+}
+
+/* quicksand-regular - latin-ext_latin_vietnamese */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 400;
+    src: url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.eot");
+    /* IE9 Compat Modes */
+    src: local("Quicksand Regular"), local("Quicksand-Regular"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.eot?#iefix") format("embedded-opentype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.woff2") format("woff2"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.woff") format("woff"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.ttf") format("truetype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-regular.svg#Quicksand") format("svg");
+    /* Legacy iOS */
+}
+
+/* quicksand-500 - latin-ext_latin_vietnamese */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 500;
+    src: url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.eot");
+    /* IE9 Compat Modes */
+    src: local("Quicksand Medium"), local("Quicksand-Medium"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.eot?#iefix") format("embedded-opentype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.woff2") format("woff2"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.woff") format("woff"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.ttf") format("truetype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-500.svg#Quicksand") format("svg");
+    /* Legacy iOS */
+}
+
+/* quicksand-700 - latin-ext_latin_vietnamese */
+@font-face {
+    font-family: 'Quicksand';
+    font-style: normal;
+    font-weight: 700;
+    src: url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.eot");
+    /* IE9 Compat Modes */
+    src: local("Quicksand Bold"), local("Quicksand-Bold"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.eot?#iefix") format("embedded-opentype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.woff2") format("woff2"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.woff") format("woff"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.ttf") format("truetype"), url("/common/fonts/quicksand-v8-latin-ext_latin_vietnamese-700.svg#Quicksand") format("svg");
+    /* Legacy iOS */
+}
+
+/*# sourceMappingURL=fonts.css.map */

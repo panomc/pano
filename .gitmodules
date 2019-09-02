@@ -1,0 +1,9 @@
+[submodule "view/ui/setup"]
+	path = view/ui/setup
+	url = https://gitlab.com/defio-workshop/pano/platform-ui/setup-ui.git
+[submodule "view/ui/site/panel"]
+	path = view/ui/site/panel
+	url = https://gitlab.com/defio-workshop/pano/platform-ui/panel-ui.git
+[submodule "view/ui/site/themes/Vanilla"]
+	path = view/ui/site/themes/Vanilla
+	url = https://gitlab.com/defio-workshop/pano/platform-ui/vanilla-theme.git
