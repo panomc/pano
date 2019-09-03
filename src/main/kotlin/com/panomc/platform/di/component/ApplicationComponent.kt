@@ -13,7 +13,8 @@ import javax.inject.Singleton
         (VertxModule::class),
         (LoggerModule::class),
         (RouterModule::class),
-        (TemplateEngineModule::class)
+        (TemplateEngineModule::class),
+        (ConfigManagerModule::class)
     ]
 )
 interface ApplicationComponent {

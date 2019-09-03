@@ -2,6 +2,7 @@ package com.panomc.platform
 
 import com.panomc.platform.di.component.ApplicationComponent
 import com.panomc.platform.di.component.DaggerApplicationComponent
+import com.panomc.platform.di.module.ConfigManagerModule
 import com.panomc.platform.di.module.LoggerModule
 import com.panomc.platform.di.module.RouterModule
 import com.panomc.platform.di.module.VertxModule
@@ -19,22 +20,24 @@ class Main : AbstractVerticle() {
     companion object {
         private val mOptions = VertxOptions()
         private val mVertx = Vertx.vertx(mOptions)
+        private val mLogger = LoggerFactory.getLogger("Pano Platform")
 
         @JvmStatic
         fun main(args: Array<String>) {
             mVertx.deployVerticle(Main())
         }
 
-        private val component: ApplicationComponent by lazy {
+        private val mComponent: ApplicationComponent by lazy {
             DaggerApplicationComponent
                 .builder()
                 .vertxModule(VertxModule(mVertx))
-                .loggerModule(LoggerModule(LoggerFactory.getLogger("Pano Platform")))
+                .loggerModule(LoggerModule(mLogger))
+                .configManagerModule(ConfigManagerModule(mLogger, mVertx))
                 .routerModule(RouterModule(mVertx))
                 .build()
         }
 
-        internal fun getComponent() = component
+        internal fun getComponent() = mComponent
     }
 
     @Inject

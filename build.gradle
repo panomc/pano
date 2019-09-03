@@ -41,6 +41,8 @@ dependencies {
     compile "io.vertx:vertx-mail-client:$vertxVersionVariable"
     compile "io.vertx:vertx-lang-kotlin:$vertxVersionVariable"
     compile "io.vertx:vertx-web-templ-handlebars:$vertxVersionVariable"
+    compile "io.vertx:vertx-config:$vertxVersionVariable"
+    compile "io.vertx:vertx-lang-kotlin-coroutines:$vertxVersionVariable"
 
     compile 'com.beust:klaxon:5.0.12'
     compile "org.slf4j:slf4j-simple:1.7.28"
@@ -52,8 +54,8 @@ dependencies {
     // recaptcha v2 1.0.2
     compile "com.github.triologygmbh:reCAPTCHA-V2-java:1.0.2"
 
-    // kotlin coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0'
+//    // kotlin coroutines
+//    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0'
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
