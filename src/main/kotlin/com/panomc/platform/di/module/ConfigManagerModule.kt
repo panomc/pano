@@ -10,6 +10,7 @@ import javax.inject.Singleton
 @Module
 class ConfigManagerModule(logger: Logger, vertx: Vertx) {
 
+    @Singleton
     private val mConfigManager = ConfigManager(logger, vertx)
 
     @Provides
