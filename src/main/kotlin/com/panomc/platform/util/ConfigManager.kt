@@ -97,4 +97,8 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
 
         return jsonObject.toJsonString(prettyPrint, canonical)
     }
+
+    fun saveConfig() {
+        mConfigFile.writeText(config.toJsonString(true))
+    }
 }

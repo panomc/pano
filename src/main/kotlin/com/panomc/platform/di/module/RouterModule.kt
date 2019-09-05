@@ -1,8 +1,11 @@
 package com.panomc.platform.di.module
 
-import com.panomc.platform.model.Route
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
+import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
+import com.panomc.platform.route.api.post.setup.step.BackStepAPI
+import com.panomc.platform.route.api.post.setup.step.CheckAPI
+import com.panomc.platform.route.api.post.setup.step.NextStepAPI
 import com.panomc.platform.route.staticFolder.assets.*
 import com.panomc.platform.route.staticFolder.common.CommonCSSFolder
 import com.panomc.platform.route.staticFolder.common.CommonFontsFolder
@@ -57,7 +60,11 @@ class RouterModule(private val mVertx: Vertx) {
     }
 
     private val mAPIRouteList by lazy {
-        arrayOf<Route>(
+        arrayOf(
+            CheckAPI(),
+            BackStepAPI(),
+            NextStepAPI(),
+            DBConnectionTestAPI()
         )
     }
 
