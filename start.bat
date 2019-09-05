@@ -1,2 +1,2 @@
-gradlew vertxdebug --no-daemon
+gradlew vertxRun --no-daemon
 PAUSE
