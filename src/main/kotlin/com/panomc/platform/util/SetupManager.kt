@@ -60,6 +60,10 @@ class SetupManager(private val mConfigManager: ConfigManager) {
             setStep(currentStep + 1)
     }
 
+    fun finishSetup() {
+        setStep(4)
+    }
+
     fun getStep() = (mConfigManager.config["setup"] as Map<*, *>)["step"] as Int
 
     private fun setStep(step: Int) {

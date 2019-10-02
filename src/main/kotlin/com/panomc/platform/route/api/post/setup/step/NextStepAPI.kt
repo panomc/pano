@@ -42,9 +42,9 @@ class NextStepAPI : Api() {
         if (clientStep == setupManager.getStep()) {
             var passStep = false
 
-            if (clientStep == 0) {
+            if (clientStep == 0)
                 passStep = true
-            } else if (clientStep == 1 && !data.getString("websiteName").isNullOrEmpty() && !data.getString("websiteDescription").isNullOrEmpty()) {
+            else if (clientStep == 1 && !data.getString("websiteName").isNullOrEmpty() && !data.getString("websiteDescription").isNullOrEmpty()) {
                 configManager.config["website-name"] = data.getString("websiteName")
                 configManager.config["website-description"] = data.getString("websiteDescription")
 

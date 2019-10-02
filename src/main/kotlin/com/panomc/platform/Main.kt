@@ -2,7 +2,9 @@ package com.panomc.platform
 
 import com.panomc.platform.di.component.ApplicationComponent
 import com.panomc.platform.di.component.DaggerApplicationComponent
-import com.panomc.platform.di.module.*
+import com.panomc.platform.di.module.LoggerModule
+import com.panomc.platform.di.module.RouterModule
+import com.panomc.platform.di.module.VertxModule
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -29,8 +31,6 @@ class Main : AbstractVerticle() {
                 .builder()
                 .vertxModule(VertxModule(mVertx))
                 .loggerModule(LoggerModule(mLogger))
-                .configManagerModule(ConfigManagerModule(mLogger, mVertx))
-                .setupManagerModule(SetupManagerModule())
                 .routerModule(RouterModule(mVertx))
                 .build()
         }

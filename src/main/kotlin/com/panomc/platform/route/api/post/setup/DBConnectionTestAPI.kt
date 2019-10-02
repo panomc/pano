@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.post.setup
 
 import com.beust.klaxon.JsonObject
+import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.Api
 import com.panomc.platform.model.RouteType
@@ -74,7 +75,7 @@ class DBConnectionTestAPI : Api() {
                         JsonObject(
                             mapOf(
                                 "result" to "error",
-                                "error" to "INVALID_DATA"
+                                "error" to ErrorCode.INVALID_DATA
                             )
                         ).toJsonString()
                     )

@@ -2,6 +2,7 @@ package com.panomc.platform.route.template
 
 import com.panomc.platform.Main
 import com.panomc.platform.model.Template
+import com.panomc.platform.util.Auth
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
@@ -31,14 +32,29 @@ class IndexTemplate : Template() {
                 "location",
                 mHotLinks[normalisedPath.toLowerCase()]
             ).setStatusCode(302).end()
-        else {
-            templateEngine
-                .render(JsonObject(), "view/ui-template/vue-ui-index.hbs") { res ->
-                    if (res.succeeded())
-                        response.end(res.result())
-                    else
-                        response.end("Hello to Pano web platform!")
-                }
-        }
+        else if (normalisedPath.startsWith("/panel")) {
+            val auth = Auth()
+
+            auth.isAdmin(context) { isAdmin ->
+                handleTemplateEngine(context, isAdmin)
+            }
+        } else
+            handleTemplateEngine(context)
+    }
+
+    private fun handleTemplateEngine(context: RoutingContext, isAdmin: Boolean = false) {
+        val response = context.response()
+
+        templateEngine
+            .render(
+                JsonObject().put("is_panel", isAdmin),
+                "view/ui-template/vue-ui-index.hbs"
+            ) { res ->
+                if (res.succeeded())
+                    response.end(res.result())
+                else
+                    response.end("Hello to Pano web platform!")
+            }
+
     }
 }

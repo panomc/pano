@@ -17,13 +17,33 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot, 
         getComponent().inject(this)
     }
 
-    override fun handle(context: RoutingContext?) {
-        val assetsFolderRoot = if (setupManager.isSetupDone())
-            "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
-        else
-            "view/ui/setup/assets/"
+    override fun handle(context: RoutingContext) {
+        if (context.normalisedPath().startsWith("/panel/")) {
+            val auth = Auth()
 
-        setWebRoot(assetsFolderRoot + mRoot)
+            auth.isAdmin(context) { isAdmin ->
+                val assetsFolderRoot = if (setupManager.isSetupDone())
+                    if (isAdmin)
+                        "view/ui/site/panel/assets/"
+                    else
+                        "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
+                else
+                    "view/ui/setup/assets/"
+
+                handle(assetsFolderRoot, context)
+            }
+        } else {
+            val assetsFolderRoot = if (setupManager.isSetupDone())
+                "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
+            else
+                "view/ui/setup/assets/"
+
+            handle(assetsFolderRoot, context)
+        }
+    }
+
+    private fun handle(path: String, context: RoutingContext) {
+        setWebRoot(path + mRoot)
 
         super.handle(context)
     }

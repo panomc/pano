@@ -3,6 +3,7 @@ package com.panomc.platform.di.module
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
+import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
 import com.panomc.platform.route.api.post.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.setup.step.NextStepAPI
@@ -64,7 +65,8 @@ class RouterModule(private val mVertx: Vertx) {
             CheckAPI(),
             BackStepAPI(),
             NextStepAPI(),
-            DBConnectionTestAPI()
+            DBConnectionTestAPI(),
+            FinishAPI()
         )
     }
 
