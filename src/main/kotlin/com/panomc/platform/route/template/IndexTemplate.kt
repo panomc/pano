@@ -44,7 +44,6 @@ class IndexTemplate : Template() {
 
     private fun handleTemplateEngine(context: RoutingContext, isAdmin: Boolean = false) {
         val response = context.response()
-
         templateEngine
             .render(
                 JsonObject().put("is_panel", isAdmin),

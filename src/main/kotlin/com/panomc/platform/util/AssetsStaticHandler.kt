@@ -22,28 +22,29 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot, 
             val auth = Auth()
 
             auth.isAdmin(context) { isAdmin ->
-                val assetsFolderRoot = if (setupManager.isSetupDone())
-                    if (isAdmin)
-                        "view/ui/site/panel/assets/"
-                    else
-                        "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
-                else
-                    "view/ui/setup/assets/"
-
-                handle(assetsFolderRoot, context)
+                handle(context, isAdmin)
             }
-        } else {
-            val assetsFolderRoot = if (setupManager.isSetupDone())
-                "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
-            else
-                "view/ui/setup/assets/"
-
-            handle(assetsFolderRoot, context)
-        }
+        } else
+            handle(context, false)
     }
 
-    private fun handle(path: String, context: RoutingContext) {
-        setWebRoot(path + mRoot)
+    private fun handle(context: RoutingContext, isAdmin: Boolean) {
+        @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var assetsFolderRoot = if (setupManager.isSetupDone())
+            "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
+        else
+            "view/ui/setup/assets/"
+
+        val normalisedPath = context.normalisedPath()
+
+        if (normalisedPath.startsWith("/panel/") && isAdmin)
+            assetsFolderRoot = "view/ui/site/panel/assets/"
+        else if (normalisedPath.startsWith("/panel/")) {
+            context.reroute("/error-404")
+
+            return
+        }
+
+        setWebRoot(assetsFolderRoot + mRoot)
 
         super.handle(context)
     }

@@ -31,32 +31,31 @@ class SrcFolderRoute : Route() {
             val auth = Auth()
 
             auth.isAdmin(context) { isAdmin ->
-                val srcFolderRoot = if (setupManager.isSetupDone())
-                    if (isAdmin)
-                        "view/ui/site/"
-                    else
-                        "view/ui/site/themes/" + configManager.config.string("current-theme") + "/"
-                else
-                    "view/ui/setup/"
-
-                handle(srcFolderRoot, context)
+                handle(context, isAdmin)
             }
-        } else {
-            val srcFolderRoot = if (setupManager.isSetupDone())
-                "view/ui/site/themes/" + configManager.config.string("current-theme") + "/"
-            else
-                "view/ui/setup/"
-
-            handle(srcFolderRoot, context)
-        }
+        } else
+            handle(context)
     }
 
-    private fun handle(path: String, context: RoutingContext) {
+    private fun handle(context: RoutingContext, isAdmin: Boolean = false) {
+        @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var srcFolderRoot = if (setupManager.isSetupDone())
+            "view/ui/site/themes/" + configManager.config.string("current-theme") + "/"
+        else
+            "view/ui/setup/"
+
         val response = context.response()
         val normalisedPath = context.normalisedPath()
 
-        val componentFile = File("$path$normalisedPath/index.js")
-        val componentUIFile = File("$path$normalisedPath/index.html")
+        if (normalisedPath.startsWith("/panel/") && isAdmin)
+            srcFolderRoot = "view/ui/site/"
+        else if (normalisedPath.startsWith("/panel/")) {
+            context.reroute("/error-404")
+
+            return
+        }
+
+        val componentFile = File("$srcFolderRoot$normalisedPath/index.js")
+        val componentUIFile = File("$srcFolderRoot$normalisedPath/index.html")
 
         if (componentFile.exists() && componentUIFile.exists())
             response.end(
