@@ -29,17 +29,21 @@ open class Auth {
 
     var ipAddress: String? = null
 
-    fun getConnection() = databaseManager.getSQLConnection()
+    lateinit var connection: Connection
+
+    fun getConnection() = databaseManager.getSQLConnection(connection)
 
     fun closeConnection(handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
-        databaseManager.closeConnection(handler)
+        databaseManager.closeConnection(connection, handler)
     }
 
     fun createConnection(resultHandler: (authResult: AuthResult) -> Unit, handler: () -> Unit) {
-        databaseManager.createConnection().setHandler {
-            if (it.succeeded())
+        databaseManager.createConnection { connection, _ ->
+            if (connection != null) {
+                this.connection = connection
+
                 handler.invoke()
-            else
+            } else
                 resultHandler.invoke(Error(ErrorCode.INVALID_DATA))
         }
     }
@@ -92,6 +96,7 @@ open class Auth {
             "SELECT permission_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(userID)) { queryResult ->
+
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else

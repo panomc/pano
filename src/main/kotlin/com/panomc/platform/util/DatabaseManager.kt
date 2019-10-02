@@ -1,7 +1,6 @@
 package com.panomc.platform.util
 
 import io.vertx.core.AsyncResult
-import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
 import io.vertx.ext.asyncsql.AsyncSQLClient
@@ -16,9 +15,7 @@ class DatabaseManager(
 
     private lateinit var mAsyncSQLClient: AsyncSQLClient
 
-    private lateinit var mSqlConnection: SQLConnection
-
-    fun createConnection() = Future.future<AsyncResult<SQLConnection>> { getConnectionFunction ->
+    fun createConnection(handler: (connection: Connection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
         if (!::mAsyncSQLClient.isInitialized) {
             val databaseConfig = (mConfigManager.config["database"] as Map<String, Any>)
 
@@ -43,47 +40,34 @@ class DatabaseManager(
             mAsyncSQLClient = MySQLClient.createShared(mVertx, mySQLClientConfig, "MysqlLoginPool")
         }
 
-        mAsyncSQLClient.getConnection { getConnection ->
-            getConnectionFunction.complete(
-                if (getConnection.succeeded()) {
-                    mSqlConnection = getConnection.result()
-
-                    mSqlConnection
-                    getConnection
-                } else {
-                    mLogger.error("Failed to connect database! Error is: ${getConnection.result()}")
-
-                    getConnection
-                }
-            )
+        Connection.createConnection(mLogger, mAsyncSQLClient) { connection, asyncResult ->
+            handler.invoke(connection, asyncResult)
         }
     }
 
-    fun closeConnection(handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
-        mSqlConnection.close {
-            handler?.invoke(it)
-        }
+    fun closeConnection(connection: Connection, handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
+        connection.closeConnection(handler)
     }
 
-    fun getSQLConnection() = mSqlConnection
+    fun getSQLConnection(connection: Connection) = connection.getSQLConnection()
 
     fun initDatabaseTables(handler: (asyncResult: AsyncResult<*>) -> Unit) {
-        createConnection().setHandler {
-            if (it.result().succeeded()) {
+        createConnection { connection, asyncResult ->
+            if (connection !== null) {
                 val tablePrefix = (mConfigManager.config["database"] as Map<*, *>)["prefix"].toString()
 
                 val databaseInitProcessHandlers = listOf(
-                    DatabaseInitUtil.createUserTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPermissionTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createTokenTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPanelConfigTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createServerTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPostTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPostCategoryTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createTicketTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createTicketCategoryTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createSchemeVersionTable(mSqlConnection, tablePrefix),
-                    DatabaseInitUtil.createAdminPermission(mSqlConnection, tablePrefix)
+                    DatabaseInitUtil.createUserTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createPermissionTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createTokenTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createPanelConfigTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createServerTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createPostTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createPostCategoryTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createTicketTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createTicketCategoryTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createSchemeVersionTable(connection.getSQLConnection(), tablePrefix),
+                    DatabaseInitUtil.createAdminPermission(connection.getSQLConnection(), tablePrefix)
                 )
 
                 var currentIndex = 0
@@ -91,10 +75,10 @@ class DatabaseManager(
                 fun invoke() {
                     val localHandler: (AsyncResult<*>) -> Unit = {
                         when {
-                            it.failed() -> closeConnection { _ ->
+                            it.failed() -> closeConnection(connection) { _ ->
                                 handler.invoke(it)
                             }
-                            currentIndex == databaseInitProcessHandlers.lastIndex -> closeConnection { _ ->
+                            currentIndex == databaseInitProcessHandlers.lastIndex -> closeConnection(connection) { _ ->
                                 handler.invoke(it)
                             }
                             else -> {
@@ -111,9 +95,7 @@ class DatabaseManager(
 
                 invoke()
             } else
-                closeConnection { _ ->
-                    handler.invoke(it.result())
-                }
+                handler.invoke(asyncResult)
         }
     }
 }
