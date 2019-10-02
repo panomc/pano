@@ -135,28 +135,31 @@ open class Auth {
     }
 
     fun isAdmin(context: RoutingContext, handler: (isAdmin: Boolean) -> Unit) {
-        isLoggedIn(context) {
-            val token = context.getCookie("pano_token").value
+        isLoggedIn(context) { isLoggedIn ->
+            if (isLoggedIn) {
+                val token = context.getCookie("pano_token").value
 
-            getUserIDFromToken(token) { userID ->
-                if (userID == 0)
-                    handler.invoke(false)
-                else
-                    getPermissionIDFromUserID(userID) { permissionID ->
-                        if (permissionID == -1)
-                            handler.invoke(false)
-                        else
-                            getPermissionFromPermissionID(permissionID) { permission ->
-                                closeConnection {
-                                    when {
-                                        permission.isNullOrEmpty() -> handler.invoke(false)
-                                        permission == "admin" -> handler.invoke(true)
-                                        else -> handler.invoke(false)
+                getUserIDFromToken(token) { userID ->
+                    if (userID == 0)
+                        handler.invoke(false)
+                    else
+                        getPermissionIDFromUserID(userID) { permissionID ->
+                            if (permissionID == -1)
+                                handler.invoke(false)
+                            else
+                                getPermissionFromPermissionID(permissionID) { permission ->
+                                    closeConnection {
+                                        when {
+                                            permission.isNullOrEmpty() -> handler.invoke(false)
+                                            permission == "admin" -> handler.invoke(true)
+                                            else -> handler.invoke(false)
+                                        }
                                     }
                                 }
-                            }
-                    }
-            }
+                        }
+                }
+            } else
+                handler.invoke(false)
         }
     }
 
