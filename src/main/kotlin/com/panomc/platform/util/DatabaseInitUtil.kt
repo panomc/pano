@@ -1,5 +1,7 @@
 package com.panomc.platform.util
 
+import com.panomc.platform.util.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
+import com.panomc.platform.util.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
@@ -254,16 +256,18 @@ object DatabaseInitUtil {
                     """
                         SELECT COUNT(`key`) FROM ${tablePrefix}scheme_version where `key` = ?
             """.trimIndent(),
-                    JsonArray().add("1")
+                    JsonArray().add(DATABASE_SCHEME_VERSION.toString())
                 ) {
                     if (it.failed() || it.result().results[0].getInteger(0) != 0)
                         handler.invoke(it)
                     else
                         sqlConnection.updateWithParams(
                             """
-                        INSERT INTO ${tablePrefix}scheme_version (`key`) VALUES (?)
+                        INSERT INTO ${tablePrefix}scheme_version (`key`, `extra`) VALUES (?, ?)
             """.trimIndent(),
-                            JsonArray().add("1")
+                            JsonArray()
+                                .add(DATABASE_SCHEME_VERSION.toString())
+                                .add(DATABASE_SCHEME_VERSION_INFO)
                         ) {
                             handler.invoke(it)
                         }

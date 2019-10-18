@@ -65,6 +65,9 @@ class DatabaseManager(
     }
 
     companion object {
+        const val DATABASE_SCHEME_VERSION = 1
+        const val DATABASE_SCHEME_VERSION_INFO = ""
+
         interface DatabaseMigration {
             fun migrate(
                 sqlConnection: SQLConnection,
