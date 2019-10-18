@@ -10,14 +10,73 @@ import io.vertx.ext.sql.SQLConnection
 class DatabaseManager(
     private val mVertx: Vertx,
     private val mLogger: Logger,
-    private val mConfigManager: ConfigManager
+    private val mConfigManager: ConfigManager,
+    setupManager: SetupManager
 ) {
-
     private lateinit var mAsyncSQLClient: AsyncSQLClient
+
+    private val mMigrations = listOf<DatabaseMigration>(
+    )
+
+    init {
+        if (setupManager.isSetupDone())
+            createConnection { connection, _ ->
+                if (connection != null) {
+                    val tablePrefix = (mConfigManager.config["database"] as Map<*, *>)["prefix"].toString()
+
+                    val query = "SELECT MAX(`key`) FROM ${tablePrefix}scheme_version"
+
+                    val sqlConnection = connection.getSQLConnection()
+
+                    sqlConnection.query(
+                        query
+                    ) { queryResult ->
+                        val databaseVersion = queryResult.result().results[0].getString(0).toIntOrNull() ?: 0
+
+                        if (databaseVersion == 0)
+                            mLogger.error("Database Error: Database scheme is not correct, please reinstall platform")
+                        else {
+                            val handlers = mMigrations.map { it.migrate(sqlConnection, databaseVersion, tablePrefix) }
+
+                            var currentIndex = 0
+
+                            fun invoke() {
+                                val localHandler: (AsyncResult<*>) -> Unit = {
+                                    when {
+                                        it.failed() -> closeConnection(connection)
+                                        currentIndex == handlers.lastIndex -> closeConnection(connection)
+                                        else -> {
+                                            currentIndex++
+
+                                            invoke()
+                                        }
+                                    }
+                                }
+
+                                if (currentIndex <= handlers.lastIndex)
+                                    handlers[currentIndex].invoke(localHandler)
+                            }
+
+                            invoke()
+                        }
+                    }
+                }
+            }
+    }
+
+    companion object {
+        interface DatabaseMigration {
+            fun migrate(
+                sqlConnection: SQLConnection,
+                version: Int,
+                tablePrefix: String
+            ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection
+        }
+    }
 
     fun createConnection(handler: (connection: Connection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
         if (!::mAsyncSQLClient.isInitialized) {
-            val databaseConfig = (mConfigManager.config["database"] as Map<String, Any>)
+            val databaseConfig = (mConfigManager.config["database"] as Map<*, *>)
 
             var port = 3306
             var host = databaseConfig["host"] as String
