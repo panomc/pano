@@ -12,6 +12,9 @@ import java.io.File
 
 class ConfigManager(mLogger: Logger, mVertx: Vertx) {
 
+    private val mMigrations = listOf<ConfigMigration>(
+    )
+
     val config = com.beust.klaxon.JsonObject()
 
     private val mConfigFile = File("config.json")
@@ -29,7 +32,7 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     companion object {
         private const val CONFIG_VERSION = 1
 
-        val DEFAULT_CONFIG by lazy {
+        private val DEFAULT_CONFIG by lazy {
             JsonObject(
                 mapOf(
                     "config-version" to CONFIG_VERSION,
@@ -60,25 +63,29 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                 )
             )
         }
+
+        abstract class ConfigMigration(configManager: ConfigManager) {
+            abstract fun migrate()
+        }
     }
 
     init {
         if (mIsFileConfig) {
-            val mFileStore = ConfigStoreOptions()
+            val fileStore = ConfigStoreOptions()
                 .setType("file")
                 .setConfig(JsonObject().put("path", "config.json"))
 
-            val mOptions = ConfigRetrieverOptions().addStore(mFileStore)
+            val options = ConfigRetrieverOptions().addStore(fileStore)
 
-            val mRetriever = ConfigRetriever.create(mVertx, mOptions)
+            val retriever = ConfigRetriever.create(mVertx, options)
 
-            runBlocking {
-                config.clear()
+            loadConfigFromFile(retriever)
 
-                config.putAll(mRetriever.getConfigAwait().map)
-            }
+            migrate()
 
-            mRetriever.listen { change ->
+            loadConfigFromFile(retriever)
+
+            retriever.listen { change ->
                 config.clear()
 
                 config.putAll(change.newConfiguration.map)
@@ -87,6 +94,20 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
             config.clear()
 
             config.putAll(DEFAULT_CONFIG.map)
+        }
+    }
+
+    private fun loadConfigFromFile(retriever: ConfigRetriever) {
+        runBlocking {
+            config.clear()
+
+            config.putAll(retriever.getConfigAwait().map)
+        }
+    }
+
+    private fun migrate() {
+        mMigrations.forEach {
+            it.migrate()
         }
     }
 
@@ -101,4 +122,6 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     fun saveConfig() {
         mConfigFile.writeText(config.toJsonString(true))
     }
+
+    fun getConfigVersion() = config["config-version"] as Int
 }
