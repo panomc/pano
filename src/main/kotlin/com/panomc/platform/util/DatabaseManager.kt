@@ -2,6 +2,7 @@ package com.panomc.platform.util
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonArray
 import io.vertx.core.logging.Logger
 import io.vertx.ext.asyncsql.AsyncSQLClient
 import io.vertx.ext.asyncsql.MySQLClient
@@ -42,14 +43,24 @@ class DatabaseManager(
 
                             fun invoke() {
                                 val localHandler: (AsyncResult<*>) -> Unit = {
-                                    when {
-                                        it.failed() || currentIndex == handlers.lastIndex -> closeConnection(connection)
-                                        else -> {
-                                            currentIndex++
+                                    mMigrations[currentIndex].updateSchemeVersion(sqlConnection, tablePrefix)
+                                        .invoke { updateSchemeVersion ->
+                                            if (updateSchemeVersion.failed())
+                                                mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                                            else {
+                                                when {
+                                                    it.failed() -> closeConnection(connection) {
+                                                        mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                                                    }
+                                                    currentIndex == handlers.lastIndex -> closeConnection(connection)
+                                                    else -> {
+                                                        currentIndex++
 
-                                            invoke()
+                                                        invoke()
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
                                 }
 
                                 if (mMigrations[currentIndex].isMigratable(databaseVersion)) {
@@ -82,7 +93,11 @@ class DatabaseManager(
                 handler: (asyncResult: AsyncResult<*>) -> Unit
             ) -> SQLConnection>
 
-            fun isMigratable(version: Int): Boolean
+            val FROM_SCHEME_VERSION: Int
+            val SCHEME_VERSION: Int
+            val SCHEME_VERSION_INFO: String
+
+            fun isMigratable(version: Int) = version == FROM_SCHEME_VERSION
 
             fun migrate(
                 sqlConnection: SQLConnection,
@@ -108,6 +123,22 @@ class DatabaseManager(
                 }
 
                 invoke()
+            }
+
+            fun updateSchemeVersion(
+                sqlConnection: SQLConnection,
+                tablePrefix: String
+            ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
+                sqlConnection.updateWithParams(
+                    """
+                        INSERT INTO ${tablePrefix}scheme_version (`key`, `extra`) VALUES (?, ?)
+            """.trimIndent(),
+                    JsonArray()
+                        .add(SCHEME_VERSION.toString())
+                        .add(DATABASE_SCHEME_VERSION_INFO)
+                ) {
+                    handler.invoke(it)
+                }
             }
         }
     }
