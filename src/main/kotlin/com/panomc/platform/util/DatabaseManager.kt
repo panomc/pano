@@ -36,15 +36,14 @@ class DatabaseManager(
                         if (databaseVersion == 0)
                             mLogger.error("Database Error: Database scheme is not correct, please reinstall platform")
                         else {
-                            val handlers = mMigrations.map { it.migrate(sqlConnection, databaseVersion, tablePrefix) }
+                            val handlers = mMigrations.map { it.migrate(sqlConnection, tablePrefix) }
 
                             var currentIndex = 0
 
                             fun invoke() {
                                 val localHandler: (AsyncResult<*>) -> Unit = {
                                     when {
-                                        it.failed() -> closeConnection(connection)
-                                        currentIndex == handlers.lastIndex -> closeConnection(connection)
+                                        it.failed() || currentIndex == handlers.lastIndex -> closeConnection(connection)
                                         else -> {
                                             currentIndex++
 
@@ -53,8 +52,16 @@ class DatabaseManager(
                                     }
                                 }
 
-                                if (currentIndex <= handlers.lastIndex)
-                                    handlers[currentIndex].invoke(localHandler)
+                                if (mMigrations[currentIndex].isMigratable(databaseVersion)) {
+                                    if (currentIndex <= handlers.lastIndex)
+                                        handlers[currentIndex].invoke(localHandler)
+                                } else if (currentIndex == handlers.lastIndex)
+                                    closeConnection(connection)
+                                else {
+                                    currentIndex++
+
+                                    invoke()
+                                }
                             }
 
                             invoke()
@@ -69,11 +76,39 @@ class DatabaseManager(
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
+            val handlers: List<(
+                sqlConnection: SQLConnection,
+                tablePrefix: String,
+                handler: (asyncResult: AsyncResult<*>) -> Unit
+            ) -> SQLConnection>
+
+            fun isMigratable(version: Int): Boolean
+
             fun migrate(
                 sqlConnection: SQLConnection,
-                version: Int,
                 tablePrefix: String
-            ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection
+            ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit = { handler ->
+                var currentIndex = 0
+
+                fun invoke() {
+                    val localHandler: (AsyncResult<*>) -> Unit = {
+                        when {
+                            it.failed() -> handler.invoke(it)
+                            currentIndex == handlers.lastIndex -> handler.invoke(it)
+                            else -> {
+                                currentIndex++
+
+                                invoke()
+                            }
+                        }
+                    }
+
+                    if (currentIndex <= handlers.lastIndex)
+                        handlers[currentIndex].invoke(sqlConnection, tablePrefix, localHandler)
+                }
+
+                invoke()
+            }
         }
     }
 
