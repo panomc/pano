@@ -43,24 +43,32 @@ class DatabaseManager(
 
                             fun invoke() {
                                 val localHandler: (AsyncResult<*>) -> Unit = {
-                                    mMigrations[currentIndex].updateSchemeVersion(sqlConnection, tablePrefix)
-                                        .invoke { updateSchemeVersion ->
-                                            if (updateSchemeVersion.failed())
+                                    fun check() {
+                                        when {
+                                            it.failed() -> closeConnection(connection) {
                                                 mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
-                                            else {
-                                                when {
-                                                    it.failed() -> closeConnection(connection) {
-                                                        mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
-                                                    }
-                                                    currentIndex == handlers.lastIndex -> closeConnection(connection)
-                                                    else -> {
-                                                        currentIndex++
+                                            }
+                                            currentIndex == handlers.lastIndex -> closeConnection(connection)
+                                            else -> {
+                                                currentIndex++
 
-                                                        invoke()
-                                                    }
-                                                }
+                                                invoke()
                                             }
                                         }
+                                    }
+
+                                    if (it.succeeded())
+                                        mMigrations[currentIndex].updateSchemeVersion(sqlConnection, tablePrefix)
+                                            .invoke { updateSchemeVersion ->
+                                                if (updateSchemeVersion.failed())
+                                                    closeConnection(connection) {
+                                                        mLogger.error("Database Error: Migration failed from version ${mMigrations[currentIndex].FROM_SCHEME_VERSION} to ${mMigrations[currentIndex].SCHEME_VERSION}")
+                                                    }
+                                                else
+                                                    check()
+                                            }
+                                    else
+                                        check()
                                 }
 
                                 if (mMigrations[currentIndex].isMigratable(databaseVersion)) {
