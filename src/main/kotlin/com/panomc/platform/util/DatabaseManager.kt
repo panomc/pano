@@ -1,5 +1,6 @@
 package com.panomc.platform.util
 
+import com.panomc.platform.migration.database.DatabaseMigration_1_2
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
@@ -17,6 +18,7 @@ class DatabaseManager(
     private lateinit var mAsyncSQLClient: AsyncSQLClient
 
     private val mMigrations = listOf<DatabaseMigration>(
+        DatabaseMigration_1_2()
     )
 
     init {
@@ -91,7 +93,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 1
+        const val DATABASE_SCHEME_VERSION = 2
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
@@ -191,19 +193,21 @@ class DatabaseManager(
         createConnection { connection, asyncResult ->
             if (connection !== null) {
                 val tablePrefix = (mConfigManager.config["database"] as Map<*, *>)["prefix"].toString()
+                val sqlConnection = connection.getSQLConnection()
 
                 val databaseInitProcessHandlers = listOf(
-                    DatabaseInitUtil.createUserTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createPermissionTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createTokenTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createPanelConfigTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createServerTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createPostTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createPostCategoryTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createTicketTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createTicketCategoryTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createSchemeVersionTable(connection.getSQLConnection(), tablePrefix),
-                    DatabaseInitUtil.createAdminPermission(connection.getSQLConnection(), tablePrefix)
+                    DatabaseInitUtil.createUserTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPermissionTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createTokenTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPanelConfigTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createServerTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPostTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPostCategoryTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createTicketTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createTicketCategoryTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createSchemeVersionTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createAdminPermission(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createSystemPropertyTable(sqlConnection, tablePrefix)
                 )
 
                 var currentIndex = 0
