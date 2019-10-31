@@ -2,6 +2,7 @@ package com.panomc.platform.di.component
 
 import com.panomc.platform.Main
 import com.panomc.platform.di.module.*
+import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
@@ -11,6 +12,7 @@ import com.panomc.platform.route.staticFolder.src.SrcFolderRoute
 import com.panomc.platform.route.template.IndexTemplate
 import com.panomc.platform.util.AssetsStaticHandler
 import com.panomc.platform.util.Auth
+import com.panomc.platform.util.PlatformCodeGenerator
 import dagger.Component
 import javax.inject.Singleton
 
@@ -47,4 +49,8 @@ interface ApplicationComponent {
     fun inject(finishAPI: FinishAPI)
 
     fun inject(auth: Auth)
+
+    fun inject(basicDataAPI: BasicDataAPI)
+
+    fun inject(platformCodeGenerator: PlatformCodeGenerator)
 }
