@@ -80,13 +80,15 @@ class RefreshKeyAPI : Api() {
 
                 platformCodeGenerator.createPlatformCode(connection) { platformCodeGeneratorResult ->
                     if (platformCodeGeneratorResult is Successful)
-                        handler.invoke(
-                            Successful(
-                                mapOf(
-                                    "key" to platformCodeGeneratorResult.map["platformCode"]
+                        databaseManager.closeConnection(connection) {
+                            handler.invoke(
+                                Successful(
+                                    mapOf(
+                                        "key" to platformCodeGeneratorResult.map["platformCode"]
+                                    )
                                 )
                             )
-                        )
+                        }
                     else
                         handler.invoke(platformCodeGeneratorResult)
                 }
