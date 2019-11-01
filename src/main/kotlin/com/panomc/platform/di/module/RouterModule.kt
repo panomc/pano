@@ -4,6 +4,7 @@ import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
+import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
@@ -72,7 +73,9 @@ class RouterModule(private val mVertx: Vertx) {
 
             BasicDataAPI(),
 
-            DashboardAPI()
+            DashboardAPI(),
+
+            RefreshKeyAPI()
         )
     }
 
