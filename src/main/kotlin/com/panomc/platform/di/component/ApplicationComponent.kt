@@ -5,6 +5,7 @@ import com.panomc.platform.di.module.*
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
@@ -65,4 +66,6 @@ interface ApplicationComponent {
     fun inject(closeGettingStartedCardAPI: CloseGettingStartedCardAPI)
 
     fun inject(closeConnectServerCardAPI: CloseConnectServerCardAPI)
+
+    fun inject(logoutAPI: LogoutAPI)
 }
