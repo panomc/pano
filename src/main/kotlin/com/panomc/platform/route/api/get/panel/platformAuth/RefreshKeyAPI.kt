@@ -79,8 +79,8 @@ class RefreshKeyAPI : Api() {
                 val platformCodeGenerator = PlatformCodeGenerator()
 
                 platformCodeGenerator.createPlatformCode(connection) { platformCodeGeneratorResult ->
-                    if (platformCodeGeneratorResult is Successful)
-                        databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(connection) {
+                        if (platformCodeGeneratorResult is Successful)
                             handler.invoke(
                                 Successful(
                                     mapOf(
@@ -88,9 +88,9 @@ class RefreshKeyAPI : Api() {
                                     )
                                 )
                             )
-                        }
-                    else
-                        handler.invoke(platformCodeGeneratorResult)
+                        else
+                            handler.invoke(platformCodeGeneratorResult)
+                    }
                 }
             }
         }
