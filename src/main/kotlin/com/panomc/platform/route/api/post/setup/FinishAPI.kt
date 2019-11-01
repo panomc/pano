@@ -4,8 +4,9 @@ import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.Api
+import com.panomc.platform.model.Error
 import com.panomc.platform.model.RouteType
-import com.panomc.platform.util.Auth
+import com.panomc.platform.model.Successful
 import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.DatabaseManager
 import com.panomc.platform.util.SetupManager
@@ -72,13 +73,13 @@ class FinishAPI : Api() {
                     val registerSystem = RegisterSystem()
 
                     registerSystem.register(data, remoteIP, true) {
-                        if (it is Auth.Successful) {
+                        if (it is Successful) {
                             val loginSystem = LoginSystem()
 
                             loginSystem.login(data, remoteIP) {
-                                if (it is Auth.Successful)
+                                if (it is Successful)
                                     loginSystem.createSession(data.getString("username"), context) {
-                                        if (it is Auth.Successful) {
+                                        if (it is Successful) {
                                             setupManager.finishSetup()
 
                                             response.end(
@@ -88,7 +89,7 @@ class FinishAPI : Api() {
                                                     )
                                                 ).toJsonString()
                                             )
-                                        } else if (it is Auth.Error)
+                                        } else if (it is Error)
                                             response.end(
                                                 JsonObject(
                                                     mapOf(
@@ -98,7 +99,7 @@ class FinishAPI : Api() {
                                                 ).toJsonString()
                                             )
                                     }
-                                else if (it is Auth.Error)
+                                else if (it is Error)
                                     response.end(
                                         JsonObject(
                                             mapOf(
@@ -108,7 +109,7 @@ class FinishAPI : Api() {
                                         ).toJsonString()
                                     )
                             }
-                        } else if (it is Auth.Error)
+                        } else if (it is Error)
                             response.end(
                                 JsonObject(
                                     mapOf(

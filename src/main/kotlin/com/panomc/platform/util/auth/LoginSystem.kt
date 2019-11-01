@@ -1,6 +1,9 @@
 package com.panomc.platform.util.auth
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.model.Error
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.Successful
 import com.panomc.platform.util.Auth
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -11,11 +14,10 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.commons.codec.digest.DigestUtils
 import java.util.*
 
-
 class LoginSystem : Auth() {
     private fun isValidLoginData(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
         var robotError = false
@@ -51,7 +53,7 @@ class LoginSystem : Auth() {
 
     private fun isLoginCorrect(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
         val query =
@@ -72,7 +74,7 @@ class LoginSystem : Auth() {
 
     private fun getUserIDFromUsername(
         username: String,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: (userID: Int) -> Unit
     ) {
         createConnection(resultHandler) {
@@ -92,7 +94,7 @@ class LoginSystem : Auth() {
 
     private fun getUserSecretKeyFromUserID(
         userID: Int,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: (secretKey: String) -> Unit
     ) {
         createConnection(resultHandler) {
@@ -112,7 +114,7 @@ class LoginSystem : Auth() {
 
     private fun createTokenForLoginSession(
         userID: Int,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: (token: String) -> Unit
     ) {
         createConnection(resultHandler) {
@@ -150,7 +152,7 @@ class LoginSystem : Auth() {
     fun createSession(
         username: String,
         routingContext: RoutingContext,
-        resultHandler: (authResult: AuthResult) -> Unit
+        resultHandler: (authResult: Result) -> Unit
     ) {
         getUserIDFromUsername(username, resultHandler) { userID ->
             createTokenForLoginSession(userID, resultHandler) { token ->
@@ -176,7 +178,7 @@ class LoginSystem : Auth() {
         formData: JsonObject,
         ipAddress: String,
         createSession: Boolean = true,
-        resultHandler: (authResult: AuthResult) -> Unit
+        resultHandler: (authResult: Result) -> Unit
     ) {
         this.ipAddress = ipAddress
 

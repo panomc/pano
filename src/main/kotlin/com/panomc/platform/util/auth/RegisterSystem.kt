@@ -1,6 +1,9 @@
 package com.panomc.platform.util.auth
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.model.Error
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.Successful
 import com.panomc.platform.util.Auth
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -12,7 +15,7 @@ import java.util.*
 class RegisterSystem : Auth() {
     private fun isValidRegisterData(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
         var robotError = false
@@ -61,7 +64,7 @@ class RegisterSystem : Auth() {
 
     private fun isRegisteredWithEmail(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
         val query =
@@ -85,7 +88,7 @@ class RegisterSystem : Auth() {
     }
 
     private fun getAdminPermissionIdFromDB(
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: (permissionID: Int) -> Unit
     ) {
         val query =
@@ -101,7 +104,7 @@ class RegisterSystem : Auth() {
 
     private fun registerNew(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
         registerNew(formData, resultHandler, 0, handler)
@@ -109,7 +112,7 @@ class RegisterSystem : Auth() {
 
     private fun registerNew(
         formData: JsonObject,
-        resultHandler: (authResult: AuthResult) -> Unit,
+        resultHandler: (authResult: Result) -> Unit,
         permissionID: Int,
         handler: () -> Unit
     ) {
@@ -130,7 +133,7 @@ class RegisterSystem : Auth() {
                 .add(Base64.getEncoder().encodeToString(key.private.encoded))
                 .add(Base64.getEncoder().encodeToString(key.public.encoded))
         ) { queryResult ->
-            if (!queryResult.succeeded()) {
+            if (queryResult.failed()) {
                 val errorCode = ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2
 
                 closeConnection {
@@ -141,12 +144,77 @@ class RegisterSystem : Auth() {
         }
     }
 
+    private fun getUserIDFromUsername(
+        formData: JsonObject,
+        resultHandler: (Result) -> Unit,
+        handler: (Successful) -> Unit
+    ) {
+        val query =
+            "SELECT id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
+
+        getConnection().queryWithParams(query, JsonArray().add(formData.getString("username"))) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(Successful(mapOf("user_id" to queryResult.result().results[0].getInteger(0))))
+            else
+                closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_12))
+                }
+        }
+    }
+
+    private fun setWhoInstalledSystem(
+        userID: Int,
+        resultHandler: (authResult: Result) -> Unit,
+        handler: () -> Unit
+    ) {
+        val tablePrefix = (configManager.config["database"] as Map<*, *>)["prefix"].toString()
+
+        getConnection().queryWithParams(
+            """
+                SELECT COUNT(value) FROM ${tablePrefix}system_property where option = ?
+            """,
+            JsonArray().add("who_installed_user_id")
+        ) {
+            when {
+                it.failed() -> closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_13))
+                }
+                it.result().results[0].getInteger(0) == 0 -> getConnection().updateWithParams(
+                    """
+                        INSERT INTO ${tablePrefix}system_property (option, value) VALUES (?, ?)
+                    """.trimIndent(),
+                    JsonArray().add("who_installed_user_id").add(userID.toString())
+                ) {
+                    if (it.succeeded())
+                        handler.invoke()
+                    else
+                        closeConnection {
+                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_14))
+                        }
+                }
+                else -> getConnection().updateWithParams(
+                    """
+                        UPDATE ${tablePrefix}system_property SET value = ? WHERE option = ?
+                    """.trimIndent(),
+                    JsonArray().add("who_installed_user_id").add(userID.toString())
+                ) {
+                    if (it.succeeded())
+                        handler.invoke()
+                    else
+                        closeConnection {
+                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_15))
+                        }
+                }
+            }
+        }
+    }
+
     fun register(
         formData: JsonObject,
         ipAddress: String,
         isAdmin: Boolean = false,
         checkRecaptcha: Boolean = !isAdmin,
-        resultHandler: (authResult: AuthResult) -> Unit
+        resultHandler: (authResult: Result) -> Unit
     ) {
         this.ipAddress = ipAddress
         this.checkRecaptcha = checkRecaptcha
@@ -163,8 +231,15 @@ class RegisterSystem : Auth() {
                     else
                         getAdminPermissionIdFromDB(resultHandler) {
                             registerNew(formData, resultHandler, it) {
-                                closeConnection {
-                                    resultHandler.invoke(Successful())
+                                getUserIDFromUsername(formData, resultHandler) { getUserIDFromUsername ->
+                                    setWhoInstalledSystem(
+                                        getUserIDFromUsername.map["user_id"] as Int,
+                                        resultHandler
+                                    ) {
+                                        closeConnection {
+                                            resultHandler.invoke(Successful())
+                                        }
+                                    }
                                 }
                             }
                         }

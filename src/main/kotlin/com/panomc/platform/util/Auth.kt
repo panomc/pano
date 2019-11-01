@@ -2,6 +2,8 @@ package com.panomc.platform.util
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.model.Error
+import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
@@ -37,7 +39,7 @@ open class Auth {
         databaseManager.closeConnection(connection, handler)
     }
 
-    fun createConnection(resultHandler: (authResult: AuthResult) -> Unit, handler: () -> Unit) {
+    fun createConnection(resultHandler: (authResult: Result) -> Unit, handler: () -> Unit) {
         databaseManager.createConnection { connection, _ ->
             if (connection != null) {
                 this.connection = connection
@@ -162,10 +164,4 @@ open class Auth {
                 handler.invoke(false)
         }
     }
-
-    abstract class AuthResult
-
-    class Error(val errorCode: ErrorCode) : AuthResult()
-
-    class Successful : AuthResult()
 }
