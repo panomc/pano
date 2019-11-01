@@ -3,6 +3,7 @@ package com.panomc.platform.di.component
 import com.panomc.platform.Main
 import com.panomc.platform.di.module.*
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
+import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
@@ -53,4 +54,6 @@ interface ApplicationComponent {
     fun inject(basicDataAPI: BasicDataAPI)
 
     fun inject(platformCodeGenerator: PlatformCodeGenerator)
+
+    fun inject(dashboardAPI: DashboardAPI)
 }
