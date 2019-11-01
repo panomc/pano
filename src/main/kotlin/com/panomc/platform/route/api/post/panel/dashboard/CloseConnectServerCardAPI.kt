@@ -91,11 +91,13 @@ class CloseConnectServerCardAPI : Api() {
                                         UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE option = ?
                                     """.trimIndent(),
                                 JsonArray().add("false").add("show_connect_server_info")
-                            ) {
-                                if (it.succeeded())
-                                    handler.invoke(Successful())
-                                else
-                                    handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_22))
+                            ) { queryResult ->
+                                databaseManager.closeConnection(connection) {
+                                    if (queryResult.succeeded())
+                                        handler.invoke(Successful())
+                                    else
+                                        handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_25))
+                                }
                             }
                     }
                 }
@@ -117,7 +119,7 @@ class CloseConnectServerCardAPI : Api() {
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_23))
+                    resultHandler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_26))
                 }
         }
     }
@@ -137,7 +139,7 @@ class CloseConnectServerCardAPI : Api() {
                     handler.invoke(queryResult.result().results[0].getInteger(0) != 0)
                 else
                     databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_24))
+                        resultHandler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_27))
                     }
             }
     }

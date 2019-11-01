@@ -88,14 +88,16 @@ class CloseGettingStartedCardAPI : Api() {
                         } else
                             connection.getSQLConnection().updateWithParams(
                                 """
-                                        UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE option = ?
-                                    """.trimIndent(),
+                                    UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE option = ?
+                                """.trimIndent(),
                                 JsonArray().add("false").add("show_getting_started")
-                            ) {
-                                if (it.succeeded())
-                                    handler.invoke(Successful())
-                                else
-                                    handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_22))
+                            ) { queryResult ->
+                                databaseManager.closeConnection(connection) {
+                                    if (queryResult.succeeded())
+                                        handler.invoke(Successful())
+                                    else
+                                        handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_22))
+                                }
                             }
                     }
                 }
