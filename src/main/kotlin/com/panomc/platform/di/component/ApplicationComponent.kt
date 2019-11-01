@@ -5,6 +5,7 @@ import com.panomc.platform.di.module.*
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
@@ -59,4 +60,6 @@ interface ApplicationComponent {
     fun inject(dashboardAPI: DashboardAPI)
 
     fun inject(refreshKeyAPI: RefreshKeyAPI)
+
+    fun inject(closeGettingStartedCardAPI: CloseGettingStartedCardAPI)
 }
