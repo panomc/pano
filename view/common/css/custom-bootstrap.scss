@@ -1,40 +1,40 @@
 // Colors
 
 $primary: #1976d2;
-$lightprimary: rgba($primary, .075);
+$lightprimary: rgba($primary, 0.075);
 $secondary: #66bb6a;
-$dark: #656D78;
-$gray: #CCD1D9;
-$light: #F5F7FA;
+$dark: #656d78;
+$gray: #ccd1d9;
+$light: #f5f7fa;
 $white: #fff;
 $black: #000;
-$glass: rgba($black, .1);
-$lightglass: rgba($white, .1);
-$mint: #48CFAD;
+$glass: rgba($black, 0.1);
+$lightglass: rgba($white, 0.1);
+$mint: #48cfad;
 $muted: #6c757d;
-$sunflower: #F6BB42;
-$bittersweet: #FC6E51;
-$aqua: #4FC1E9;
+$sunflower: #f6bb42;
+$bittersweet: #fc6e51;
+$aqua: #4fc1e9;
 
 $body-bg: $light;
 $body-color: $dark;
 
 $theme-colors: (
-        "primary": $primary,
-        "secondary": $secondary,
-        "dark": $dark,
-        "light": $light,
-        "gray": $gray,
-        "white": $white,
-        "black": $black,
-        "lightprimary": $lightprimary,
-        "mint": $mint,
-        "muted": $muted,
-        "sunflower": $sunflower,
-        "glass": $glass,
-        "bittersweet": $bittersweet,
-        "lightglass": $lightglass,
-        "aqua": $aqua,
+  'primary': $primary,
+  'secondary': $secondary,
+  'dark': $dark,
+  'light': $light,
+  'gray': $gray,
+  'white': $white,
+  'black': $black,
+  'lightprimary': $lightprimary,
+  'mint': $mint,
+  'muted': $muted,
+  'sunflower': $sunflower,
+  'glass': $glass,
+  'bittersweet': $bittersweet,
+  'lightglass': $lightglass,
+  'aqua': $aqua
 );
 
 // Settings
@@ -60,9 +60,9 @@ $headings-font-weight: bolder;
 
 // Borders
 
-$border-radius: .3rem;
-$border-radius-lg: .3rem;
-$border-radius-sm: .3rem;
+$border-radius: 0.3rem;
+$border-radius-lg: 0.3rem;
+$border-radius-sm: 0.3rem;
 
 // Buttons
 
@@ -87,7 +87,7 @@ $box-shadow-lg: 0 10px 0 $glass;
 
 // Modals
 
-$modal-backdrop-opacity: .2;
+$modal-backdrop-opacity: 0.2;
 $modal-content-box-shadow-sm-up: 0 0 30px $glass;
 
 // Alerts
@@ -117,7 +117,7 @@ $navbar-light-disabled-color: $gray;
 $navbar-padding-y: 1rem;
 $navbar-padding-x: 1rem;
 $navbar-nav-link-padding-x: 1rem;
-$navbar-dark-color: rgba($white, .9);
+$navbar-dark-color: rgba($white, 0.9);
 
 // Tables
 
@@ -132,8 +132,8 @@ $nav-pills-link-active-bg: $lightprimary;
 
 // List Group
 
-$list-group-item-padding-y: .5rem;
-$list-group-item-padding-x: .5rem;
+$list-group-item-padding-y: 0.5rem;
+$list-group-item-padding-x: 0.5rem;
 $list-group-hover-bg: $lightprimary;
 $list-group-active-bg: $white;
 $list-group-active-color: $primary;

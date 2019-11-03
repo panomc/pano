@@ -1,6 +1,6 @@
-@import "custom-bootstrap";
-@import "../node_modules/bootstrap/scss/bootstrap.scss";
-@import "fonts";
+@import 'custom-bootstrap';
+@import '../node_modules/bootstrap/scss/bootstrap.scss';
+@import 'fonts';
 
 // Main Styles
 
@@ -9,7 +9,7 @@
   margin-left: 0;
 
   > .col,
-  > [class*="col-"] {
+  > [class*='col-'] {
     padding-right: 0;
     padding-left: 0;
   }
@@ -28,7 +28,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba($color: $glass, $alpha: .1);
+  background: rgba($color: $glass, $alpha: 0.1);
   border-radius: 8px;
 }
 
@@ -37,12 +37,13 @@
 }
 
 .icon-link {
-  transition: .2s;
+  transition: 0.2s;
 
-  &:focus, &:active {
+  &:focus,
+  &:active {
     border-radius: 75px !important;
     outline: 0 !important;
     background: $lightprimary !important;
-    transition: .2s;
+    transition: 0.2s;
   }
 }
