@@ -121,7 +121,7 @@ class DashboardAPI : Api() {
     private fun getUserIDFromToken(
         connection: Connection,
         token: String,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (userID: Int) -> Unit
     ) {
         val query =
@@ -140,7 +140,7 @@ class DashboardAPI : Api() {
     private fun isUserInstalledSystem(
         connection: Connection,
         userID: Int,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =
@@ -159,7 +159,7 @@ class DashboardAPI : Api() {
 
     private fun getCountOfUsers(
         connection: Connection,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (userCount: Int) -> Unit
     ) {
         val query =
@@ -177,7 +177,7 @@ class DashboardAPI : Api() {
 
     private fun getCountOfPosts(
         connection: Connection,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (postCount: Int) -> Unit
     ) {
         val query =
@@ -195,7 +195,7 @@ class DashboardAPI : Api() {
 
     private fun getWelcomeBoardStatus(
         connection: Connection,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (showWelcomeBoard: Boolean) -> Unit
     ) {
         val query =
@@ -216,7 +216,7 @@ class DashboardAPI : Api() {
 
     private fun getConnectBoardStatus(
         connection: Connection,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (showConnectBoard: Boolean) -> Unit
     ) {
         val query =

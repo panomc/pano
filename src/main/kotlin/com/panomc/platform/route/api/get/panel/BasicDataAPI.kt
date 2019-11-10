@@ -2,6 +2,7 @@ package com.panomc.platform.route.api.get.panel
 
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.Main.Companion.PORT
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
 import com.panomc.platform.util.*
@@ -118,7 +119,7 @@ class BasicDataAPI : Api() {
                                                             "description" to configManager.config["website-description"]
                                                         ),
                                                         "platform_server_match_key" to platformCodeGeneratorResult.map["platformCode"],
-                                                        "platform_host_address" to localHost.hostName,
+                                                        "platform_host_address" to localHost.hostAddress + ":" + PORT,
                                                         "servers" to listOf<Map<String, Any?>>()
                                                     )
                                                 )

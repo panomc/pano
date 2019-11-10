@@ -108,7 +108,7 @@ class CloseGettingStartedCardAPI : Api() {
     private fun getUserIDFromToken(
         connection: Connection,
         token: String,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (userID: Int) -> Unit
     ) {
         val query =
@@ -127,7 +127,7 @@ class CloseGettingStartedCardAPI : Api() {
     private fun isUserInstalledSystem(
         connection: Connection,
         userID: Int,
-        resultHandler: (authResult: Result) -> Unit,
+        resultHandler: (result: Result) -> Unit,
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =

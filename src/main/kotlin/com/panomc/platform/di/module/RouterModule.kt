@@ -8,6 +8,7 @@ import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
@@ -83,7 +84,9 @@ class RouterModule(private val mVertx: Vertx) {
             CloseGettingStartedCardAPI(),
             CloseConnectServerCardAPI(),
 
-            LogoutAPI()
+            LogoutAPI(),
+
+            ConnectNewAPI()
         )
     }
 
