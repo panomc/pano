@@ -8,7 +8,7 @@ apply plugin: 'org.jetbrains.kotlin.kapt'
 group 'com.panomc.platform'
 version '1.0'
 
-def vertxVersionVariable = '3.8.1'
+def vertxVersionVariable = '3.8.3'
 
 sourceCompatibility = 1.8
 
@@ -44,12 +44,12 @@ dependencies {
     compile "io.vertx:vertx-config:$vertxVersionVariable"
     compile "io.vertx:vertx-lang-kotlin-coroutines:$vertxVersionVariable"
 
-    compile 'com.beust:klaxon:5.0.12'
-    compile "org.slf4j:slf4j-simple:1.7.28"
+    compile 'com.beust:klaxon:5.2'
+    compile "org.slf4j:slf4j-simple:1.7.29"
 
     // dagger 2x
-    compile 'com.google.dagger:dagger:2.24'
-    kapt 'com.google.dagger:dagger-compiler:2.24'
+    compile 'com.google.dagger:dagger:2.25.2'
+    kapt 'com.google.dagger:dagger-compiler:2.25.2'
 
     // recaptcha v2 1.0.2
     compile "com.github.triologygmbh:reCAPTCHA-V2-java:1.0.2"
