@@ -21,6 +21,8 @@ class Main : AbstractVerticle() {
         private val mVertx = Vertx.vertx(mOptions)
         private val mLogger = LoggerFactory.getLogger("Pano Platform")
 
+        const val PORT = 8088
+
         @JvmStatic
         fun main(args: Array<String>) {
             mVertx.deployVerticle(Main())
@@ -50,7 +52,7 @@ class Main : AbstractVerticle() {
                 future.complete(init.result())
             }
         }, {
-            startWebServer(startFuture)
+            startWebServer()
         })
     }
 
@@ -60,20 +62,15 @@ class Main : AbstractVerticle() {
         init.complete(true)
     }
 
-    private fun startWebServer(startFuture: Future<Void>) {
-        val port = 8088
-
+    private fun startWebServer() {
         vertx
             .createHttpServer()
             .requestHandler(router)
-            .listen(port) { result ->
-                if (result.succeeded()) {
-                    logger.info("Started listening port $port")
-                    startFuture.complete()
-                } else {
-                    logger.error("Failed to listen port $port")
-                    startFuture.fail(result.cause())
-                }
+            .listen(PORT) { result ->
+                if (result.succeeded())
+                    logger.info("Started listening port $PORT")
+                else
+                    logger.error("Failed to listen port $PORT")
             }
     }
 }
