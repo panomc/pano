@@ -50,7 +50,7 @@ class PlatformCodeGenerator {
                     """
                                         UPDATE ${tablePrefix}system_property SET value = ? WHERE option = ?
                                     """.trimIndent(),
-                    JsonArray().add("platformCode").add(platformCode.toString())
+                    JsonArray().add(platformCode.toString()).add("platformCode")
                 ) {
                     if (it.succeeded())
                         handler.invoke(Successful(mapOf("platformCode" to platformCode)))
