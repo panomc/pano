@@ -1,8 +1,7 @@
 // Colors
 
 $primary: #1976d2;
-$lightprimary: rgba($primary, 0.075);
-$secondary: #66bb6a;
+$secondary: #72c076;
 $dark: #656d78;
 $gray: #ccd1d9;
 $light: #f5f7fa;
@@ -12,9 +11,15 @@ $glass: rgba($black, 0.1);
 $lightglass: rgba($white, 0.1);
 $mint: #48cfad;
 $muted: #6c757d;
-$sunflower: #f6bb42;
+$sunflower: #f8ca6d;
 $bittersweet: #fc6e51;
 $aqua: #4fc1e9;
+$lightprimary: rgba($primary, 0.075);
+$lightsecondary: rgba($secondary, 0.075);
+$lightsunflower: rgba($sunflower, 0.075);
+$lightbittersweet: rgba($bittersweet, 0.075);
+$lightaqua: rgba($aqua, 0.075);
+$lightmint: rgba($mint, 0.075);
 
 $body-bg: $light;
 $body-color: $dark;
@@ -28,6 +33,11 @@ $theme-colors: (
   'white': $white,
   'black': $black,
   'lightprimary': $lightprimary,
+  'lightsecondary': $lightsecondary,
+  'lightsunflower': $lightsunflower,
+  'ligthbittersweet': $lightbittersweet,
+  'lightaqua': $lightaqua,
+  'lightmint': $lightmint,
   'mint': $mint,
   'muted': $muted,
   'sunflower': $sunflower,
@@ -145,3 +155,10 @@ $list-group-border-width: 0;
 
 $pagination-active-bg: $lightprimary;
 $pagination-active-color: $primary;
+
+// Badges
+
+$badge-font-weight: 0.9rem;
+$badge-padding-x: 1rem;
+$badge-padding-y: 0.5rem;
+$badge-pill-padding-x: 1rem;
