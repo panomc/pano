@@ -135,7 +135,7 @@ class TicketsPageInitAPI : Api() {
         handler: (tickets: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, ticket_category_id, user_id, date FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ? ORDER BY date DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, ticket_category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ? ORDER BY date DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -159,7 +159,10 @@ class TicketsPageInitAPI : Api() {
 
                                             categoryQueryResult.result().results.forEach { categoryInDB ->
                                                 if (categoryInDB.getInteger(0) == ticketInDB.getString(2).toInt())
-                                                    category = categoryInDB
+                                                    category = mapOf(
+                                                        "id" to categoryInDB.getInteger(0),
+                                                        "title" to categoryInDB.getString(1)
+                                                    )
                                             }
 
                                             if (category == "null")
@@ -172,8 +175,11 @@ class TicketsPageInitAPI : Api() {
                                                     "id" to ticketInDB.getInteger(0),
                                                     "title" to ticketInDB.getString(1),
                                                     "category" to category,
-                                                    "writer" to username,
-                                                    "date" to ticketInDB.getInteger(4)
+                                                    "writer" to mapOf(
+                                                        "username" to username
+                                                    ),
+                                                    "date" to ticketInDB.getInteger(4),
+                                                    "status" to ticketInDB.getInteger(5)
                                                 )
                                             )
 
