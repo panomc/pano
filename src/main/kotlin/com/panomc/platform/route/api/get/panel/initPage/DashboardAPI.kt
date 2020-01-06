@@ -90,8 +90,7 @@ class DashboardAPI : Api() {
 
                                 if (!isUserInstalledSystem) {
                                     result["getting_started_blocks"] = mapOf(
-                                        "welcome_board" to false,
-                                        "connect_board" to false
+                                        "welcome_board" to false
                                     )
 
                                     databaseManager.closeConnection(connection) {
@@ -99,15 +98,12 @@ class DashboardAPI : Api() {
                                     }
                                 } else
                                     getWelcomeBoardStatus(connection, handler) { showWelcomeBoard ->
-                                        getConnectBoardStatus(connection, handler) { showConnectBoard ->
-                                            result["getting_started_blocks"] = mapOf(
-                                                "welcome_board" to showWelcomeBoard,
-                                                "connect_board" to showConnectBoard
-                                            )
+                                        result["getting_started_blocks"] = mapOf(
+                                            "welcome_board" to showWelcomeBoard
+                                        )
 
-                                            databaseManager.closeConnection(connection) {
-                                                handler.invoke(Successful(result))
-                                            }
+                                        databaseManager.closeConnection(connection) {
+                                            handler.invoke(Successful(result))
                                         }
                                     }
                             }
@@ -210,27 +206,6 @@ class DashboardAPI : Api() {
                 else
                     databaseManager.closeConnection(connection) {
                         resultHandler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_20))
-                    }
-            }
-    }
-
-    private fun getConnectBoardStatus(
-        connection: Connection,
-        resultHandler: (result: Result) -> Unit,
-        handler: (showConnectBoard: Boolean) -> Unit
-    ) {
-        val query =
-            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where option = ?"
-
-        databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add("show_connect_server_info")) { queryResult ->
-                if (queryResult.succeeded())
-                    if (queryResult.result().results[0].getString(0) == null)
-                        handler.invoke(false)
-                    else handler.invoke(queryResult.result().results[0].getString(0)!!.toBoolean())
-                else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_21))
                     }
             }
     }

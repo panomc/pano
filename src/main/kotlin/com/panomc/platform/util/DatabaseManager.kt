@@ -1,6 +1,7 @@
 package com.panomc.platform.util
 
 import com.panomc.platform.migration.database.DatabaseMigration_1_2
+import com.panomc.platform.migration.database.DatabaseMigration_2_3
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
@@ -18,7 +19,8 @@ class DatabaseManager(
     private lateinit var mAsyncSQLClient: AsyncSQLClient
 
     private val mMigrations = listOf<DatabaseMigration>(
-        DatabaseMigration_1_2()
+        DatabaseMigration_1_2(),
+        DatabaseMigration_2_3()
     )
 
     init {
