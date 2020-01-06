@@ -8,6 +8,7 @@ import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
@@ -71,4 +72,6 @@ interface ApplicationComponent {
     fun inject(logoutAPI: LogoutAPI)
 
     fun inject(connectNewAPI: ConnectNewAPI)
+
+    fun inject(ticketsPageInitAPI: TicketsPageInitAPI)
 }

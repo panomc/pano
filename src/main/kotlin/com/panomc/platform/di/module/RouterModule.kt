@@ -8,6 +8,7 @@ import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
@@ -32,6 +33,7 @@ import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
 import javax.inject.Singleton
+
 
 @Module
 class RouterModule(private val mVertx: Vertx) {
@@ -86,7 +88,9 @@ class RouterModule(private val mVertx: Vertx) {
 
             LogoutAPI(),
 
-            ConnectNewAPI()
+            ConnectNewAPI(),
+
+            TicketsPageInitAPI()
         )
     }
 
@@ -103,7 +107,7 @@ class RouterModule(private val mVertx: Vertx) {
         router.route().handler(CookieHandler.create())
         router.route().handler(SessionHandler.create(LocalSessionStore.create(mVertx)))
 
-        val allowedHeaders = mutableSetOf<String>()
+        val allowedHeaders: MutableSet<String> = HashSet()
         allowedHeaders.add("x-requested-with")
         allowedHeaders.add("Access-Control-Allow-Origin")
         allowedHeaders.add("origin")
@@ -111,7 +115,7 @@ class RouterModule(private val mVertx: Vertx) {
         allowedHeaders.add("accept")
         allowedHeaders.add("X-PINGARUNER")
 
-        val allowedMethods = mutableSetOf<HttpMethod>()
+        val allowedMethods: MutableSet<HttpMethod> = HashSet()
         allowedMethods.add(HttpMethod.GET)
         allowedMethods.add(HttpMethod.POST)
         allowedMethods.add(HttpMethod.OPTIONS)
@@ -121,7 +125,7 @@ class RouterModule(private val mVertx: Vertx) {
         allowedMethods.add(HttpMethod.PUT)
 
         router.route().handler(
-            CorsHandler.create(".*").allowCredentials(true).allowedHeaders(allowedHeaders).allowedMethods(allowedMethods)
+            CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods)
         )
 
         mRouteList.forEach { route ->
