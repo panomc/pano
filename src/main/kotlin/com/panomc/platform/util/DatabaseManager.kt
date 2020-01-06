@@ -95,7 +95,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 2
+        const val DATABASE_SCHEME_VERSION = 3
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {

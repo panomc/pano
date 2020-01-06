@@ -324,19 +324,7 @@ object DatabaseInitUtil {
                         .add("show_getting_started")
                         .add("true")
                 ) {
-                    if (it.succeeded())
-                        sqlConnection.updateWithParams(
-                            """
-                    INSERT INTO ${tablePrefix}system_property (`option`, `value`) VALUES (?, ?)
-            """.trimIndent(),
-                            JsonArray()
-                                .add("show_connect_server_info")
-                                .add("true")
-                        ) {
-                            handler.invoke(it)
-                        }
-                    else
-                        handler.invoke(it)
+                    handler.invoke(it)
                 }
             else
                 handler.invoke(it)
