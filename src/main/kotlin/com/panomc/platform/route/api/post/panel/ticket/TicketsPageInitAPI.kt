@@ -96,7 +96,7 @@ class TicketsPageInitAPI : Api() {
                         getTickets(connection, page, pageType, handler) { tickets ->
                             val result = mutableMapOf<String, Any?>(
                                 "tickets" to tickets,
-                                "tickets_count" to tickets.size,
+                                "tickets_count" to countOfTicketsByPageType,
                                 "total_page" to totalPage
                             )
 
