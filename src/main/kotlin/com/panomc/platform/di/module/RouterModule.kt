@@ -8,6 +8,7 @@ import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
@@ -92,7 +93,9 @@ class RouterModule(private val mVertx: Vertx) {
             ConnectNewAPI(),
 
             TicketsPageInitAPI(),
-            TicketCategoryPageInitAPI()
+            TicketCategoryPageInitAPI(),
+
+            PostsPageInitAPI()
         )
     }
 
