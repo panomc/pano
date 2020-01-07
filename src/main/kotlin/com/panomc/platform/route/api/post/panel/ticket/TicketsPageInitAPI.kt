@@ -135,9 +135,14 @@ class TicketsPageInitAPI : Api() {
         handler: (tickets: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, ticket_category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ? ORDER BY date DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, ticket_category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 1) "WHERE status = ? " else ""}ORDER BY date DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
-        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
+        val paramaters = JsonArray()
+
+        if (pageType != 1)
+            paramaters.add(pageType)
+
+        databaseManager.getSQLConnection(connection).queryWithParams(query, paramaters) { queryResult ->
             if (queryResult.succeeded()) {
                 val tickets = mutableListOf<Map<String, Any>>()
 
