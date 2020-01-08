@@ -5,6 +5,7 @@ import com.panomc.platform.di.module.*
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
@@ -83,4 +84,6 @@ interface ApplicationComponent {
     fun inject(postsPageInitAPI: PostsPageInitAPI)
 
     fun inject(postCategoryPageInitAPI: PostCategoryPageInitAPI)
+
+    fun inject(categoriesAPI: CategoriesAPI)
 }
