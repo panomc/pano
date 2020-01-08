@@ -13,6 +13,7 @@ import com.panomc.platform.route.api.post.panel.post.PostCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryDeleteAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
@@ -100,7 +101,9 @@ class RouterModule(private val mVertx: Vertx) {
             PostsPageInitAPI(),
             PostCategoryPageInitAPI(),
 
-            CategoriesAPI()
+            CategoriesAPI(),
+
+            TicketCategoryDeleteAPI()
         )
     }
 
