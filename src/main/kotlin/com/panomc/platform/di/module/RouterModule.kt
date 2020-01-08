@@ -12,6 +12,7 @@ import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCar
 import com.panomc.platform.route.api.post.panel.post.PostCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
@@ -112,7 +113,8 @@ class RouterModule(private val mVertx: Vertx) {
             TicketCategoryUpdateAPI(),
 
             PostCategoryAddAPI(),
-            PostCategoryUpdateAPI()
+            PostCategoryUpdateAPI(),
+            PostCategoryDeleteAPI()
         )
     }
 
