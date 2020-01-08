@@ -9,8 +9,7 @@ import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
-import com.panomc.platform.route.api.post.panel.post.PostCategoryPageInitAPI
-import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
+import com.panomc.platform.route.api.post.panel.post.*
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
@@ -114,7 +113,15 @@ class RouterModule(private val mVertx: Vertx) {
 
             PostCategoryAddAPI(),
             PostCategoryUpdateAPI(),
-            PostCategoryDeleteAPI()
+            PostCategoryDeleteAPI(),
+
+            EditPostPageInitAPI(),
+
+            PostDeleteAPI(),
+            PostOnlyPublishAPI(),
+            PostMoveTrashAPI(),
+            PostMoveDraftAPI(),
+            PostPublishAPI()
         )
     }
 

@@ -9,8 +9,7 @@ import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
-import com.panomc.platform.route.api.post.panel.post.PostCategoryPageInitAPI
-import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
+import com.panomc.platform.route.api.post.panel.post.*
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
@@ -104,4 +103,16 @@ interface ApplicationComponent {
     fun inject(postCategoryUpdateAPI: PostCategoryUpdateAPI)
 
     fun inject(postCategoryDeleteAPI: PostCategoryDeleteAPI)
+
+    fun inject(editPostPageInitAPI: EditPostPageInitAPI)
+
+    fun inject(postDeleteAPI: PostDeleteAPI)
+
+    fun inject(postOnlyPublishAPI: PostOnlyPublishAPI)
+
+    fun inject(postMoveTrashAPI: PostMoveTrashAPI)
+
+    fun inject(postMoveDraftAPI: PostMoveDraftAPI)
+
+    fun inject(postPublishAPI: PostPublishAPI)
 }
