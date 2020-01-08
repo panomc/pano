@@ -158,7 +158,7 @@ class PostCategoryAddAPI : Api() {
                 handler.invoke(queryResult.result().results[0].getInteger(0) == 1)
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_45))
+                    resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_49))
                 }
         }
     }
@@ -187,7 +187,7 @@ class PostCategoryAddAPI : Api() {
                 handler.invoke()
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_44))
+                    resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_48))
                 }
         }
     }
