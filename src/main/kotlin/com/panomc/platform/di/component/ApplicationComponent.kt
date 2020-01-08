@@ -12,6 +12,7 @@ import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCar
 import com.panomc.platform.route.api.post.panel.post.PostCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.PostsPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryAddAPI
@@ -98,4 +99,6 @@ interface ApplicationComponent {
     fun inject(ticketCategoryUpdateAPI: TicketCategoryUpdateAPI)
 
     fun inject(postCategoryAddAPI: PostCategoryAddAPI)
+
+    fun inject(postCategoryUpdateAPI: PostCategoryUpdateAPI)
 }
