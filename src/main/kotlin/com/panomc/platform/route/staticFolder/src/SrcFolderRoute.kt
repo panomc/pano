@@ -46,16 +46,21 @@ class SrcFolderRoute : Route() {
         val response = context.response()
         val normalisedPath = context.normalisedPath()
 
-        if (normalisedPath.startsWith("/panel/") && isAdmin)
-            srcFolderRoot = "view/ui/site/"
-        else if (normalisedPath.startsWith("/panel/")) {
-            context.reroute("/error-404")
+        if (setupManager.isSetupDone())
+            if (normalisedPath.startsWith("/panel/") && isAdmin)
+                srcFolderRoot = "view/ui/site/"
+            else if (normalisedPath.startsWith("/panel/")) {
+                context.reroute("/error-404")
 
-            return
-        }
+                return
+            }
 
-        val componentFile = File("$srcFolderRoot$normalisedPath/index.js")
-        val componentUIFile = File("$srcFolderRoot$normalisedPath/index.html")
+        val pathSplit = normalisedPath.split("/")
+
+        val componentName = pathSplit.lastOrNull() ?: ""
+
+        val componentFile = File("$srcFolderRoot$normalisedPath/$componentName.js")
+        val componentUIFile = File("$srcFolderRoot$normalisedPath/$componentName.html")
 
         if (componentFile.exists() && componentUIFile.exists())
             response.end(
@@ -65,7 +70,13 @@ class SrcFolderRoute : Route() {
                 )
             )
         else
-            context.reroute("/")
+            if (setupManager.isSetupDone())
+                if (normalisedPath.startsWith("/panel/") && isAdmin)
+                    context.reroute("/panel/error-404")
+                else
+                    context.reroute("/error-404")
+            else
+                context.reroute("/error-404")
 
     }
 }
