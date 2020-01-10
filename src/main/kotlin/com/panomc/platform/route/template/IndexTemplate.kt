@@ -3,6 +3,7 @@ package com.panomc.platform.route.template
 import com.panomc.platform.Main
 import com.panomc.platform.model.Template
 import com.panomc.platform.util.Auth
+import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
@@ -23,6 +24,9 @@ class IndexTemplate : Template() {
     @Inject
     lateinit var templateEngine: HandlebarsTemplateEngine
 
+    @Inject
+    lateinit var setupManager: SetupManager
+
     override fun getHandler() = Handler<RoutingContext> { context ->
         val response = context.response()
         val normalisedPath = context.normalisedPath()
@@ -32,7 +36,7 @@ class IndexTemplate : Template() {
                 "location",
                 mHotLinks[normalisedPath.toLowerCase()]
             ).setStatusCode(302).end()
-        else if (normalisedPath.startsWith("/panel")) {
+        else if (normalisedPath.startsWith("/panel") && setupManager.isSetupDone()) {
             val auth = Auth()
 
             auth.isAdmin(context) { isAdmin ->
@@ -44,6 +48,7 @@ class IndexTemplate : Template() {
 
     private fun handleTemplateEngine(context: RoutingContext, isAdmin: Boolean = false) {
         val response = context.response()
+
         templateEngine
             .render(
                 JsonObject().put("is_panel", isAdmin),
