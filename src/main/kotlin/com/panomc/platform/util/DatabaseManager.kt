@@ -3,6 +3,7 @@ package com.panomc.platform.util
 import com.panomc.platform.migration.database.DatabaseMigration_1_2
 import com.panomc.platform.migration.database.DatabaseMigration_2_3
 import com.panomc.platform.migration.database.DatabaseMigration_3_4
+import com.panomc.platform.migration.database.DatabaseMigration_4_5
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
@@ -22,7 +23,8 @@ class DatabaseManager(
     private val mMigrations = listOf<DatabaseMigration>(
         DatabaseMigration_1_2(),
         DatabaseMigration_2_3(),
-        DatabaseMigration_3_4()
+        DatabaseMigration_3_4(),
+        DatabaseMigration_4_5()
     )
 
     init {
@@ -97,7 +99,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 4
+        const val DATABASE_SCHEME_VERSION = 5
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
