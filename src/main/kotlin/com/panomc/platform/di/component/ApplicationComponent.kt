@@ -3,6 +3,7 @@ package com.panomc.platform.di.component
 import com.panomc.platform.Main
 import com.panomc.platform.di.module.*
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
+import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
@@ -115,4 +116,6 @@ interface ApplicationComponent {
     fun inject(postMoveDraftAPI: PostMoveDraftAPI)
 
     fun inject(postPublishAPI: PostPublishAPI)
+
+    fun inject(panelNotificationsAPI: PanelNotificationsAPI)
 }
