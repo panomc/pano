@@ -4,6 +4,7 @@ import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
+import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
@@ -124,7 +125,8 @@ class RouterModule(private val mVertx: Vertx) {
             PostMoveDraftAPI(),
             PostPublishAPI(),
 
-            PanelNotificationsAPI()
+            PanelNotificationsAPI(),
+            PanelQuickNotificationsAPI()
         )
     }
 
