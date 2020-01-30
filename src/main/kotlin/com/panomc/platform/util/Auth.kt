@@ -126,14 +126,18 @@ open class Auth {
     }
 
     fun isLoggedIn(context: RoutingContext, handler: (isLoggedIn: Boolean) -> Unit) {
-        val token = context.getCookie("pano_token").value
+        val cookie = context.getCookie("pano_token")
+        val token = if (cookie == null) "" else cookie.value
 
-        isLoginSessionTokenExists(token) {
-            if (it)
-                handler.invoke(true)
-            else
-                handler.invoke(false)
-        }
+        if (token == "")
+            handler.invoke(false)
+        else
+            isLoginSessionTokenExists(token) {
+                if (it)
+                    handler.invoke(true)
+                else
+                    handler.invoke(false)
+            }
     }
 
     fun isAdmin(context: RoutingContext, handler: (isAdmin: Boolean) -> Unit) {
