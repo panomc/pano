@@ -4,6 +4,4 @@
 build
 .directory
 
-view/common/node_modules/
-
 config.json
