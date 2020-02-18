@@ -8,7 +8,7 @@ apply plugin: 'org.jetbrains.kotlin.kapt'
 group 'com.panomc.platform'
 version '1.0'
 
-def vertxVersionVariable = '3.8.4'
+def vertxVersionVariable = '3.8.5'
 
 sourceCompatibility = 1.8
 
@@ -48,20 +48,20 @@ dependencies {
     compile "org.slf4j:slf4j-simple:1.7.30"
 
     // dagger 2x
-    compile 'com.google.dagger:dagger:2.25.4'
-    kapt 'com.google.dagger:dagger-compiler:2.25.4'
+    compile 'com.google.dagger:dagger:2.26'
+    kapt 'com.google.dagger:dagger-compiler:2.26'
 
     // recaptcha v2 1.0.2
-    compile "com.github.triologygmbh:reCAPTCHA-V2-java:1.0.2"
+    compile "com.github.triologygmbh:reCAPTCHA-V2-java:1.0.3"
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
-    compile group: 'commons-codec', name: 'commons-codec', version: '1.13'
+    compile group: 'commons-codec', name: 'commons-codec', version: '1.14'
 
-    compile 'io.jsonwebtoken:jjwt-api:0.10.7'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.7',
+    compile 'io.jsonwebtoken:jjwt-api:0.11.0'
+    runtime 'io.jsonwebtoken:jjwt-impl:0.11.0',
             // Uncomment the next line if you want to use RSASSA-PSS (PS256, PS384, PS512) algorithms:
             //'org.bouncycastle:bcprov-jdk15on:1.60',
-            'io.jsonwebtoken:jjwt-jackson:0.10.7'
+            'io.jsonwebtoken:jjwt-jackson:0.11.0'
 }
 
 compileKotlin {
