@@ -11,6 +11,7 @@ import io.vertx.core.logging.Logger
 import io.vertx.ext.asyncsql.AsyncSQLClient
 import io.vertx.ext.asyncsql.MySQLClient
 import io.vertx.ext.sql.SQLConnection
+import io.vertx.kotlin.core.json.jsonObjectOf
 
 class DatabaseManager(
     private val mVertx: Vertx,
@@ -20,7 +21,7 @@ class DatabaseManager(
 ) {
     private lateinit var mAsyncSQLClient: AsyncSQLClient
 
-    private val mMigrations = listOf<DatabaseMigration>(
+    private val mMigrations = listOf(
         DatabaseMigration_1_2(),
         DatabaseMigration_2_3(),
         DatabaseMigration_3_4(),
@@ -174,12 +175,13 @@ class DatabaseManager(
                 port = splitHost[1].toInt()
             }
 
-            val mySQLClientConfig = io.vertx.core.json.JsonObject()
-                .put("host", host)
-                .put("port", port)
-                .put("database", databaseConfig["name"])
-                .put("username", databaseConfig["username"])
-                .put("password", databaseConfig["password"])
+            val mySQLClientConfig = jsonObjectOf(
+                Pair("host", host),
+                Pair("port", port),
+                Pair("database", databaseConfig["name"]),
+                Pair("username", databaseConfig["username"]),
+                Pair("password", if (databaseConfig["password"] == "") null else databaseConfig["password"])
+            )
 
             mAsyncSQLClient = MySQLClient.createShared(mVertx, mySQLClientConfig, "MysqlLoginPool")
         }

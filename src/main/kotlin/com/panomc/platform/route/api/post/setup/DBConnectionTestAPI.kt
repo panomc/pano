@@ -9,6 +9,7 @@ import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.asyncsql.MySQLClient
 import io.vertx.ext.web.RoutingContext
+import io.vertx.kotlin.core.json.jsonObjectOf
 import javax.inject.Inject
 
 class DBConnectionTestAPI : Api() {
@@ -47,12 +48,13 @@ class DBConnectionTestAPI : Api() {
             port = splitHost[1].toInt()
         }
 
-        val mySQLClientConfig = io.vertx.core.json.JsonObject()
-            .put("host", host)
-            .put("port", port)
-            .put("database", data.getString("dbName"))
-            .put("username", data.getString("username"))
-            .put("password", data.getString("password"))
+        val mySQLClientConfig = jsonObjectOf(
+            Pair("host", host),
+            Pair("port", port),
+            Pair("database", data.getString("dbName")),
+            Pair("username", data.getString("username")),
+            Pair("password", if (data.getString("password").isNullOrEmpty()) null else data.getString("password"))
+        )
 
         val mySQLClient = MySQLClient.createNonShared(context.vertx(), mySQLClientConfig)
 
