@@ -106,7 +106,7 @@ class ConnectNewAPI : Api() {
         handler: (platformCode: String) -> Unit
     ) {
         val query =
-            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where option = ?"
+            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("platformCode")) { queryResult ->

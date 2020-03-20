@@ -101,7 +101,7 @@ class PanelQuickNotificationsAPI : Api() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -120,7 +120,7 @@ class PanelQuickNotificationsAPI : Api() {
         handler: (notifications: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT id, user_id, type_ID, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (user_id = ? OR user_id = ?) AND status = ? ORDER BY date DESC, id DESC LIMIT 5"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->

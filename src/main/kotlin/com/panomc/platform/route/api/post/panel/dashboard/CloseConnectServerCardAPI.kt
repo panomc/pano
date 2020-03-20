@@ -88,7 +88,7 @@ class CloseConnectServerCardAPI : Api() {
                         } else
                             connection.getSQLConnection().updateWithParams(
                                 """
-                                        UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE option = ?
+                                        UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE `option` = ?
                                     """.trimIndent(),
                                 JsonArray().add("false").add("show_connect_server_info")
                             ) { queryResult ->
@@ -131,7 +131,7 @@ class CloseConnectServerCardAPI : Api() {
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(value) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where option = ? and value = ?"
+            "SELECT COUNT(`value`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("who_installed_user_id").add(userID.toString())) { queryResult ->

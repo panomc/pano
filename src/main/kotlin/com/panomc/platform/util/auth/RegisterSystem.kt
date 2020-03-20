@@ -171,7 +171,7 @@ class RegisterSystem : Auth() {
 
         getConnection().queryWithParams(
             """
-                SELECT COUNT(value) FROM ${tablePrefix}system_property where option = ?
+                SELECT COUNT(`value`) FROM ${tablePrefix}system_property where `option` = ?
             """,
             JsonArray().add("who_installed_user_id")
         ) {
@@ -181,7 +181,7 @@ class RegisterSystem : Auth() {
                 }
                 it.result().results[0].getInteger(0) == 0 -> getConnection().updateWithParams(
                     """
-                        INSERT INTO ${tablePrefix}system_property (option, value) VALUES (?, ?)
+                        INSERT INTO ${tablePrefix}system_property (`option`, `value`) VALUES (?, ?)
                     """.trimIndent(),
                     JsonArray().add("who_installed_user_id").add(userID.toString())
                 ) {
@@ -194,7 +194,7 @@ class RegisterSystem : Auth() {
                 }
                 else -> getConnection().updateWithParams(
                     """
-                        UPDATE ${tablePrefix}system_property SET value = ? WHERE option = ?
+                        UPDATE ${tablePrefix}system_property SET value = ? WHERE `option` = ?
                     """.trimIndent(),
                     JsonArray().add("who_installed_user_id").add(userID.toString())
                 ) {

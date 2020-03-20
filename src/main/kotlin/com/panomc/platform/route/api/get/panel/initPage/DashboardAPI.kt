@@ -121,7 +121,7 @@ class DashboardAPI : Api() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -140,7 +140,7 @@ class DashboardAPI : Api() {
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(value) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where option = ? and value = ?"
+            "SELECT COUNT(`value`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("who_installed_user_id").add(userID.toString())) { queryResult ->
@@ -195,7 +195,7 @@ class DashboardAPI : Api() {
         handler: (showWelcomeBoard: Boolean) -> Unit
     ) {
         val query =
-            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where option = ?"
+            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("show_getting_started")) { queryResult ->

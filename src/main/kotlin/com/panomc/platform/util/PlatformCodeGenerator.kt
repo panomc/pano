@@ -29,7 +29,7 @@ class PlatformCodeGenerator {
 
         sqlConnection.queryWithParams(
             """
-                    SELECT COUNT(value) FROM ${tablePrefix}system_property where option = ?
+                    SELECT COUNT(`value`) FROM ${tablePrefix}system_property where `option` = ?
                 """,
             JsonArray().add("platformCode")
         ) {
@@ -37,7 +37,7 @@ class PlatformCodeGenerator {
                 it.failed() -> handler.invoke(Error(ErrorCode.PLATFORM_CODE_GENERATOR_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_9))
                 it.result().results[0].getInteger(0) == 0 -> sqlConnection.updateWithParams(
                     """
-                                        INSERT INTO ${tablePrefix}system_property (option, value) VALUES (?, ?)
+                                        INSERT INTO ${tablePrefix}system_property (`option`, `value`) VALUES (?, ?)
                                     """.trimIndent(),
                     JsonArray().add("platformCode").add(platformCode.toString())
                 ) {
@@ -48,7 +48,7 @@ class PlatformCodeGenerator {
                 }
                 else -> sqlConnection.updateWithParams(
                     """
-                                        UPDATE ${tablePrefix}system_property SET value = ? WHERE option = ?
+                                        UPDATE ${tablePrefix}system_property SET value = ? WHERE `option` = ?
                                     """.trimIndent(),
                     JsonArray().add(platformCode.toString()).add("platformCode")
                 ) {
