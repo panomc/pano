@@ -14,13 +14,10 @@ Docker Compose (optional)
 ## Development
 #### Getting Started
 1) Clone this repository.
-2) Init & update submodules.
 
 ```bash
-git clone https://gitlab.com/defio-workshop/pano/pano-web-platform
+git clone --recursive https://gitlab.com/defio-workshop/pano/pano-web-platform.git
 cd pano-web-platform
-git submodule init
-git submodule update
 ```
 
 ##### Compile & Run
