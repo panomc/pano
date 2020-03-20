@@ -49,4 +49,4 @@ If you would like to stop Docker while it's not running in background use `ctrl 
 Merge requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
-This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU GPLv3 License - see the [LICENSE](LICENSE) file for details
