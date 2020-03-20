@@ -7,7 +7,7 @@ Pano is still under heavy development. There can be breaking changes but we're t
 
 #### Prerequisites
 JDK 8+ <br>
-MySQL  5.0 <br>
+MySQL v5+ / MariaDB <br>
 Docker (optional) <br>
 Docker Compose (optional)
 
