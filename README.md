@@ -45,6 +45,13 @@ If you would like to run Docker in background, use ` -d` at the end of the comma
 If you want to stop Docker while it's running in background `docker-compose down`. 
 If you would like to stop Docker while it's not running in background use `ctrl + c`.
 
+##### MYSQL Default Values
+
+```bash
+database: pano
+root password: pano
+```
+
 ## Contributing
 Merge requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
