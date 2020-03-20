@@ -48,7 +48,7 @@ class SrcFolderRoute : Route() {
 
         if (setupManager.isSetupDone())
             if (normalisedPath.startsWith("/panel/") && isAdmin)
-                srcFolderRoot = "src/main/resources/site/"
+                srcFolderRoot = "src/main/resources/"
             else if (normalisedPath.startsWith("/panel/")) {
                 context.reroute("/error-404")
 
