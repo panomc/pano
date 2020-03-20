@@ -30,14 +30,14 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot, 
 
     private fun handle(context: RoutingContext, isAdmin: Boolean) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var assetsFolderRoot = if (setupManager.isSetupDone())
-            "view/ui/site/themes/" + configManager.config.string("current-theme") + "/assets/"
+            "src/main/resources/themes/" + configManager.config.string("current-theme") + "/assets/"
         else
-            "view/ui/setup/assets/"
+            "src/main/resources/setup/assets/"
 
         val normalisedPath = context.normalisedPath()
 
         if (normalisedPath.startsWith("/panel/") && isAdmin)
-            assetsFolderRoot = "view/ui/site/panel/assets/"
+            assetsFolderRoot = "src/main/resources/panel/assets/"
         else if (normalisedPath.startsWith("/panel/")) {
             context.reroute("/error-404")
 

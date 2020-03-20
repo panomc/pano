@@ -1,0 +1,98 @@
+<!-- Admins Page -->
+
+<div class="content">
+    <!-- Action Menu -->
+    <div class="row mb-3">
+        <div class="col-md-4 col-6">
+            <h3 class="text-muted badge badge-lightprimary panel-subtitle">
+                Admin
+            </h3>
+        </div>
+        <div class="col text-right">
+            <router-link
+                    class="btn btn-primary"
+                    role="button"
+                    to="/panel/posts/create-post"
+            >
+                <i aria-hidden="true" class="fa fa-plus fa-fw"></i>
+                <span class="d-md-inline d-none">Yönetici Ekle</span>
+            </router-link>
+        </div>
+    </div>
+
+    <!-- Admin Cards -->
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-auto">
+                            <img
+                                    alt="Butlu"
+                                    class="rounded-circle border float-left"
+                                    height="48"
+                                    src="https://minotar.net/avatar/e5eea5f735c444a28af9b2c867ade454/64"
+                                    width="48"
+                            />
+                        </div>
+                        <div class="col">
+                            <h4 class="card-title mb-1">Butlu</h4>
+                            <span>selimgokcek@outlook.com</span>
+                            <div class="row justify-content-between pt-2 px-2">
+                                <div>
+                                    <i
+                                            aria-hidden="true"
+                                            class="far fa-sticky-note text-primary fa-fw"
+                                    ></i>
+                                    5 Yazı
+                                </div>
+                                <div>
+                                    <i
+                                            aria-hidden="true"
+                                            class="fa fa-align-left text-primary fa-fw"
+                                    ></i>
+                                    Türkçe (TR)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <router-link
+                            class="btn btn-outline-primary btn-sm"
+                            role="button"
+                            to="/"
+                    >
+                        Yönet
+                    </router-link>
+                    <div class="float-right">
+                        <router-link
+                                class="btn bg-link text-primary btn-sm"
+                                role="button"
+                                title="Profili Görüntüle"
+                                to="/"
+                        >
+                            <i class="fas fa-user"></i>
+                        </router-link>
+                        <router-link
+                                class="btn btn-link text-danger btn-sm"
+                                role="button"
+                                title="Yöneticiyi Kaldır"
+                                to="/"
+                        >
+                            <i aria-hidden="true" class="fa fa-times"></i>
+                        </router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moderator Cards -->
+    <div class="my-3">
+        <h3 class="text-muted badge badge-lightprimary panel-subtitle">
+            Diğer
+        </h3>
+    </div>
+</div>

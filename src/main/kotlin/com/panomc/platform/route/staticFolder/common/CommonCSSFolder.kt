@@ -6,5 +6,5 @@ import io.vertx.ext.web.handler.StaticHandler
 class CommonCSSFolder : Route() {
     override val routes = arrayListOf("/common/css/*")
 
-    override fun getHandler() = StaticHandler.create("view/common/css").setCachingEnabled(true)!!
+    override fun getHandler() = StaticHandler.create("src/main/resources/common/css").setCachingEnabled(true)!!
 }

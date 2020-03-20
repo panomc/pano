@@ -1,0 +1,16 @@
+<div id="App">
+
+    <link crossorigin="anonymous" href="https://use.fontawesome.com/releases/v5.8.0/css/all.css"
+          integrity="sha384-Mmxa0mLqhmOeaE8vgOSbKacftZcsNYDjQzuCOm6D02luYSzBG8vpaOykv9lFQ51Y" rel="stylesheet"/>
+    <link href="/common/css/animate.css" rel="stylesheet"/>
+
+    <!-- Splash Animation -->
+    <div class="d-flex justify-content-center align-items-center w-100 min-vh-100" role="status" v-if="showSplash">
+        <img class="animated fadeIn infinite slow" src="/panel/assets/img/logo-blue.svg" style="visibility: hidden;"
+             width="32">
+    </div>
+
+    <!-- Main Contents Hidden -->
+    <Main :class="{ 'd-flex': !showSplash }" v-show="!showSplash"></Main>
+
+</div>

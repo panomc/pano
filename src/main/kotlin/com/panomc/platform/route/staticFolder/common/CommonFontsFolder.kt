@@ -6,5 +6,5 @@ import io.vertx.ext.web.handler.StaticHandler
 class CommonFontsFolder : Route() {
     override val routes = arrayListOf("/common/fonts/*")
 
-    override fun getHandler() = StaticHandler.create("view/common/fonts").setCachingEnabled(true)!!
+    override fun getHandler() = StaticHandler.create("src/main/resources/common/fonts").setCachingEnabled(true)!!
 }

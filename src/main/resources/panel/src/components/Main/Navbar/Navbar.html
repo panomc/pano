@@ -1,0 +1,129 @@
+<!-- Top Navbar -->
+<nav
+        class="navbar navbar-expand navbar-light bg-white sticky-top border-bottom"
+>
+    <ul class="nav navbar-nav mr-auto">
+        <li class="nav-item mr-3">
+            <a
+                    @click="onSideBarCollapseClick"
+                    class="icon-link nav-link"
+                    href="javascript:void(0);"
+                    title="Menüyü Aç/Kapa"
+            >
+                <i aria-hidden="true" class="fa fa-bars"></i>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a
+                    class="btn btn-link border-lightprimary text-secondary"
+                    href="#"
+                    target="_blank"
+            >
+                <i class="fa fa-store fa-fw d-lg-none d-inline"></i>
+                <span class="d-lg-inline d-none">Web Market</span>
+            </a>
+        </li>
+    </ul>
+    <ul class="nav navbar-nav m-auto">
+        <div class="navbar-brand">
+            <span class="font-weight-normal">Panel</span>
+        </div>
+    </ul>
+    <ul class="nav navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    class="icon-link nav-link position-relative dropdown-toggle"
+                    data-toggle="dropdown"
+                    href="javascript:void(0);"
+                    role="button"
+                    title="Bildirimler"
+            >
+                <i aria-hidden="true" class="far fa-bell"></i>
+            </a>
+            <div
+                    class="dropdown-menu animated fadeIn faster dropdown-menu-right notifications"
+            >
+                <h6 class="dropdown-header">
+                    Bildirimler
+                    <a
+                            class="float-right"
+                            href="javascript:void(0);"
+                            title="Tümünü Temizle"
+                            v-if="quickNotifications.length !== 0"
+                    >
+                        <i aria-hidden="true" class="fas fa-broom"></i>
+                    </a>
+                </h6>
+                <a :key="index" class="dropdown-item py-3" href="javascript:void(0);"
+                   v-for="(notification, index) in quickNotifications">
+                    <i aria-hidden="true" class="fa fa-check text-primary fa-fw"></i>
+                    <strong class="text-muted" v-text="notification.type_ID"></strong>
+                </a>
+
+                <div class="d-flex flex-column align-items-center justify-content-center"
+                     v-if="quickNotifications.length === 0">
+                    <i aria-hidden="true" class="far fa-bell fa-3x text-glass m-3"></i>
+                    <p class="text-gray">Yeni bildirim yok.</p>
+                </div>
+                <hr class="m-0 pb-2"/>
+                <div class="text-center">
+                    <router-link class="small" to="/panel/notifications">
+                        Bildirim Geçmişini Görüntüle
+                    </router-link>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item dropdown">
+            <a
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                    class="icon-link nav-link dropdown-toggle text-capitalize"
+                    data-toggle="dropdown"
+                    href="javascript:void(0);"
+                    title="Oturum"
+            >
+                <i aria-hidden="true" class="far fa-user fa-fw"></i>
+                <span class="d-lg-inline d-none">{{ username }}</span>
+            </a>
+            <div
+                    class="dropdown-menu dropdown-menu-right animated fadeIn faster notifications"
+            >
+                <div class="px-2 py-2 d-flex align-items-center">
+                    <img
+                            :src=" 'https://www.gravatar.com/avatar/' + md5(email.trim().toLocaleLowerCase()) + '/64'"
+                            alt=""
+                            class="rounded mx-2"
+                            width="32"
+                    />
+                    <span class="text-muted">Yerel Hesap</span>
+                    <a
+                            @click="logout"
+                            class="btn btn-link btn-sm text-danger ml-auto"
+                            href="javascript:void(0)"
+                            v-tooltip:top="'Çıkış Yap'"
+                    >
+                        <i aria-hidden="true" class="fas fa-sign-out-alt fa-lg"></i>
+                    </a>
+                </div>
+                <hr class="mt-2 mb-0 pb-2"/>
+                <ul class="nav font-weight-normal flex-column p-0 m-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"
+                        ><i aria-hidden="true" class="fa fa-user-cog fa-fw"></i> Hesabı
+                            Yönet</a
+                        >
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"
+                        ><i aria-hidden="true" class="fa fa-user-plus fa-fw"></i>
+                            Yönetici Ekle</a
+                        >
+                    </li>
+                </ul>
+            </div>
+        </li>
+    </ul>
+</nav>

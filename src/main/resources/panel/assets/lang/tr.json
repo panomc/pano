@@ -1,0 +1,24 @@
+{
+  "message": {
+    "hello": "selam dünya"
+  },
+  "Common": {
+    "Page": {
+      "title": "Pano | Yönetim Paneli",
+      "description": "Pano, Minecraft oyun sunucunuzu en iyi şekilde sunmak ve yönetmek için harika sistemler sunar."
+    },
+    "Language": {
+      "current-language-symbol": "TR",
+      "languages": [
+        {
+          "name": "Türkçe (TR)",
+          "symbol": "tr"
+        },
+        {
+          "name": "English (US)",
+          "symbol": "en"
+        }
+      ]
+    }
+  }
+}

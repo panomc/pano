@@ -1,0 +1,23 @@
+<!-- View Page -->
+<div>
+
+    <!-- View Categories Navigation -->
+    <nav class="border-bottom border-glass page-category">
+        <div class="nav nav-pills d-flex flex-row w-100">
+            <router-link :class="{ 'active': currentActiveNavLink === 1 }" class="nav-item nav-link" to="/panel/view">
+                Temalar
+            </router-link>
+
+            <router-link :class="{ 'active': currentActiveNavLink === 2 }" class="nav-item nav-link"
+                         to="/panel/view/theme-options">
+                Tema Seçenekleri
+            </router-link>
+        </div>
+    </nav>
+
+    <!-- Settings Contents -->
+    <article class="content">
+        <router-view></router-view>
+    </article>
+
+</div>

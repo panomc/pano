@@ -1,0 +1,20 @@
+<div>
+    <Sidebar></Sidebar>
+    <!--  Main  -->
+    <main class="panel-content">
+        <Navbar></Navbar>
+
+        <!-- Content  -->
+        <router-view
+                v-show="!routePageLoading && !initialPageDataLoading"
+        ></router-view>
+
+        <div
+                :class="{ 'd-flex': routePageLoading || initialPageDataLoading }"
+                class="align-items-center justify-content-center w-100 h-75"
+                v-show="routePageLoading"
+        >
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    </main>
+</div>

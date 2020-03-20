@@ -1,0 +1,309 @@
+<div>
+    <!-- Action Menu -->
+    <div class="row mb-3">
+        <div class="col-md-4 col-6">
+            <router-link
+                    class="btn btn-link"
+                    role="button"
+                    to="/panel/posts/categories"
+            >
+                <i aria-hidden="true" class="far fa-list-alt fa-fw"></i>
+                <span class="d-md-inline d-none">Kategoriler</span>
+            </router-link>
+        </div>
+        <div class="col text-right">
+            <router-link
+                    class="btn btn-primary"
+                    role="button"
+                    to="/panel/posts/create-post"
+            >
+                <i aria-hidden="true" class="fa fa-plus fa-fw"></i>
+                <span class="d-md-inline d-none">Yazı Oluştur</span>
+            </router-link>
+        </div>
+    </div>
+
+    <!-- All Posts -->
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row justify-content-between">
+                <div class="col-md-6 col-12 text-md-left text-center">
+                    <h5 class="card-title">
+                        {{ posts_count }} Yazı -
+                        <span class="text-primary">{{ page }}/{{ total_page }}</span>
+                    </h5>
+                </div>
+                <div class="col-md-6 col-12 text-md-right text-center">
+                    <div class="btn-group">
+                        <router-link
+                                :class="{ 'active': page_type === 'published' }"
+                                class="btn btn-sm btn-outline-light btn-link"
+                                role="button"
+                                to="/panel/posts/published"
+                        >
+                            Yayınlanmış
+                        </router-link>
+                        <router-link
+                                :class="{ 'active': page_type === 'draft' }"
+                                class="btn btn-sm btn-outline-light btn-link"
+                                role="button"
+                                to="/panel/posts/draft"
+                        >
+                            Taslak
+                        </router-link>
+                        <router-link
+                                :class="{ 'active': page_type === 'trash' }"
+                                class="btn btn-sm btn-outline-light btn-link text-danger"
+                                role="button"
+                                to="/panel/posts/trash"
+                        >
+                            Çöp
+                        </router-link>
+                    </div>
+                </div>
+            </div>
+
+            <!-- No Posts -->
+            <div class="container text-center" v-if="posts_count === 0">
+                <i
+                        aria-hidden="true"
+                        class="far fa-sticky-note fa-4x text-glass m-3"
+                ></i>
+                <p class="text-gray">Burada içerik yok.</p>
+            </div>
+
+            <!-- Posts Table -->
+            <div class="table-responsive" v-if="posts_count !== 0">
+                <table class="table mb-0">
+                    <thead>
+                    <tr>
+                        <th scope="col"></th>
+                        <th class="min-w-200px" scope="col">Başlık</th>
+                        <th scope="col">Kategori</th>
+                        <th scope="col">Yazar</th>
+                        <th scope="col">Görüntülenme</th>
+                        <th scope="col">Tarih</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr :key="index" v-for="(post, index) in posts">
+                        <th class="min-w-50px" scope="row">
+                            <div class="dropdown position-absolute">
+                                <a
+                                        aria-expanded="false"
+                                        aria-haspopup="true"
+                                        class="icon-link d-block m-auto"
+                                        data-toggle="dropdown"
+                                        href="javascript:void(0);"
+                                        id="postAction"
+                                        title="Eylemler"
+                                >
+                                    <i aria-hidden="true" class="fa fa-ellipsis-v px-3"></i>
+                                </a>
+                                <div
+                                        aria-labelledby="postAction"
+                                        class="dropdown-menu dropdown-menu-right"
+                                >
+                                    <router-link class="dropdown-item" target="_blank" to="/">
+                                        <i
+                                                aria-hidden="true"
+                                                class="fa fa-eye fa-fw text-primary"
+                                        ></i>
+                                        Görüntüle
+                                    </router-link>
+                                    <a
+                                            :disabled="drafting"
+                                            @click="moveToDraft(index)"
+                                            class="dropdown-item"
+                                            href="javascript:void(0);"
+                                            v-if="page_type !== 'draft'"
+                                    >
+                      <span v-if="!drafting">
+                        <i
+                                aria-hidden="true"
+                                class="fa fa-bookmark fa-fw text-primary"
+                        ></i>
+                        Taslaklara Taşı
+                      </span>
+
+                                        <div
+                                                class="spinner-border spinner-border-sm text-primary"
+                                                role="status"
+                                                v-if="drafting"
+                                        ></div>
+                                    </a>
+                                    <a
+                                            :disabled="publishing"
+                                            @click="publish(post.id)"
+                                            class="dropdown-item"
+                                            href="javascript:void(0);"
+                                            v-if="page_type !== 'published'"
+                                    >
+                      <span v-if="!publishing">
+                        <i
+                                aria-hidden="true"
+                                class="fa fa-globe-americas fa-fw text-primary"
+                        ></i>
+                        Yayınla
+                      </span>
+
+                                        <div
+                                                class="spinner-border spinner-border-sm text-primary"
+                                                role="status"
+                                                v-if="publishing"
+                                        ></div>
+                                    </a>
+                                    <a
+                                            @click="deletingPostID = post.id"
+                                            class="dropdown-item"
+                                            data-target="#confirmDeletePost"
+                                            data-toggle="modal"
+                                            href="javascript:void(0);"
+                                    >
+                                        <i
+                                                aria-hidden="true"
+                                                class="fa fa-trash fa-fw text-danger"
+                                        ></i>
+                                        Sil
+                                    </a>
+                                </div>
+                            </div>
+                        </th>
+                        <td>
+                            <router-link
+                                    :to="'/panel/posts/post/' + post.id"
+                                    title="Yazıyı Düzenle"
+                            >
+                                {{ post.title }}
+                            </router-link>
+                        </td>
+                        <td>
+                <span
+                        :style="{ background: '#' + post.category.color }"
+                        class="border px-3 rounded"
+                >
+                  {{ post.category.title }}
+                </span>
+                        </td>
+                        <td>
+                            <router-link
+                                    title="Oyuncu Profiline Git"
+                                    to="#"
+                                    v-tooltip:top="'Username'"
+                            >
+                                <img
+                                        alt="Oyuncu Adı"
+                                        class="rounded-circle border"
+                                        height="32"
+                                        src="https://minotar.net/avatar/e5eea5f735c444a28af9b2c867ade454/32"
+                                        width="32"
+                                />
+                            </router-link>
+                        </td>
+                        <td>0</td>
+                        <td>{{ getFormattedDate(post.date) }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <nav class="pt-3">
+                <ul class="pagination pagination-sm mb-0 justify-content-start">
+                    <li
+                            :class="{ 'disabled': page === 1 }"
+                            @click="routePage(1)"
+                            class="page-item"
+                    >
+                        <a
+                                class="page-link"
+                                href="javascript:void(0);"
+                                title="Önceki Sayfa"
+                        >
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <li
+                            :class="{ 'active': index === page }"
+                            :key="index"
+                            @click="routePage(index)"
+                            class="page-item"
+                            v-for="index in total_page"
+                    >
+                        <a
+                                class="page-link"
+                                href="javascript:void(0);"
+                                v-if="page !== index"
+                        >
+                            {{index}}
+                        </a>
+                        <a class="page-link" v-if="page === index">{{index}}</a>
+                    </li>
+
+                    <li
+                            :class="{ 'disabled': page === total_page }"
+                            @click="routePage(total_page)"
+                            class="page-item"
+                    >
+                        <a
+                                class="page-link"
+                                href="javascript:void(0);"
+                                title="Sonraki Sayfa"
+                        >
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Post Modal -->
+    <div
+            aria-hidden="true"
+            class="modal fade"
+            id="confirmDeletePost"
+            role="dialog"
+            tabindex="-1"
+    >
+        <div class="modal-dialog modal-dialog-centered" role="dialog">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="pb-3">
+                        <i
+                                aria-hidden="true"
+                                class="fa fa-question-circle fa-4x d-block m-auto text-gray"
+                        ></i>
+                    </div>
+                    <span
+                            v-text="page_type === 'trash' ? 'Bu yazıyı kalıcı olarak silmek istediğinizden emin misiniz?' : 'Bu yazıyı çöp kutusuna taşımak istediğinizden emin misiniz?'"
+                    ></span>
+                </div>
+                <div class="modal-footer">
+                    <button
+                            class="btn btn-outline-primary w-100"
+                            data-dismiss="modal"
+                            type="button"
+                    >
+                        Hayır
+                    </button>
+                    <button
+                            :disabled="deleting"
+                            @click="page_type === 'trash' ? deletePost() : moveToTrash()"
+                            class="btn btn-danger w-100"
+                            type="button"
+                    >
+                        <div
+                                class="spinner-border spinner-border-sm text-white"
+                                role="status"
+                                v-if="deleting"
+                        ></div>
+                        <span v-if="!deleting">Evet</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

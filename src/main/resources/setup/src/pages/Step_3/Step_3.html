@@ -1,0 +1,91 @@
+<div>
+    <h3 class="pb-3">Adım - 3/3</h3>
+    <p>Son olarak, platformunuzu yönetmek için bir hesaba ihtiyacınız var. Çevrimiçi <a href="https://panomc.com"
+                                                                                        target="_blank">Panomc.com</a>
+        hesabınızı kullanabilir veya yerel bir hesap
+        oluşturabilirsiniz.</p>
+
+    <h5 class="text-primary">Yönetici Hesabı Bilgileri</h5>
+
+    <form @submit.prevent="finish">
+        <div class="py-2">
+            <div class="alert alert-primary" v-if="panoAccountAccessToken === '' || savingPanoAccount"><i
+                    aria-hidden="true"
+                    class="fa fa-info mr-2"></i>Pano
+                hesabınızı
+                bağladığınızda temalar ve eklentiler için gerekli alışveriş işlemlerini kullanabilirsiniz.
+            </div>
+
+            <button :aria-disabled="connectPanoAccountButtonStatus === 'LOADING'"
+                    :disabled="connectPanoAccountButtonStatus === 'LOADING'" @click="connectPanoAccount"
+                    class="btn text-primary"
+                    target="_blank" type="button" v-if="panoAccountAccessToken === '' || savingPanoAccount">
+        <span aria-hidden="true" class="spinner-border spinner-border text-primary mx-4" role="status"
+              v-if="connectPanoAccountButtonStatus === 'LOADING'"></span>
+
+                <span v-if="connectPanoAccountButtonStatus !== 'LOADING'">
+          <i aria-hidden="true" class="fas fa-arrow-right"></i>
+
+          Pano Hesabımı Platforma Bağla (Önerilir)
+        </span>
+            </button>
+
+            <div class="alert alert-success" v-if="panoAccountAccessToken !== '' && !savingPanoAccount">
+                <h5><i aria-hidden="true" class="fa fa-check mr-2"></i> Başarılı!</h5>
+                <hr>
+                <strong>@{{ panoAccountUsername }}</strong> hesabı başarıyla platforma bağlandı.
+                <br>
+                <br>
+                <a @click="disconnectPanoAccount" class="alert-link text-danger" href="javascript:void(0);">Bağlantıyı
+                    Kes
+                </a>
+            </div>
+
+            <div class="alert alert-dismissible text-danger text-left font-weight-bold p-2" id="finishError"
+                 style="display: none;">
+                {{ $t("Common.Error") }}: {{ $t("Errors." + errorCode) }}
+                <button :aria-label="$t('Finish.close')" @click="dismissErrorBox" class="close p-1" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="pt-3">
+                <div class="form-group">
+                    <label for="admin-username">Minecraft Kullanıcı Adı:</label>
+                    <input class="form-control" id="admin-username" type="text" v-model="username">
+                </div>
+                <div class="form-group">
+                    <label for="admin-email">E-Posta:</label>
+                    <input class="form-control" id="admin-email" type="email" v-model="email">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Şifre:</label>
+                    <input class="form-control" id="admin-password" type="password" v-model="password">
+                    <small>Minimum: 6 karakter.</small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="pt-3 d-block m-auto">
+            <button :aria-disabled="disableFinishButton || finishButtonLoading"
+                    :disabled="disableFinishButton || finishButtonLoading" class="btn btn-secondary text-white"
+                    type="submit">
+        <span aria-hidden="true" class="spinner-border spinner-border-sm text-light mx-4" role="status"
+              v-if="finishButtonLoading">
+        </span>
+                <span v-if="!finishButtonLoading">
+          <i class="fas fa-check"></i> Tamamla
+        </span>
+            </button>
+            <button :aria-disabled="backButtonLoading" :disabled="backButtonLoading" @click="back"
+                    class="btn btn-outline-primary" type="button">
+        <span aria-hidden="true" class="spinner-border spinner-border-sm text-primary mx-4" role="status"
+              v-if="backButtonLoading"></span>
+                <a v-if="!backButtonLoading">
+                    <i class="fas fa-arrow-alt-circle-left"></i> Geri
+                </a>
+            </button>
+        </div>
+    </form>
+</div>

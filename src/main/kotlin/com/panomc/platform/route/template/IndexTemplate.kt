@@ -52,7 +52,7 @@ class IndexTemplate : Template() {
         templateEngine
             .render(
                 JsonObject().put("is_panel", isAdmin),
-                "view/ui-template/vue-ui-index.hbs"
+                "src/main/resources/index-template.hbs"
             ) { res ->
                 if (res.succeeded())
                     response.end(res.result())

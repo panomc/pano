@@ -39,16 +39,16 @@ class SrcFolderRoute : Route() {
 
     private fun handle(context: RoutingContext, isAdmin: Boolean = false) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var srcFolderRoot = if (setupManager.isSetupDone())
-            "view/ui/site/themes/" + configManager.config.string("current-theme") + "/"
+            "src/main/resources/themes/" + configManager.config.string("current-theme") + "/"
         else
-            "view/ui/setup/"
+            "src/main/resources/setup/"
 
         val response = context.response()
         val normalisedPath = context.normalisedPath()
 
         if (setupManager.isSetupDone())
             if (normalisedPath.startsWith("/panel/") && isAdmin)
-                srcFolderRoot = "view/ui/site/"
+                srcFolderRoot = "src/main/resources/site/"
             else if (normalisedPath.startsWith("/panel/")) {
                 context.reroute("/error-404")
 

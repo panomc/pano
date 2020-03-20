@@ -1,0 +1,246 @@
+@import "../../../common/css/main";
+
+// Control Panel Styles
+
+body {
+  overflow: hidden;
+}
+
+.notification {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  background: $bittersweet;
+  border-radius: 50%;
+}
+
+.notifications {
+  min-width: 16rem;
+}
+
+.content {
+  padding: 1.5rem 1.5rem;
+  @include media-breakpoint-down(xs) {
+    padding: 1rem 1rem;
+  }
+}
+
+.card {
+  box-shadow: $box-shadow-sm;
+  margin-bottom: 1rem;
+}
+
+.sidebar-logo {
+  height: 73px;
+  display: flex;
+  align-items: center;
+  background: $white;
+}
+
+.sidebar-head {
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem 0.5rem;
+  padding-bottom: 1rem;
+}
+
+.sidebar-icon {
+  border: 10px solid $lightglass;
+  border-radius: 75%;
+  margin-bottom: 1rem;
+}
+
+.alert-welcome {
+  position: relative;
+  background: url("/panel/assets/img/header-bg.jpg") no-repeat top;
+  background-size: cover;
+  padding: 0;
+  margin: 0;
+
+  &:before {
+    position: absolute;
+    bottom: 0;
+    padding: 0;
+    margin: 0;
+    content: "";
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba($white, 0.3) 0%, $white 100%);
+  }
+}
+
+.sidebar {
+  position: relative;
+  display: block;
+  width: 240px;
+  height: 100vh;
+  transition: 0.5s all;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  @include media-breakpoint-down(md) {
+    position: fixed;
+    left: 0;
+    z-index: 9999;
+  }
+}
+
+.sidebar:not(.active) {
+  margin-left: -250px;
+}
+
+.sidebar.active {
+  @include media-breakpoint-down(md) {
+    box-shadow: 5px 0 3px 0 $glass;
+  }
+}
+
+.sidebar-inner {
+  overflow-y: auto;
+  height: calc(100vh - 130px);
+  scrollbar-color: $lightglass $primary;
+  scrollbar-width: thin;
+}
+
+.menu.navbar-nav li.nav-item {
+  padding: 0.2rem 2rem;
+}
+
+.sidebar-tab {
+  padding: 0.5rem 1rem;
+}
+
+.sidebar-bottom {
+  position: absolute;
+  bottom: 0;
+}
+
+.panel-content {
+  display: block;
+  height: 100vh;
+  min-width: 300px;
+  width: 100%;
+  overflow-y: auto;
+  transition: 0.2s ease-in;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.menu > li.nav-item {
+  position: relative;
+  border-radius: 0.5rem;
+
+  &:hover {
+    transition: 0.3s all;
+
+    &:before {
+      background: $gray;
+      border-radius: 20px;
+      content: " ";
+      height: 35%;
+      left: -6px;
+      top: 35%;
+      position: absolute;
+      width: 12px;
+      transition: 0.3s all;
+    }
+  }
+}
+
+.menu > li.nav-item.active {
+  position: relative;
+  border-radius: 0.5rem;
+  transition: 0.3s all;
+
+  &:before {
+    display: flex;
+    align-items: center;
+    background: $gray;
+    border-radius: 20px;
+    content: " ";
+    height: 90%;
+    top: 10%;
+    left: -6px;
+    position: absolute;
+    width: 12px;
+    transition: 0.3s all;
+  }
+}
+
+.management-tab > li.nav-item {
+  a.nav-link.active {
+    background: $glass;
+    color: $sunflower;
+    font-weight: bolder;
+  }
+}
+
+.panel-subtitle {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.page-category {
+  background: $white;
+  width: 100%;
+  padding: 1rem 1.5rem;
+}
+
+.page-category-v {
+  background: $white;
+  width: 100%;
+  height: calc(100vh - 74px);
+  padding: 1rem 1.5rem;
+  @include media-breakpoint-down(md) {
+    padding: 0.5rem 0.5rem;
+  }
+}
+
+.settings-form {
+  padding: 0.5rem 1rem;
+  min-width: 400px;
+  max-width: 800px;
+}
+
+.selected {
+  box-shadow: 0 0 0 4px inset $primary !important;
+  position: relative;
+  transition: 0.2s;
+
+  &:after {
+    position: absolute;
+    content: "";
+    top: 3px;
+    right: 3px;
+    width: 30px;
+    height: 30px;
+    background: url("../panel/assets/img/check-solid.svg") no-repeat top 3px right 3px;
+    background-size: 16px;
+    background-color: $primary;
+    border-bottom-left-radius: 75px;
+  }
+}
+
+.min-w-200px {
+  min-width: 200px;
+}
+
+.min-w-50px {
+  min-width: 50px;
+}
+
+.btn-secondary {
+  color: $white;
+}
+
+.tool-card {
+  width: 100px;
+  height: 100px;
+}

@@ -1,0 +1,362 @@
+<div>
+    <!-- Sidebar -->
+    <aside :class="{ 'active': isSidebarOpen }" class="sidebar bg-primary">
+
+        <!-- Sidebar Logo -->
+        <div class="sidebar-logo bg-lightglass border-bottom border-glass justify-content-lg-center">
+            <a @click="onMobileSideBarCollapseClick"
+               class="icon-link text-light nav-link ml-3 mr-5 d-lg-none d-block animated fadeIn fast"
+               href="javascript:void(0);">
+                <i aria-hidden="true" class="fa fa-bars"></i>
+            </a>
+            <img alt="Pano" src="/panel/assets/img/logo.svg" width="20"/>
+        </div>
+
+        <div class="sidebar-inner bg-primary">
+
+            <!-- Sidebar Head Website -->
+            <div class="sidebar-head">
+                <div class="sidebar-icon">
+                    <img alt="Server İkon" class="rounded-circle" height="64"
+                         src="http://icons.iconarchive.com/icons/ampeross/lamond/256/minecraft-icon.png" width="64"/>
+                </div>
+
+                <!-- Sidebar Title Website -->
+                <h5 class="text-white" v-text="websiteName"></h5>
+
+                <a href="/" style="z-index: 1;" target="_blank" v-if="sidebarTabsState === 'website'">
+                    <button class="btn btn-secondary btn-sm" type="button">
+                        Websiteyi Görüntüle
+                    </button>
+                </a>
+
+                <a href="javascript:void(0);" style="z-index: 1;" v-if="sidebarTabsState === 'game'">
+                    <button class="btn btn-aqua btn-sm text-white" data-target="#showServers" data-toggle="modal"
+                            type="button">
+                        Sunucuları Görüntüle
+                    </button>
+                </a>
+            </div>
+
+            <!-- Sidebar Tabs -->
+            <nav class="sidebar-tab py-2">
+                <ul class="management-tab nav nav-pills nav-fill lex-row flex-nowrap">
+                    <li class="nav-item">
+                        <a :class="{ 'active': sidebarTabsState === 'website', 'text-light': sidebarTabsState !== 'website' }"
+                           @click="onWebsiteClick" class="nav-link" href="javascript:void(0)" v-tooltip:top="'Website'">
+                            <i aria-hidden="true" class="fa fa-globe fa-fw fa-lg"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a :class="{ 'active': sidebarTabsState === 'game', 'text-light': sidebarTabsState !== 'game' }"
+                           @click="onGameClick" class="nav-link" href="javascript:void(0)" v-tooltip:top="'Sunucular'">
+                            <i aria-hidden="true" class="fa fa-cube fa-fw fa-lg"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Site Navigation Menu -->
+            <nav class="sidebar-nav navbar-dark" v-if="sidebarTabsState === 'website'">
+                <ul class="menu navbar-nav font-weight-normal">
+                    <li :class="{ 'active': path === '/panel' || path === '/panel/' }" class="nav-item">
+                        <router-link class="nav-link" to="/panel">
+                            <i class="fas fa-chart-line fa-fw"></i> İstatistikler
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/posts') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/posts">
+                            <i class="fas fa-sticky-note fa-fw"></i> Yazılar
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/tickets') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/tickets">
+                            <i class="fas fa-ticket-alt fa-fw"></i> Talepler
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/players') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/players">
+                            <i class="fas fa-users fa-fw"></i> Oyuncular
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/addons') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/addons">
+                            <i class="fas fa-puzzle-piece fa-fw"></i> Eklentiler
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/view') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/view">
+                            <i class="fas fa-palette fa-fw"></i> Görünüm
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/admins') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/admins">
+                            <i aria-hidden="true" class="fa fa-user-circle fa-fw"></i> Yöneticiler
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/tools') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/tools">
+                            <i aria-hidden="true" class="fa fa-tools fa-fw"></i> Araçlar
+                        </router-link>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Server Navigation Menu -->
+            <nav class="sidebar-nav navbar-dark" v-if="sidebarTabsState === 'game'">
+                <ul class="menu navbar-nav font-weight-normal">
+                    <li :class="{ 'active': path.startsWith('/panel/server-panel') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/tools">
+                            <i aria-hidden="true" class="fa fa-tachometer-alt fa-fw"></i> Sunucu Durumu
+                        </router-link>
+                    </li>
+                    <li :class="{ 'active': path.startsWith('/panel/server-preferences') }" class="nav-item">
+                        <router-link class="nav-link" to="/panel/tools">
+                            <i aria-hidden="true" class="fa fa-cogs fa-fw"></i> Konfigürasyon
+                        </router-link>
+                    </li>
+                </ul>
+                <div class="container text-center">
+                    <i aria-hidden="true" class="fa fa-cube fa-3x text-lightglass m-3"></i>
+                    <p class="text-gray">Bağlı sunucu yok. Sunucu yönetimi menüsünü getirmek için bir sunucu
+                        bağlayın.</p>
+                    <button class="btn btn-secondary btn-sm" data-target="#connectServer" data-toggle="modal"
+                            type="button">
+                        <i aria-hidden="true" class="fa fa-plus fa-fw"></i>
+                        Suncuu Bağla
+                    </button>
+                </div>
+            </nav>
+
+        </div>
+
+        <!-- Sidebar Bottom -->
+        <div
+                class="sidebar-bottom px-2 py-2 w-100 d-flex align-items-center justify-content-between bg-primary border-top border-right border-glass">
+            <router-link class="btn btn-link text-light" to="/panel/settings" v-tooltip:top="'Ayarlar'">
+                <i aria-hidden="true" class="fa fa-cog"></i>
+            </router-link>
+            <router-link class="btn btn-link text-light" to="/panel/settings/updates" v-tooltip:top="'Güncellemeler'">
+                <i aria-hidden="true" class="fa fa-sync"></i>
+            </router-link>
+            <a class="btn btn-link text-light" href="https://panomc.com/discord" target="_blank"
+               v-tooltip:top="'Pano Discord'">
+                <i aria-hidden="true" class="fab fa-discord"></i>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Servers Modal -->
+    <div aria-hidden="true" class="modal fade" id="showServers" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sunucular</h5>
+                    <button class="btn btn-link bg-light btn-sm ml-3" data-dismiss="modal" data-target="#connectServer"
+                            data-toggle="modal" type="button">
+                        <i aria-hidden="true" class="fa fa-plus fa-fw"></i> Suncuu Bağla
+                    </button>
+                    <button aria-label="Kapat" class="close" data-dismiss="modal" title="Pencereyi Kapat" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="spinner-border text-primary" role="status" v-if="serverListLoading"></div>
+
+                        <!-- Server Card -->
+                        <div :key="index" class="col-lg-4 col-md-6" v-for="(server, index) in servers"
+                             v-if="!serverListLoading && servers.length > 0">
+                            <div :class="{ 'selected': selected_server.id === server.id }" class="card w-100">
+                                <a @click="selectServer(server)" href="javascript:void(0);">
+                                    <div class="card-img-top bg-primary border-0" style="height: 100px;">
+                                        <div class="card-body">
+                                            <h4 class="card-title text-white lead">
+                                                <i aria-hidden="true" class="fa fa-home fa-fw text-primary fa-xs"
+                                                   v-if="main_server.id === server.id"></i>
+                                                {{ server.name }}</h4>
+                                            <h5 class="badge badge-sunflower">Spigot</h5>
+                                        </div>
+                                    </div>
+                                    <div class="position-relative">
+                                        <div class="position-absolute w-100" style="top: -60px;">
+                                            <img :src="server.favicon" alt=" Sever İkon"
+                                                 class="d-block m-auto border rounded-circle shadow-sm bg-white p-1 text-center">
+                                        </div>
+                                        <div class="mt-4 card-body text-center text-dark d-flex flex-row justify-content-between">
+                                            <div>
+                        <span
+                                class="lead">{{ server.status === 'online' ? server.player_count : 0 }}/{{ server.max_player_count }}</span>
+                                                <br>
+                                                <strong>Oyuncu</strong>
+                                            </div>
+                                            <div>
+                                                <div>
+                                                    <span class="lead">14 ms.</span>
+                                                    <br>
+                                                    <strong>Gecikme</strong>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <span class="text-dark lead">1.14</span>
+                                                <br>
+                                                <strong>Sürüm</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="card-footer bg-lightprimary text-center">
+                                    <div class="dropup">
+                                        <button aria-expanded="false" aria-haspopup="true"
+                                                class="btn btn-link btn-block"
+                                                data-toggle="dropdown" id="serverOptions" title="Seçenekler"
+                                                type="button">
+                                            <i aria-hidden="true" class="fa fa-cog fa-fw"></i>
+                                        </button>
+                                        <div aria-labelledby="serverOptions" class="dropdown-menu">
+
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                               v-if="main_server.id !== server.id">
+                                                <i aria-hidden="true" class="fa fa-home fa-fw text-primary"></i> Ana
+                                                Sunucu Olarak Belirle
+                                            </a>
+
+                                            <a class="dropdown-item" href="javascript:void(0);"
+                                               v-if="main_server.id === server.id">
+                                                <i aria-hidden="true" class="fa fa-times fa-fw text-primary"></i> Ana
+                                                Sunuculuğunu Kaldır
+                                            </a>
+
+                                            <a @click="onRemoveClick(server)" class="dropdown-item" data-dismiss="modal"
+                                               data-target="#confirmRemoveServer" data-toggle="modal"
+                                               href="javascript:void(0);">
+                                                <i aria-hidden="true" class="fa fa-times fa-fw text-danger"></i>
+                                                Sunucuyu Kaldır
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Server -->
+                        <div class="container text-center" v-if="servers.length === 0">
+                            <i aria-hidden="true" class="fas fa-cube fa-4x text-glass m-3"></i>
+                            <p class="text-gray">Bağlı sunucu yok.</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Connect Server Modal -->
+    <div aria-hidden="true" class="modal fade" id="connectServer" role="document" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sunucu Bağla</h5>
+                    <button class="close" data-dismiss="modal" title="Pencereyi Kapat" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="card-body text-center">
+
+                        <div class="mb-3">
+                            <i aria-hidden="true" class="fa fa-download fa-3x text-primary"></i>
+                        </div>
+
+                        <h5 class="text-primary" for="downloadPlugin">1. Oyun Eklentisini Sunucunuza İndirin:</h5>
+                        <button class="btn btn-link bg-light">
+                            <i aria-hidden="true" class="fas fa-file-download fa-fw"></i> Pano Minecraft Eklentisini
+                            İndir
+                            <br>
+                            <span class="font-weight-normal small">BungeeCord, Bukkit, Spigot, PaperSpigot</span>
+                        </button>
+
+                        <div class="my-4">
+                            <i aria-hidden="true" class="fa fa-terminal fa-3x text-primary"></i>
+                        </div>
+
+                        <h5 class="text-primary" for="platformToken">2. Bağlantı Komutunu Çalıştırın:</h5>
+                        <div class="input-group mb-2">
+                            <input :value="'/pano connect ' + platformAddress + ' ' + key"
+                                   class="form-control shadow-sm" id="platformToken"
+                                   type="text">
+                            <div class="input-group-append">
+                                <button @click="onCopyPlatformMatchKeyClick"
+                                        class="btn btn-link bg-light border shadow-sm" id="copyPlatformToken"
+                                        type="button"
+                                        v-tooltip:top="isPlatformMatchKeyCopied ? 'Kopyalandı!' : 'Kopyala'">
+                                    <i aria-hidden="true" class="fa fa-clipboard fa-fw"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <small class="text-muted ml-2">
+                            <i aria-hidden="true" class="fa fa-hourglass-half fa-fw"></i> Kod
+                            {{ timeToRefreshKey }}{{ timeToRefreshKey === '...' ? '' : ' saniye'}} sonra yenilenecek.
+                        </small>
+
+                        <div class="my-4">
+                            <i aria-hidden="true" class="fa fa-check-circle fa-3x text-primary"></i>
+                        </div>
+
+                        <h5 class="text-primary">3. Bağlantı İsteğine Onay Verin:</h5>
+                        <p class="mb-0">Bildirim panelinden (<i aria-hidden="true" class="far fa-bell"></i>) "Sunucu
+                            Bağlantısı İsteği" bildirimini açarak, onay verin.</p>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Category Modal -->
+    <div aria-hidden="true" class="modal fade" id="confirmRemoveServer" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered" role="dialog">
+            <div class="modal-content">
+                <form @submit.prevent="submitRemoveServer">
+                    <div class="modal-body text-center">
+                        <div class="pb-3">
+                            <i aria-hidden="true" class="fa fa-question-circle fa-4x d-block m-auto text-gray"></i>
+                        </div>
+                        Bu sunucuyu kaldırmak istediğinizden emin misiniz?
+                        <div class="container d-block m-auto">
+                            <label for="confirmRemoveServerPassword">Onaylamak için lütfen şifrenizi girin:</label>
+                            <input :class="{ 'border-danger': removingServerForm.error.password }"
+                                   aria-describedby="helpId"
+                                   class="form-control text-center mb-2" id="confirmRemoveServerPassword"
+                                   placeholder="Pano Hesabı Şifreniz" type="password"
+                                   v-model="removingServerForm.password">
+
+                            <small class="form-text text-danger d-inline" v-if="removingServerForm.error.code !== ''">
+                                <i aria-hidden="true" class="fa fa-exclamation-circle fa-fw"></i> {{
+                                removingServerForm.error.code }}
+                            </small>
+                        </div>
+                        <span class="text-danger">
+              <i aria-hidden="true" class="fa fa-exclamation-circle fa-fw"></i>
+              Platform ile eşitlenmiş sunucu verileri ve bilgileri sıfırlanacak.</span>
+                    </div>
+                    <div class="modal-footer">
+                        <button :disabled="removingServerForm.removing" class="btn btn-outline-primary w-100"
+                                data-dismiss="modal"
+                                type="button">Hayır
+                        </button>
+
+                        <button :disabled="removingServerForm.removing || removingServerForm.password === ''"
+                                class="btn btn-danger w-100" type="submit">
+                            <div class="spinner-border spinner-border-sm text-white" role="status"
+                                 v-if="removingServerForm.removing">
+                            </div>
+                            <span v-if="!removingServerForm.removing">Evet</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
