@@ -81,6 +81,14 @@ tasks {
         dependsOn(shadowJar)
     }
 
+    vertxDebug {
+        environment("EnvironmentType", "DEVELOPMENT")
+    }
+
+    vertxRun {
+        environment("EnvironmentType", "DEVELOPMENT")
+    }
+
     build {
         dependsOn("copyJar")
     }

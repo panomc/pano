@@ -21,6 +21,12 @@ class Main : AbstractVerticle() {
         private val mVertx = Vertx.vertx(mOptions)
         private val mLogger = LoggerFactory.getLogger("Pano Platform")
 
+        val ENVIRONMENT =
+            if (System.getenv("EnvironmentType").isNullOrEmpty())
+                EnvironmentType.RELEASE
+            else
+                EnvironmentType.DEVELOPMENT
+
         const val PORT = 8088
 
         @JvmStatic
@@ -38,6 +44,10 @@ class Main : AbstractVerticle() {
         }
 
         internal fun getComponent() = mComponent
+
+        enum class EnvironmentType {
+            DEVELOPMENT, RELEASE
+        }
     }
 
     @Inject
