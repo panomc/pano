@@ -13,7 +13,7 @@ Docker Compose (optional)
 
 ## Development
 #### Getting Started
-1) Clone this repository.
+Clone this repository.
 
 ```bash
 git clone --recursive https://gitlab.com/defio-workshop/pano/pano-web-platform.git
