@@ -8,8 +8,7 @@ Pano is still under heavy development. There can be breaking changes but we're t
 #### Prerequisites
 JDK 8+ <br>
 MySQL v5+ / MariaDB <br>
-Docker (optional) <br>
-Docker Compose (optional)
+Docker & Docker Compose (optional)
 
 ## Development
 #### Getting Started
@@ -37,10 +36,6 @@ cd pano-web-platform
 ```bash
 docker-compose up
 ```
-
-If you would like to run Docker in background, use ` -d` at the end of the command like `docker-compose up -d`. 
-If you want to stop Docker while it's running in background `docker-compose down`. 
-If you would like to stop Docker while it's not running in background use `ctrl + c`.
 
 ##### MySQL Default Values
 
