@@ -51,7 +51,9 @@ class IndexTemplate : Template() {
 
         templateEngine
             .render(
-                JsonObject().put("is_panel", isAdmin),
+                JsonObject()
+                    .put("is_panel", isAdmin)
+                    .put("is_setup", !setupManager.isSetupDone()),
                 "src/main/resources/index-template.hbs"
             ) { res ->
                 if (res.succeeded())

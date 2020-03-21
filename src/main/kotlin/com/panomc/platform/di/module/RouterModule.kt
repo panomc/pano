@@ -17,10 +17,7 @@ import com.panomc.platform.route.api.post.setup.step.BackStepAPI
 import com.panomc.platform.route.api.post.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.setup.step.NextStepAPI
 import com.panomc.platform.route.staticFolder.assets.*
-import com.panomc.platform.route.staticFolder.common.CommonCSSFolder
-import com.panomc.platform.route.staticFolder.common.CommonFontsFolder
-import com.panomc.platform.route.staticFolder.common.CommonImgFolder
-import com.panomc.platform.route.staticFolder.common.CommonJsFolder
+import com.panomc.platform.route.staticFolder.common.*
 import com.panomc.platform.route.staticFolder.src.SrcFolderRoute
 import com.panomc.platform.route.template.IndexTemplate
 import dagger.Module
@@ -51,6 +48,7 @@ class RouterModule(private val mVertx: Vertx) {
             CommonFontsFolder(),
             CommonImgFolder(),
             CommonJsFolder(),
+            CommonFaviconFolder(),
 
             AssetsCssFolder(),
             AssetsFontsFolder(),
