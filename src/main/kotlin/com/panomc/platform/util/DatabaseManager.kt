@@ -1,9 +1,6 @@
 package com.panomc.platform.util
 
-import com.panomc.platform.migration.database.DatabaseMigration_1_2
-import com.panomc.platform.migration.database.DatabaseMigration_2_3
-import com.panomc.platform.migration.database.DatabaseMigration_3_4
-import com.panomc.platform.migration.database.DatabaseMigration_4_5
+import com.panomc.platform.migration.database.*
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.json.JsonArray
@@ -25,7 +22,8 @@ class DatabaseManager(
         DatabaseMigration_1_2(),
         DatabaseMigration_2_3(),
         DatabaseMigration_3_4(),
-        DatabaseMigration_4_5()
+        DatabaseMigration_4_5(),
+        DatabaseMigration_5_6()
     )
 
     init {
@@ -100,7 +98,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 5
+        const val DATABASE_SCHEME_VERSION = 6
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
@@ -209,10 +207,6 @@ class DatabaseManager(
                     DatabaseInitUtil.createTokenTable(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createPanelConfigTable(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createServerTable(sqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPostTable(sqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPostCategoryTable(sqlConnection, tablePrefix),
-                    DatabaseInitUtil.createTicketTable(sqlConnection, tablePrefix),
-                    DatabaseInitUtil.createTicketCategoryTable(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createSchemeVersionTable(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createAdminPermission(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createSystemPropertyTable(sqlConnection, tablePrefix),
