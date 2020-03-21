@@ -67,6 +67,7 @@ class SetupManager(private val mConfigManager: ConfigManager) {
     fun getStep() = (mConfigManager.config["setup"] as Map<*, *>)["step"] as Int
 
     private fun setStep(step: Int) {
+        @Suppress("UNCHECKED_CAST")
         (mConfigManager.config["setup"] as MutableMap<String, Any>).replace("step", step)
 
         mConfigManager.saveConfig()

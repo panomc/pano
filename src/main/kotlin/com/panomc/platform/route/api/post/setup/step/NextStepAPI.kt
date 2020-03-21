@@ -55,7 +55,8 @@ class NextStepAPI : Api() {
                 !data.getString("dbName").isNullOrEmpty() &&
                 !data.getString("username").isNullOrEmpty()
             ) {
-                val databaseOptions = (configManager.config["database"] as MutableMap<String, Any>)
+                @Suppress("UNCHECKED_CAST") val databaseOptions =
+                    (configManager.config["database"] as MutableMap<String, Any>)
 
                 databaseOptions.replace("host", data.getString("host"))
                 databaseOptions.replace("name", data.getString("dbName"))

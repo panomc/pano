@@ -5,7 +5,7 @@ import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl
 import javax.inject.Inject
 
-class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot, null) {
+class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot) {
 
     @Inject
     lateinit var setupManager: SetupManager
