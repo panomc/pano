@@ -7,6 +7,7 @@ import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.get.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
@@ -14,7 +15,6 @@ import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
 import com.panomc.platform.route.api.post.setup.step.BackStepAPI
-import com.panomc.platform.route.api.post.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.setup.step.NextStepAPI
 import com.panomc.platform.route.staticFolder.assets.*
 import com.panomc.platform.route.staticFolder.common.*
@@ -26,6 +26,7 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.CookieHandler
 import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.sstore.LocalSessionStore
@@ -101,9 +102,6 @@ class RouterModule(private val mVertx: Vertx) {
     }
 
     private fun init(router: Router) {
-        router.route().handler(BodyHandler.create())
-        router.route().handler(SessionHandler.create(LocalSessionStore.create(mVertx)))
-
         val allowedHeaders: MutableSet<String> = HashSet()
         allowedHeaders.add("x-requested-with")
         allowedHeaders.add("Access-Control-Allow-Origin")
@@ -112,7 +110,7 @@ class RouterModule(private val mVertx: Vertx) {
         allowedHeaders.add("accept")
         allowedHeaders.add("X-PINGARUNER")
 
-        val allowedMethods: MutableSet<HttpMethod> = HashSet()
+        val allowedMethods = mutableSetOf<HttpMethod>()
         allowedMethods.add(HttpMethod.GET)
         allowedMethods.add(HttpMethod.POST)
         allowedMethods.add(HttpMethod.OPTIONS)
@@ -121,9 +119,16 @@ class RouterModule(private val mVertx: Vertx) {
         allowedMethods.add(HttpMethod.PATCH)
         allowedMethods.add(HttpMethod.PUT)
 
-        router.route().handler(
-            CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods)
-        )
+        router.route()
+            .handler(BodyHandler.create())
+            .handler(CookieHandler.create())
+            .handler(SessionHandler.create(LocalSessionStore.create(mVertx)))
+            .handler(
+                CorsHandler.create(".*.")
+                    .allowCredentials(true)
+                    .allowedHeaders(allowedHeaders)
+                    .allowedMethods(allowedMethods)
+            )
 
         mRouteList.forEach { route ->
             route.routes.forEach { url ->

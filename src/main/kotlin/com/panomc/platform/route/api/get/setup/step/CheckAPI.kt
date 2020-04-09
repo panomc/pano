@@ -1,4 +1,4 @@
-package com.panomc.platform.route.api.post.setup.step
+package com.panomc.platform.route.api.get.setup.step
 
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.Api
@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
 class CheckAPI : Api() {
-    override val routeType = RouteType.POST
+    override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/setup/step/check")
 
