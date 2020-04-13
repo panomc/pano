@@ -81,13 +81,16 @@ class PanelQuickNotificationsAPI : Api() {
             else
                 getUserIDFromToken(connection, token, handler) { userID ->
                     getNotifications(connection, userID, handler) { notifications ->
-                        val result = mutableMapOf<String, Any?>(
-                            "notifications" to notifications,
-                            "notifications_count" to notifications.size
-                        )
+                        getNotificationsCount(connection, userID, handler) { count ->
 
-                        databaseManager.closeConnection(connection) {
-                            handler.invoke(Successful(result))
+                            val result = mutableMapOf<String, Any?>(
+                                "notifications" to notifications,
+                                "notifications_count" to count
+                            )
+
+                            databaseManager.closeConnection(connection) {
+                                handler.invoke(Successful(result))
+                            }
                         }
                     }
                 }
@@ -120,28 +123,49 @@ class PanelQuickNotificationsAPI : Api() {
         handler: (notifications: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->
+            .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
                 if (queryResult.succeeded()) {
                     val notifications = mutableListOf<Map<String, Any>>()
 
                     if (queryResult.result().results.size > 0)
                         queryResult.result().results.forEach { categoryInDB ->
-                            notifications.add(
-                                mapOf(
-                                    "id" to categoryInDB.getInteger(0),
-                                    "type_ID" to categoryInDB.getString(2),
-                                    "date" to categoryInDB.getInteger(3),
-                                    "status" to categoryInDB.getString(4),
-                                    "isPersonal" to (categoryInDB.getInteger(1) == userID)
+                            if (categoryInDB.getString(4) == NotificationStatus.NOT_READ.toString())
+                                notifications.add(
+                                    mapOf(
+                                        "id" to categoryInDB.getInteger(0),
+                                        "type_ID" to categoryInDB.getString(2),
+                                        "date" to categoryInDB.getInteger(3),
+                                        "status" to categoryInDB.getString(4),
+                                        "isPersonal" to (categoryInDB.getInteger(1) == userID)
+                                    )
                                 )
-                            )
                         }
 
                     handler.invoke(notifications)
                 } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
+                    }
+            }
+    }
+
+    private fun getNotificationsCount(
+        connection: Connection,
+        userID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (count: Int) -> Unit
+    ) {
+        val query =
+            "SELECT count(`id`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(queryResult.result().results[0].getInteger(0))
+                else
                     databaseManager.closeConnection(connection) {
                         resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
                     }
