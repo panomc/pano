@@ -58,7 +58,7 @@ class Main : AbstractVerticle() {
 
     override fun start(startFuture: Future<Void>) {
         vertx.executeBlocking<Any>({ future ->
-            init().setHandler { init ->
+            init().onComplete { init ->
                 future.complete(init.result())
             }
         }, {
