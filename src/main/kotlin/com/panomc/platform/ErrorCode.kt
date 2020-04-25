@@ -2,6 +2,7 @@ package com.panomc.platform
 
 enum class ErrorCode {
     INVALID_DATA,
+    UNKNOWN,
 
     REGISTER_USERNAME_EMPTY,
     REGISTER_EMAIL_EMPTY,
