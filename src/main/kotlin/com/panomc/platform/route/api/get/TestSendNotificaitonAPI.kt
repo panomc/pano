@@ -8,7 +8,6 @@ import com.panomc.platform.util.*
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
-import java.util.*
 import javax.inject.Inject
 
 class TestSendNotificaitonAPI : Api() {
@@ -120,7 +119,7 @@ class TestSendNotificaitonAPI : Api() {
                     "VALUES (?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection)
-            .updateWithParams(query, JsonArray().add(userID).add("TEST NOTIFICATION").add(Date().time.toInt()).add(NotificationStatus.NOT_READ)) { queryResult ->
+            .updateWithParams(query, JsonArray().add(userID).add("TEST NOTIFICATION").add(System.currentTimeMillis()).add(NotificationStatus.NOT_READ)) { queryResult ->
                 if (queryResult.succeeded())
                     handler.invoke()
                 else
