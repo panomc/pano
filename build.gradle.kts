@@ -46,7 +46,7 @@ dependencies {
     kapt("com.google.dagger:dagger-compiler:2.27")
 
     // recaptcha v2 1.0.3
-    implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.3")
+    implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.4")
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     implementation(group = "commons-codec", name = "commons-codec", version = "1.14")
