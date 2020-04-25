@@ -5,6 +5,7 @@ import com.panomc.platform.model.Template
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
+import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAndReadAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.get.setup.step.CheckAPI
@@ -88,7 +89,8 @@ class RouterModule(private val mVertx: Vertx) {
             ConnectNewAPI(),
 
             PanelNotificationsAPI(),
-            PanelQuickNotificationsAPI()
+            PanelQuickNotificationsAPI(),
+            PanelQuickNotificationsAndReadAPI()
         )
     }
 

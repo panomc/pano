@@ -1,22 +1,23 @@
-package com.panomc.platform.route.api.get.panel
+package com.panomc.platform.route.api.get
 
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.Main
 import com.panomc.platform.model.*
 import com.panomc.platform.util.*
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
-class PanelNotificationsAPI : Api() {
+class TestSendNotificaitonAPI : Api() {
     override val routeType = RouteType.GET
 
-    override val routes = arrayListOf("/api/panel/notifications")
+    override val routes = arrayListOf("/api/testNotification")
 
     init {
-        getComponent().inject(this)
+        Main.getComponent().inject(this)
     }
 
     @Inject
@@ -44,7 +45,7 @@ class PanelNotificationsAPI : Api() {
                 response
                     .putHeader("content-type", "application/json; charset=utf-8")
 
-                getNotificationsData(context) { result ->
+                sendNotification(context) { result ->
                     if (result is Successful) {
                         val responseMap = mutableMapOf<String, Any?>(
                             "result" to "ok"
@@ -72,7 +73,7 @@ class PanelNotificationsAPI : Api() {
         }
     }
 
-    private fun getNotificationsData(context: RoutingContext, handler: (result: Result) -> Unit) {
+    private fun sendNotification(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
         databaseManager.createConnection { connection, _ ->
@@ -80,13 +81,9 @@ class PanelNotificationsAPI : Api() {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
             else
                 getUserIDFromToken(connection, token, handler) { userID ->
-                    getNotificationsCount(connection, userID, handler) { notificationsCount ->
-                        val result = mutableMapOf<String, Any?>(
-                            "notifications_count" to notificationsCount
-                        )
-
+                    insertNotification(connection, userID, handler) {
                         databaseManager.closeConnection(connection) {
-                            handler.invoke(Successful(result))
+                            handler.invoke(Successful())
                         }
                     }
                 }
@@ -107,28 +104,28 @@ class PanelNotificationsAPI : Api() {
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN))
                 }
         }
     }
 
-
-    private fun getNotificationsCount(
+    private fun insertNotification(
         connection: Connection,
         userID: Int,
         resultHandler: (result: Result) -> Unit,
-        handler: (count: Int) -> Unit
+        handler: () -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification (user_id, type_ID, date, status) " +
+                    "VALUES (?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->
+            .updateWithParams(query, JsonArray().add(userID).add("TEST NOTIFICATION").add(Date().time.toInt()).add(NotificationStatus.NOT_READ)) { queryResult ->
                 if (queryResult.succeeded())
-                    handler.invoke(queryResult.result().results[0].getInteger(0))
+                    handler.invoke()
                 else
                     databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
+                        resultHandler.invoke(Error(ErrorCode.UNKNOWN))
                     }
             }
     }

@@ -111,7 +111,7 @@ class PanelQuickNotificationsAPI : Api() {
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
+                    resultHandler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_74))
                 }
         }
     }
@@ -147,7 +147,7 @@ class PanelQuickNotificationsAPI : Api() {
                     handler.invoke(notifications)
                 } else
                     databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
+                        resultHandler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_73))
                     }
             }
     }
@@ -167,7 +167,7 @@ class PanelQuickNotificationsAPI : Api() {
                     handler.invoke(queryResult.result().results[0].getInteger(0))
                 else
                     databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
+                        resultHandler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_67))
                     }
             }
     }
