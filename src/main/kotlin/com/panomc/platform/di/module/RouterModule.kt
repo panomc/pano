@@ -2,6 +2,7 @@ package com.panomc.platform.di.module
 
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
+import com.panomc.platform.route.api.get.TestSendNotificaitonAPI
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
@@ -90,7 +91,8 @@ class RouterModule(private val mVertx: Vertx) {
 
             PanelNotificationsAPI(),
             PanelQuickNotificationsAPI(),
-            PanelQuickNotificationsAndReadAPI()
+            PanelQuickNotificationsAndReadAPI(),
+            TestSendNotificaitonAPI()
         )
     }
 

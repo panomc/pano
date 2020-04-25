@@ -2,6 +2,7 @@ package com.panomc.platform.di.component
 
 import com.panomc.platform.Main
 import com.panomc.platform.di.module.*
+import com.panomc.platform.route.api.get.TestSendNotificaitonAPI
 import com.panomc.platform.route.api.get.panel.BasicDataAPI
 import com.panomc.platform.route.api.get.panel.PanelNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
@@ -80,4 +81,6 @@ interface ApplicationComponent {
     fun inject(panelQuickNotificationsAPI: PanelQuickNotificationsAPI)
 
     fun inject(panelQuickNotificationsAndReadAPI: PanelQuickNotificationsAndReadAPI)
+
+    fun inject(testSendNotificaitonAPI: TestSendNotificaitonAPI)
 }
