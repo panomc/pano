@@ -2,14 +2,12 @@ package com.panomc.platform.route.api.get.panel
 
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.PORT
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
 import com.panomc.platform.util.*
 import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
-import java.net.InetAddress
 import javax.inject.Inject
 
 class BasicDataAPI : Api() {
@@ -75,8 +73,6 @@ class BasicDataAPI : Api() {
     }
 
     private fun getBasicData(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val localHost = InetAddress.getLocalHost()
-
         databaseManager.createConnection { connection, _ ->
             if (connection == null)
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -100,7 +96,7 @@ class BasicDataAPI : Api() {
                                                         "description" to configManager.config["website-description"]
                                                     ),
                                                     "platform_server_match_key" to platformCodeGeneratorResult.map["platformCode"],
-                                                    "platform_host_address" to localHost.hostAddress + ":" + PORT,
+                                                    "platform_host_address" to context.request().host(),
                                                     "servers" to listOf<Map<String, Any?>>(),
                                                     "notifications_count" to count
                                                 )
