@@ -137,7 +137,7 @@ class PanelQuickNotificationsAPI : Api() {
                                     mapOf(
                                         "id" to categoryInDB.getInteger(0),
                                         "type_ID" to categoryInDB.getString(2),
-                                        "date" to categoryInDB.getLong(3),
+                                        "date" to categoryInDB.getString(3).toLong(),
                                         "status" to categoryInDB.getString(4),
                                         "isPersonal" to (categoryInDB.getInteger(1) == userID)
                                     )

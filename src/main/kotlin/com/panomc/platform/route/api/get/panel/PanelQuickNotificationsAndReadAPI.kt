@@ -130,13 +130,14 @@ class PanelQuickNotificationsAndReadAPI : Api() {
             .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
                 if (queryResult.succeeded()) {
                     val notifications = mutableListOf<Map<String, Any>>()
+
                     if (queryResult.result().results.size > 0)
                         queryResult.result().results.forEach { categoryInDB ->
                             notifications.add(
                                 mapOf(
                                     "id" to categoryInDB.getInteger(0),
                                     "type_ID" to categoryInDB.getString(2),
-                                    "date" to categoryInDB.getLong(3),
+                                    "date" to categoryInDB.getString(3).toLong(),
                                     "status" to categoryInDB.getString(4),
                                     "isPersonal" to (categoryInDB.getInteger(1) == userID)
                                 )

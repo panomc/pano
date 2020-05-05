@@ -81,12 +81,17 @@ class PanelNotificationsAPI : Api() {
             else
                 getUserIDFromToken(connection, token, handler) { userID ->
                     getNotificationsCount(connection, userID, handler) { notificationsCount ->
-                        val result = mutableMapOf<String, Any?>(
-                            "notifications_count" to notificationsCount
-                        )
+                        getNotifications(connection, userID, handler) { notifications ->
+                            markNotificationsRead(connection, userID, handler) {
+                                val result = mutableMapOf<String, Any?>(
+                                    "notifications" to notifications,
+                                    "notifications_count" to notificationsCount
+                                )
 
-                        databaseManager.closeConnection(connection) {
-                            handler.invoke(Successful(result))
+                                databaseManager.closeConnection(connection) {
+                                    handler.invoke(Successful(result))
+                                }
+                            }
                         }
                     }
                 }
@@ -112,6 +117,60 @@ class PanelNotificationsAPI : Api() {
         }
     }
 
+    private fun getNotifications(
+        connection: Connection,
+        userID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (notifications: List<Map<String, Any>>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val notifications = mutableListOf<Map<String, Any>>()
+
+                    if (queryResult.result().results.size > 0)
+                        queryResult.result().results.forEach { categoryInDB ->
+                            notifications.add(
+                                mapOf(
+                                    "id" to categoryInDB.getInteger(0),
+                                    "type_ID" to categoryInDB.getString(2),
+                                    "date" to categoryInDB.getString(3).toLong(),
+                                    "status" to categoryInDB.getString(4),
+                                    "isPersonal" to (categoryInDB.getInteger(1) == userID)
+                                )
+                            )
+                        }
+
+                    handler.invoke(notifications)
+                } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_110))
+                    }
+            }
+    }
+
+    private fun markNotificationsRead(
+        connection: Connection,
+        userID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: () -> Unit
+    ) {
+        val query =
+            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(NotificationStatus.READ).add(userID).add(-1)) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke()
+                else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_111))
+                    }
+            }
+    }
 
     private fun getNotificationsCount(
         connection: Connection,
