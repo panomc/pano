@@ -9,10 +9,20 @@ import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAndReadAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.get.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.post.*
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryDeleteAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryUpdateAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
@@ -92,7 +102,32 @@ class RouterModule(private val mVertx: Vertx) {
             PanelNotificationsAPI(),
             PanelQuickNotificationsAPI(),
             PanelQuickNotificationsAndReadAPI(),
-            TestSendNotificaitonAPI()
+            TestSendNotificaitonAPI(),
+
+
+            TicketsPageInitAPI(),
+            TicketCategoryPageInitAPI(),
+
+            PostsPageInitAPI(),
+            PostCategoryPageInitAPI(),
+
+            CategoriesAPI(),
+
+            TicketCategoryDeleteAPI(),
+            TicketCategoryAddAPI(),
+            TicketCategoryUpdateAPI(),
+
+            PostCategoryAddAPI(),
+            PostCategoryUpdateAPI(),
+            PostCategoryDeleteAPI(),
+
+            EditPostPageInitAPI(),
+
+            PostDeleteAPI(),
+            PostOnlyPublishAPI(),
+            PostMoveTrashAPI(),
+            PostMoveDraftAPI(),
+            PostPublishAPI()
         )
     }
 

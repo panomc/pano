@@ -9,10 +9,20 @@ import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAPI
 import com.panomc.platform.route.api.get.panel.PanelQuickNotificationsAndReadAPI
 import com.panomc.platform.route.api.get.panel.initPage.DashboardAPI
 import com.panomc.platform.route.api.get.panel.platformAuth.RefreshKeyAPI
+import com.panomc.platform.route.api.get.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.get.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.post.*
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
+import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryAddAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryDeleteAPI
+import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryUpdateAPI
 import com.panomc.platform.route.api.post.server.ConnectNewAPI
 import com.panomc.platform.route.api.post.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.post.setup.FinishAPI
@@ -83,4 +93,38 @@ interface ApplicationComponent {
     fun inject(panelQuickNotificationsAndReadAPI: PanelQuickNotificationsAndReadAPI)
 
     fun inject(testSendNotificaitonAPI: TestSendNotificaitonAPI)
+
+    fun inject(ticketsPageInitAPI: TicketsPageInitAPI)
+
+    fun inject(ticketCategoryPageInitAPI: TicketCategoryPageInitAPI)
+
+    fun inject(postsPageInitAPI: PostsPageInitAPI)
+
+    fun inject(postCategoryPageInitAPI: PostCategoryPageInitAPI)
+
+    fun inject(categoriesAPI: CategoriesAPI)
+
+    fun inject(ticketCategoryDeleteAPI: TicketCategoryDeleteAPI)
+
+    fun inject(ticketCategoryAddAPI: TicketCategoryAddAPI)
+
+    fun inject(ticketCategoryUpdateAPI: TicketCategoryUpdateAPI)
+
+    fun inject(postCategoryAddAPI: PostCategoryAddAPI)
+
+    fun inject(postCategoryUpdateAPI: PostCategoryUpdateAPI)
+
+    fun inject(postCategoryDeleteAPI: PostCategoryDeleteAPI)
+
+    fun inject(editPostPageInitAPI: EditPostPageInitAPI)
+
+    fun inject(postDeleteAPI: PostDeleteAPI)
+
+    fun inject(postOnlyPublishAPI: PostOnlyPublishAPI)
+
+    fun inject(postMoveTrashAPI: PostMoveTrashAPI)
+
+    fun inject(postMoveDraftAPI: PostMoveDraftAPI)
+
+    fun inject(postPublishAPI: PostPublishAPI)
 }

@@ -131,7 +131,7 @@ class PanelQuickNotificationsAndReadAPI : Api() {
                 if (queryResult.succeeded()) {
                     val notifications = mutableListOf<Map<String, Any>>()
                     if (queryResult.result().results.size > 0)
-                        queryResult.result().results.forEachIndexed { index, categoryInDB ->
+                        queryResult.result().results.forEach { categoryInDB ->
                             notifications.add(
                                 mapOf(
                                     "id" to categoryInDB.getInteger(0),

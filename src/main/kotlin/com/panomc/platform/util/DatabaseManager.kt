@@ -24,7 +24,8 @@ class DatabaseManager(
         DatabaseMigration_3_4(),
         DatabaseMigration_4_5(),
         DatabaseMigration_5_6(),
-        DatabaseMigration_6_7()
+        DatabaseMigration_6_7(),
+        DatabaseMigration_7_8()
     )
 
     init {
@@ -99,7 +100,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 7
+        const val DATABASE_SCHEME_VERSION = 8
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
@@ -211,7 +212,11 @@ class DatabaseManager(
                     DatabaseInitUtil.createSchemeVersionTable(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createAdminPermission(sqlConnection, tablePrefix),
                     DatabaseInitUtil.createSystemPropertyTable(sqlConnection, tablePrefix),
-                    DatabaseInitUtil.createPanelNotificationsTable(sqlConnection, tablePrefix)
+                    DatabaseInitUtil.createPanelNotificationsTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPostTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createPostCategoryTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createTicketTable(sqlConnection, tablePrefix),
+                    DatabaseInitUtil.createTicketCategoryTable(sqlConnection, tablePrefix)
                 )
 
                 var currentIndex = 0
