@@ -12,10 +12,10 @@ class DatabaseMigration_4_5 : DatabaseMigration {
 
     override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
-            createPanelNotificationsTable()
+            updatePanelNotificationsTable()
         )
 
-    private fun createPanelNotificationsTable(): (
+    private fun updatePanelNotificationsTable(): (
         sqlConnection: SQLConnection,
         tablePrefix: String,
         handler: (asyncResult: AsyncResult<*>) -> Unit
@@ -23,7 +23,7 @@ class DatabaseMigration_4_5 : DatabaseMigration {
         sqlConnection.query(
             """
                     ALTER TABLE `${tablePrefix}panel_notification` 
-                    ADD date int(50), ADD status varchar(255);
+                    ADD date long, ADD status varchar(255);
                 """
         ) {
             handler.invoke(it)
