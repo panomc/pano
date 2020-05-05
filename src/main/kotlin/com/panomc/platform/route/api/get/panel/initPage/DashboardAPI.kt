@@ -82,32 +82,53 @@ class DashboardAPI : Api() {
                 getUserIDFromToken(connection, token, handler) { userID ->
                     isUserInstalledSystem(connection, userID, handler) { isUserInstalledSystem ->
                         getCountOfUsers(connection, handler) { countOfUsers ->
-                            val result = mutableMapOf<String, Any?>(
-                                "registered_player_count" to countOfUsers
-                            )
-
-                            if (!isUserInstalledSystem) {
-                                result["getting_started_blocks"] = mapOf(
-                                    "welcome_board" to false
+                            getCountOfPosts(connection, handler) { countOfPosts ->
+                                val result = mutableMapOf<String, Any?>(
+                                    "registered_player_count" to countOfUsers,
+                                    "post_count" to countOfPosts
                                 )
 
-                                databaseManager.closeConnection(connection) {
-                                    handler.invoke(Successful(result))
-                                }
-                            } else
-                                getWelcomeBoardStatus(connection, handler) { showWelcomeBoard ->
+                                if (!isUserInstalledSystem) {
                                     result["getting_started_blocks"] = mapOf(
-                                        "welcome_board" to showWelcomeBoard
+                                        "welcome_board" to false
                                     )
 
                                     databaseManager.closeConnection(connection) {
                                         handler.invoke(Successful(result))
                                     }
-                                }
+                                } else
+                                    getWelcomeBoardStatus(connection, handler) { showWelcomeBoard ->
+                                        result["getting_started_blocks"] = mapOf(
+                                            "welcome_board" to showWelcomeBoard
+                                        )
+
+                                        databaseManager.closeConnection(connection) {
+                                            handler.invoke(Successful(result))
+                                        }
+                                    }
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun getCountOfPosts(
+        connection: Connection,
+        resultHandler: (result: Result) -> Unit,
+        handler: (postCount: Int) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post"
+
+        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0))
+            else
+                databaseManager.closeConnection(connection) {
+                    resultHandler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_19))
+                }
         }
     }
 
