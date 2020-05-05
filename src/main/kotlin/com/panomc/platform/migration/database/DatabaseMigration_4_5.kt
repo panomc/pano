@@ -23,7 +23,7 @@ class DatabaseMigration_4_5 : DatabaseMigration {
         sqlConnection.query(
             """
                     ALTER TABLE `${tablePrefix}panel_notification` 
-                    ADD date long, ADD status varchar(255);
+                    ADD date MEDIUMTEXT, ADD status varchar(255);
                 """
         ) {
             handler.invoke(it)

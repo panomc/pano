@@ -218,7 +218,7 @@ object DatabaseInitUtil {
               `id` int NOT NULL AUTO_INCREMENT,
               `user_id` int NOT NULL,
               `type_ID` varchar(255) NOT NULL,
-              `date` long NOT NULL,
+              `date` MEDIUMTEXT NOT NULL,
               `status` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Panel Notification table.';

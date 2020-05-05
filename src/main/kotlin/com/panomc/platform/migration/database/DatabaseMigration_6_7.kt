@@ -22,7 +22,7 @@ class DatabaseMigration_6_7 : DatabaseMigration {
     ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
         sqlConnection.query(
             """
-                    ALTER TABLE `${tablePrefix}panel_notification` MODIFY `date` BIGINT(250);
+                    ALTER TABLE `${tablePrefix}panel_notification` MODIFY `date` MEDIUMTEXT;
                 """
         ) {
             handler.invoke(it)
