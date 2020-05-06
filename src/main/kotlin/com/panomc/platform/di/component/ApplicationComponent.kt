@@ -32,7 +32,6 @@ import com.panomc.platform.route.staticFolder.src.SrcFolderRoute
 import com.panomc.platform.route.template.IndexTemplate
 import com.panomc.platform.util.AssetsStaticHandler
 import com.panomc.platform.util.Auth
-import com.panomc.platform.util.PlatformCodeGenerator
 import dagger.Component
 import javax.inject.Singleton
 
@@ -46,7 +45,8 @@ import javax.inject.Singleton
         (TemplateEngineModule::class),
         (ConfigManagerModule::class),
         (SetupManagerModule::class),
-        (DatabaseManagerModule::class)
+        (DatabaseManagerModule::class),
+        (PlatformCodeManagerModule::class)
     ]
 )
 interface ApplicationComponent {
@@ -71,8 +71,6 @@ interface ApplicationComponent {
     fun inject(auth: Auth)
 
     fun inject(basicDataAPI: BasicDataAPI)
-
-    fun inject(platformCodeGenerator: PlatformCodeGenerator)
 
     fun inject(dashboardAPI: DashboardAPI)
 

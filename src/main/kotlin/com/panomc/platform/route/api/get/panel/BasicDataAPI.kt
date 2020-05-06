@@ -28,6 +28,9 @@ class BasicDataAPI : Api() {
     @Inject
     lateinit var configManager: ConfigManager
 
+    @Inject
+    lateinit var platformCodeManager: PlatformCodeManager
+
     override fun getHandler() = Handler<RoutingContext> { context ->
         if (!setupManager.isSetupDone()) {
             context.reroute("/")
@@ -79,35 +82,29 @@ class BasicDataAPI : Api() {
             else {
                 val token = context.getCookie("pano_token").value
 
-                val platformCodeGenerator = PlatformCodeGenerator()
-
-                platformCodeGenerator.createPlatformCode(connection) { platformCodeGeneratorResult ->
-                    if (platformCodeGeneratorResult is Successful)
-                        getUserIDFromToken(connection, token, handler) { userID ->
-                            getBasicUserData(connection, userID, handler) { getBasicUserData ->
-                                getNotificationsCount(connection, userID, handler) { count ->
-                                    databaseManager.closeConnection(connection) {
-                                        handler.invoke(
-                                            Successful(
-                                                mapOf(
-                                                    "user" to getBasicUserData,
-                                                    "website" to mapOf(
-                                                        "name" to configManager.config["website-name"],
-                                                        "description" to configManager.config["website-description"]
-                                                    ),
-                                                    "platform_server_match_key" to platformCodeGeneratorResult.map["platformCode"],
-                                                    "platform_host_address" to context.request().host(),
-                                                    "servers" to listOf<Map<String, Any?>>(),
-                                                    "notifications_count" to count
-                                                )
-                                            )
+                getUserIDFromToken(connection, token, handler) { userID ->
+                    getBasicUserData(connection, userID, handler) { getBasicUserData ->
+                        getNotificationsCount(connection, userID, handler) { count ->
+                            databaseManager.closeConnection(connection) {
+                                handler.invoke(
+                                    Successful(
+                                        mapOf(
+                                            "user" to getBasicUserData,
+                                            "website" to mapOf(
+                                                "name" to configManager.config["website-name"],
+                                                "description" to configManager.config["website-description"]
+                                            ),
+                                            "platform_server_match_key" to platformCodeManager.getPlatformKey(),
+                                            "platform_server_match_key_time_started" to platformCodeManager.getTimeStarted(),
+                                            "platform_host_address" to context.request().host(),
+                                            "servers" to listOf<Map<String, Any?>>(),
+                                            "notifications_count" to count
                                         )
-                                    }
-                                }
+                                    )
+                                )
                             }
                         }
-                    else
-                        handler.invoke(platformCodeGeneratorResult)
+                    }
                 }
             }
         }

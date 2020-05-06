@@ -1,10 +1,11 @@
 package com.panomc.platform.route.api.get.panel.platformAuth
 
 import com.beust.klaxon.JsonObject
-import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.*
+import com.panomc.platform.util.Auth
+import com.panomc.platform.util.PlatformCodeManager
+import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
@@ -22,10 +23,7 @@ class RefreshKeyAPI : Api() {
     lateinit var setupManager: SetupManager
 
     @Inject
-    lateinit var databaseManager: DatabaseManager
-
-    @Inject
-    lateinit var configManager: ConfigManager
+    lateinit var platformCodeManager: PlatformCodeManager
 
     override fun getHandler() = Handler<RoutingContext> { context ->
         if (!setupManager.isSetupDone()) {
@@ -72,27 +70,13 @@ class RefreshKeyAPI : Api() {
     }
 
     private fun getRefreshKeyData(handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null)
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-            else {
-                val platformCodeGenerator = PlatformCodeGenerator()
-
-                platformCodeGenerator.createPlatformCode(connection) { platformCodeGeneratorResult ->
-                    databaseManager.closeConnection(connection) {
-                        if (platformCodeGeneratorResult is Successful)
-                            handler.invoke(
-                                Successful(
-                                    mapOf(
-                                        "key" to platformCodeGeneratorResult.map["platformCode"]
-                                    )
-                                )
-                            )
-                        else
-                            handler.invoke(platformCodeGeneratorResult)
-                    }
-                }
-            }
-        }
+        handler.invoke(
+            Successful(
+                mapOf(
+                    "key" to platformCodeManager.getPlatformKey(),
+                    "timeStarted" to platformCodeManager.getTimeStarted()
+                )
+            )
+        )
     }
 }
