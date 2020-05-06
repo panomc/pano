@@ -7,7 +7,7 @@ class PlatformCodeManager(
     vertx: Vertx
 ) {
     private var mPlatformKey = 0
-    private var mStartedTime = Date().time
+    private var mStartedTime = 0L
 
     init {
         generateCode()
