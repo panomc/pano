@@ -4,10 +4,7 @@ import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.ConfigManager
-import com.panomc.platform.util.Connection
-import com.panomc.platform.util.DatabaseManager
-import com.panomc.platform.util.SetupManager
+import com.panomc.platform.util.*
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
@@ -34,6 +31,9 @@ class ConnectNewAPI : Api() {
 
     @Inject
     lateinit var configManager: ConfigManager
+
+    @Inject
+    lateinit var platformCodeManager: PlatformCodeManager
 
     override fun getHandler() = Handler<RoutingContext> { context ->
         if (!setupManager.isSetupDone()) {
@@ -76,49 +76,25 @@ class ConnectNewAPI : Api() {
         val data = context.bodyAsJson
 
         databaseManager.createConnection { connection, _ ->
-            if (connection == null)
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-            else
-                getPlatformCode(connection, handler) { platformCode ->
-                    if (data.getString("platformCode", "") == platformCode)
-                        addServer(connection, data, handler) { token ->
-                            databaseManager.closeConnection(connection) {
-                                handler.invoke(
-                                    Successful(
-                                        mapOf(
-                                            "token" to token
-                                        )
-                                    )
+            when {
+                connection == null -> handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+                data.getString("platformCode", "") == platformCodeManager.getPlatformKey().toString() -> addServer(connection, data, handler) { token ->
+                    databaseManager.closeConnection(connection) {
+                        handler.invoke(
+                            Successful(
+                                mapOf(
+                                    "token" to token
                                 )
-                            }
-                        }
-                    else
-                        databaseManager.closeConnection(connection) {
-                            handler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_PLATFORM_CODE_WRONG))
-                        }
+                            )
+                        )
+                    }
                 }
+                else -> databaseManager.closeConnection(connection) {
+                    handler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_PLATFORM_CODE_WRONG))
+                }
+            }
         }
     }
-
-    private fun getPlatformCode(
-        connection: Connection,
-        resultHandler: (result: Result) -> Unit,
-        handler: (platformCode: String) -> Unit
-    ) {
-        val query =
-            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ?"
-
-        databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add("platformCode")) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke(queryResult.result().results[0].getString(0))
-                else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_30))
-                    }
-            }
-    }
-
 
     private fun addServer(
         connection: Connection,
