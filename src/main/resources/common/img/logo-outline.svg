@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196.05 289.07">
-    <defs>
-        <style>.a{fill:none;stroke:#1976d2;stroke-miterlimit:10;stroke-width:10px;}</style>
-    </defs>
-    <title>Asset 3</title>
-    <path class="a" d="M5,237.56v16.51a30,30,0,0,0,30,30H68a30,30,0,0,0,30-30V191H51.51S5,191,5,237.56Z"/>
-    <path class="a"
-          d="M161,5H35A30,30,0,0,0,5,35V237.56C5,191,51.51,191,51.51,191H161a30,30,0,0,0,30-30V35A30,30,0,0,0,161,5Z"/>
-</svg>
