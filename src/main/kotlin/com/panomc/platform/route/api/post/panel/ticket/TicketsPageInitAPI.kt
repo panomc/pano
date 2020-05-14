@@ -115,9 +115,14 @@ class TicketsPageInitAPI : Api() {
         handler: (ticketsCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ?"
+            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 1) "WHERE status = ?" else ""}"
 
-        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
+        val parameters = JsonArray()
+
+        if (pageType != 1)
+            parameters.add(pageType)
+
+        databaseManager.getSQLConnection(connection).queryWithParams(query, parameters) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else
@@ -137,12 +142,12 @@ class TicketsPageInitAPI : Api() {
         var query =
             "SELECT id, title, ticket_category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 1) "WHERE status = ? " else ""}ORDER BY date DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
-        val paramaters = JsonArray()
+        val parameters = JsonArray()
 
         if (pageType != 1)
-            paramaters.add(pageType)
+            parameters.add(pageType)
 
-        databaseManager.getSQLConnection(connection).queryWithParams(query, paramaters) { queryResult ->
+        databaseManager.getSQLConnection(connection).queryWithParams(query, parameters) { queryResult ->
             if (queryResult.succeeded()) {
                 val tickets = mutableListOf<Map<String, Any>>()
 
