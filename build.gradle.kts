@@ -2,7 +2,7 @@ plugins {
     java
     kotlin("jvm") version "1.3.72"
     kotlin("kapt") version "1.3.72"
-    id("io.vertx.vertx-plugin") version "1.0.2"
+    id("io.vertx.vertx-plugin") version "1.0.3"
 }
 
 group = "com.panomc.platform"
