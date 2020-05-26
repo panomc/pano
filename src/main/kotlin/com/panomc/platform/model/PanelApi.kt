@@ -1,6 +1,5 @@
 package com.panomc.platform.model
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.Main
 import com.panomc.platform.util.Auth
 import com.panomc.platform.util.SetupManager
@@ -34,27 +33,7 @@ abstract class PanelApi : Api() {
                     .putHeader("content-type", "application/json; charset=utf-8")
 
                 getHandler(context) { result ->
-                    if (result is Successful) {
-                        val responseMap = mutableMapOf<String, Any?>(
-                            "result" to "ok"
-                        )
-
-                        responseMap.putAll(result.map)
-
-                        response.end(
-                            JsonObject(
-                                responseMap
-                            ).toJsonString()
-                        )
-                    } else if (result is Error)
-                        response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errorCode
-                                )
-                            ).toJsonString()
-                        )
+                    getResultHandler(result, context)
                 }
             } else
                 context.reroute("/")
