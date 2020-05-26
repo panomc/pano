@@ -10,7 +10,7 @@ import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class TestSendNotificaitonAPI : Api() {
+class TestSendNotificationAPI : Api() {
     override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/testNotification")

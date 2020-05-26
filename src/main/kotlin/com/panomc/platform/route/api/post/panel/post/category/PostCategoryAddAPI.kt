@@ -4,13 +4,14 @@ import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.*
-import io.vertx.core.Handler
+import com.panomc.platform.util.ConfigManager
+import com.panomc.platform.util.Connection
+import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class PostCategoryAddAPI : Api() {
+class PostCategoryAddAPI : PanelApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/panel/post/category/add")
@@ -20,69 +21,12 @@ class PostCategoryAddAPI : Api() {
     }
 
     @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
     lateinit var databaseManager: DatabaseManager
 
     @Inject
     lateinit var configManager: ConfigManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
-        if (!setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return@Handler
-        }
-
-        val auth = Auth()
-
-        auth.isAdmin(context) { isAdmin ->
-            if (isAdmin) {
-                val response = context.response()
-
-                response
-                    .putHeader("content-type", "application/json; charset=utf-8")
-
-                addCategory(context) { result ->
-                    when (result) {
-                        is Successful -> {
-                            val responseMap = mutableMapOf<String, Any?>(
-                                "result" to "ok"
-                            )
-
-                            responseMap.putAll(result.map)
-
-                            response.end(
-                                JsonObject(
-                                    responseMap
-                                ).toJsonString()
-                            )
-                        }
-                        is Error -> response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errorCode
-                                )
-                            ).toJsonString()
-                        )
-                        is Errors -> response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errors
-                                )
-                            ).toJsonString()
-                        )
-                    }
-                }
-            } else
-                context.reroute("/")
-        }
-    }
-
-    private fun addCategory(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val name = data.getString("name")
         val description = data.getString("description")

@@ -1,16 +1,14 @@
 package com.panomc.platform.route.api.get.panel
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
 import com.panomc.platform.util.*
-import io.vertx.core.Handler
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class BasicDataAPI : Api() {
+class BasicDataAPI : PanelApi() {
     override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/panel/basicData")
@@ -18,9 +16,6 @@ class BasicDataAPI : Api() {
     init {
         getComponent().inject(this)
     }
-
-    @Inject
-    lateinit var setupManager: SetupManager
 
     @Inject
     lateinit var databaseManager: DatabaseManager
@@ -31,51 +26,7 @@ class BasicDataAPI : Api() {
     @Inject
     lateinit var platformCodeManager: PlatformCodeManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
-        if (!setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return@Handler
-        }
-
-        val response = context.response()
-
-        val auth = Auth()
-
-        auth.isAdmin(context) { isAdmin ->
-            if (isAdmin) {
-                response
-                    .putHeader("content-type", "application/json; charset=utf-8")
-
-                getBasicData(context) { result ->
-                    if (result is Successful) {
-                        val responseMap = mutableMapOf<String, Any?>(
-                            "result" to "ok"
-                        )
-
-                        responseMap.putAll(result.map)
-
-                        response.end(
-                            JsonObject(
-                                responseMap
-                            ).toJsonString()
-                        )
-                    } else if (result is Error)
-                        response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errorCode
-                                )
-                            ).toJsonString()
-                        )
-                }
-            } else
-                context.reroute("/")
-        }
-    }
-
-    private fun getBasicData(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         databaseManager.createConnection { connection, _ ->
             if (connection == null)
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))

@@ -1,16 +1,17 @@
 package com.panomc.platform.route.api.get.panel
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.*
-import io.vertx.core.Handler
+import com.panomc.platform.util.ConfigManager
+import com.panomc.platform.util.Connection
+import com.panomc.platform.util.DatabaseManager
+import com.panomc.platform.util.NotificationStatus
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class PanelQuickNotificationsAndReadAPI : Api() {
+class PanelQuickNotificationsAndReadAPI : PanelApi() {
     override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/panel/quickNotificationsAndRead")
@@ -20,59 +21,12 @@ class PanelQuickNotificationsAndReadAPI : Api() {
     }
 
     @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
     lateinit var databaseManager: DatabaseManager
 
     @Inject
     lateinit var configManager: ConfigManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
-        if (!setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return@Handler
-        }
-
-        val response = context.response()
-
-        val auth = Auth()
-
-        auth.isAdmin(context) { isAdmin ->
-            if (isAdmin) {
-                response
-                    .putHeader("content-type", "application/json; charset=utf-8")
-
-                getNotificationsData(context) { result ->
-                    if (result is Successful) {
-                        val responseMap = mutableMapOf<String, Any?>(
-                            "result" to "ok"
-                        )
-
-                        responseMap.putAll(result.map)
-
-                        response.end(
-                            JsonObject(
-                                responseMap
-                            ).toJsonString()
-                        )
-                    } else if (result is Error)
-                        response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errorCode
-                                )
-                            ).toJsonString()
-                        )
-                }
-            } else
-                context.reroute("/")
-        }
-    }
-
-    private fun getNotificationsData(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
         databaseManager.createConnection { connection, _ ->

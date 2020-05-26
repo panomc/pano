@@ -41,6 +41,7 @@ class FinishAPI : Api() {
 
             return@Handler
         }
+
         val response = context.response()
 
         if (setupManager.getStep() == 3) {

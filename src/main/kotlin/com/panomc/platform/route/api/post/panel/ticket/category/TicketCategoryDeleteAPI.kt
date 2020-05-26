@@ -1,16 +1,16 @@
 package com.panomc.platform.route.api.post.panel.ticket.category
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.*
-import io.vertx.core.Handler
+import com.panomc.platform.util.ConfigManager
+import com.panomc.platform.util.Connection
+import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class TicketCategoryDeleteAPI : Api() {
+class TicketCategoryDeleteAPI : PanelApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/panel/ticket/category/delete")
@@ -20,59 +20,12 @@ class TicketCategoryDeleteAPI : Api() {
     }
 
     @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
     lateinit var databaseManager: DatabaseManager
 
     @Inject
     lateinit var configManager: ConfigManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
-        if (!setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return@Handler
-        }
-
-        val auth = Auth()
-
-        auth.isAdmin(context) { isAdmin ->
-            if (isAdmin) {
-                val response = context.response()
-
-                response
-                    .putHeader("content-type", "application/json; charset=utf-8")
-
-                deleteCategory(context) { result ->
-                    if (result is Successful) {
-                        val responseMap = mutableMapOf<String, Any?>(
-                            "result" to "ok"
-                        )
-
-                        responseMap.putAll(result.map)
-
-                        response.end(
-                            JsonObject(
-                                responseMap
-                            ).toJsonString()
-                        )
-                    } else if (result is Error)
-                        response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "error",
-                                    "error" to result.errorCode
-                                )
-                            ).toJsonString()
-                        )
-                }
-            } else
-                context.reroute("/")
-        }
-    }
-
-    private fun deleteCategory(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
