@@ -68,11 +68,11 @@ class TicketsPageInitAPI : PanelApi() {
         handler: (ticketsCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 1) "WHERE status = ?" else ""}"
+            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ?" else ""}"
 
         val parameters = JsonArray()
 
-        if (pageType != 1)
+        if (pageType != 2)
             parameters.add(pageType)
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, parameters) { queryResult ->
