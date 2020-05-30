@@ -21,6 +21,7 @@ import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryUpdateAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketCategoryPageInitAPI
+import com.panomc.platform.route.api.post.panel.ticket.TicketPageCloseTicketsAPI
 import com.panomc.platform.route.api.post.panel.ticket.TicketsPageInitAPI
 import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryAddAPI
 import com.panomc.platform.route.api.post.panel.ticket.category.TicketCategoryDeleteAPI
@@ -131,4 +132,6 @@ interface ApplicationComponent {
     fun inject(loggedInApi: LoggedInApi)
 
     fun inject(panelApi: PanelApi)
+
+    fun inject(ticketPageCloseTicketsAPI: TicketPageCloseTicketsAPI)
 }
