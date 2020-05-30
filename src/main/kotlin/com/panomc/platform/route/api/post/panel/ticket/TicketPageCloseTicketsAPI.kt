@@ -72,7 +72,7 @@ class TicketPageCloseTicketsAPI : PanelApi() {
                     handler.invoke()
                 else
                     databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_89))
+                        resultHandler.invoke(Error(ErrorCode.TICKET_CLOSE_TICKETS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_113))
                     }
             }
         }
