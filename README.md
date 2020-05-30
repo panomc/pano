@@ -8,6 +8,8 @@
   <a href="https://discord.gg/KPRGPFs"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg?style=for-the-badge" alt="Chat"></a>
 </p>
 
+---
+
 #### Project Status
 Pano is still under heavy development. There can be breaking changes but we're trying to keep them as minimum as possible.
 
