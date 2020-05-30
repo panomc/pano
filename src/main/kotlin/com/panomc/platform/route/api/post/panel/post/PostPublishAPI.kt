@@ -93,7 +93,11 @@ class PostPublishAPI : PanelApi() {
                 handler.invoke(queryResult.result().results[0].getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_105))
+                    resultHandler.invoke(
+                        Error(
+                            ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_116
+                        )
+                    )
                 }
         }
     }
@@ -127,7 +131,7 @@ class PostPublishAPI : PanelApi() {
                 handler.invoke(queryResult.result().keys.getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_103))
+                    resultHandler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_114))
                 }
         }
     }
@@ -163,7 +167,7 @@ class PostPublishAPI : PanelApi() {
                 handler.invoke()
             else
                 databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_103))
+                    resultHandler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_115))
                 }
         }
     }
