@@ -92,4 +92,15 @@ tasks {
     build {
         dependsOn("copyJar")
     }
+
+    register("buildDev") {
+        dependsOn("build")
+    }
+
+    shadowJar {
+        manifest {
+            if (project.gradle.startParameter.taskNames.contains("buildDev"))
+                attributes(mapOf("MODE" to "DEVELOPMENT"))
+        }
+    }
 }

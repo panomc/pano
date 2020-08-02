@@ -12,6 +12,8 @@ import io.vertx.core.VertxOptions
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
+import java.net.URLClassLoader
+import java.util.jar.Manifest
 import javax.inject.Inject
 
 class Main : AbstractVerticle() {
@@ -21,8 +23,20 @@ class Main : AbstractVerticle() {
         private val mVertx = Vertx.vertx(mOptions)
         private val mLogger = LoggerFactory.getLogger("Pano Platform")
 
+        private val mURLClassLoader = Main::class.java.classLoader as URLClassLoader
+        private val mMode by lazy {
+            try {
+                val manifestUrl = mURLClassLoader.findResource("META-INF/MANIFEST.MF")
+                val manifest = Manifest(manifestUrl.openStream())
+
+                manifest.mainAttributes.getValue("MODE").toString()
+            } catch (e: Exception) {
+                ""
+            }
+        }
+
         val ENVIRONMENT =
-            if (System.getenv("EnvironmentType").isNullOrEmpty())
+            if (mMode != "DEVELOPMENT" && System.getenv("EnvironmentType").isNullOrEmpty())
                 EnvironmentType.RELEASE
             else
                 EnvironmentType.DEVELOPMENT
