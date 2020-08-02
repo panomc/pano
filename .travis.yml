@@ -12,8 +12,10 @@ before_deploy:
 
 deploy:
   provider: releases
-  user: $GITHUB_LOGIN_USERNAME
-  password: $GITHUB_API_KEY_ENCRYPTED
-  file: "Pano Web Platform-1.0-all.jar"
+  api_key:
+    secure: $GITHUB_API_KEY_ENCRYPTED
+  file: Pano\ Web\ Platform-1.0-all.jar
   on:
+    repo: panocms/pano
     branch: dev
+  skip_cleanup: 'true'
