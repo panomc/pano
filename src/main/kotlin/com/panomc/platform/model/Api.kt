@@ -28,5 +28,14 @@ abstract class Api : Route() {
                     )
                 ).toJsonString()
             )
+        else if (result is Errors)
+            response.end(
+                JsonObject(
+                    mapOf(
+                        "result" to "error",
+                        "error" to result.errors
+                    )
+                ).toJsonString()
+            )
     }
 }
