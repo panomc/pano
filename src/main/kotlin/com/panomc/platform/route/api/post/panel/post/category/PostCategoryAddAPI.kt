@@ -28,12 +28,12 @@ class PostCategoryAddAPI : PanelApi() {
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
-        val name = data.getString("name")
+        val title = data.getString("title")
         val description = data.getString("description")
         val url = data.getString("url")
-        val colorCode = data.getString("colorCode")
+        val color = data.getString("color")
 
-        if (colorCode.length != 7) {
+        if (color.length != 7) {
             context.response().end(
                 JsonObject(
                     mapOf(
@@ -47,8 +47,8 @@ class PostCategoryAddAPI : PanelApi() {
 
         val errors = mutableMapOf<String, Boolean>()
 
-        if (name.isEmpty() || name.length > 32)
-            errors["name"] = true
+        if (title.isEmpty() || title.length > 32)
+            errors["title"] = true
 
         if (description.isEmpty())
             errors["description"] = true
@@ -79,7 +79,7 @@ class PostCategoryAddAPI : PanelApi() {
                                 )
                             }
                         } else
-                            addCategoryToDB(connection, name, description, url, colorCode, handler) {
+                            addCategoryToDB(connection, title, description, url, color, handler) {
                                 databaseManager.closeConnection(connection) {
                                     handler.invoke(Successful())
                                 }
@@ -109,10 +109,10 @@ class PostCategoryAddAPI : PanelApi() {
 
     private fun addCategoryToDB(
         connection: Connection,
-        name: String,
+        title: String,
         description: String,
         url: String,
-        colorCode: String,
+        color: String,
         resultHandler: (result: Result) -> Unit,
         handler: () -> Unit
     ) {
@@ -122,10 +122,10 @@ class PostCategoryAddAPI : PanelApi() {
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
             JsonArray()
-                .add(name)
+                .add(title)
                 .add(description)
                 .add(url)
-                .add(colorCode.replace("#", ""))
+                .add(color.replace("#", ""))
         ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke()
@@ -135,6 +135,4 @@ class PostCategoryAddAPI : PanelApi() {
                 }
         }
     }
-
-    private class Errors(val errors: Map<String, Any>) : Result()
 }
