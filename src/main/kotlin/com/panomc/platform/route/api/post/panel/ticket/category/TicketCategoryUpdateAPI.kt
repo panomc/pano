@@ -28,13 +28,13 @@ class TicketCategoryUpdateAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
-        val name = data.getString("name")
+        val title = data.getString("title")
         val description = data.getString("description")
 
         val errors = mutableMapOf<String, Boolean>()
 
-        if (name.isEmpty() || name.length > 32)
-            errors["name"] = true
+        if (title.isEmpty() || title.length > 32)
+            errors["title"] = true
 
         if (description.isEmpty())
             errors["description"] = true
@@ -46,7 +46,7 @@ class TicketCategoryUpdateAPI : PanelApi() {
                 if (connection == null)
                     handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 else
-                    updateCategoryInDB(connection, id, name, description, handler) {
+                    updateCategoryInDB(connection, id, title, description, handler) {
                         databaseManager.closeConnection(connection) {
                             handler.invoke(Successful())
                         }
@@ -57,7 +57,7 @@ class TicketCategoryUpdateAPI : PanelApi() {
     private fun updateCategoryInDB(
         connection: Connection,
         id: Int,
-        name: String,
+        title: String,
         description: String,
         resultHandler: (result: Result) -> Unit,
         handler: () -> Unit
@@ -66,7 +66,7 @@ class TicketCategoryUpdateAPI : PanelApi() {
             "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category SET title = ?, description = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection)
-            .updateWithParams(query, JsonArray().add(name).add(description).add(id)) { queryResult ->
+            .updateWithParams(query, JsonArray().add(title).add(description).add(id)) { queryResult ->
                 if (queryResult.succeeded())
                     handler.invoke()
                 else
@@ -75,6 +75,4 @@ class TicketCategoryUpdateAPI : PanelApi() {
                     }
             }
     }
-
-    private class Errors(val errors: Map<String, Any>) : Result()
 }

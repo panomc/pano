@@ -27,13 +27,13 @@ class TicketCategoryAddAPI : PanelApi() {
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
-        val name = data.getString("name")
+        val title = data.getString("title")
         val description = data.getString("description")
 
         val errors = mutableMapOf<String, Boolean>()
 
-        if (name.isEmpty() || name.length > 32)
-            errors["name"] = true
+        if (title.isEmpty() || title.length > 32)
+            errors["title"] = true
 
         if (description.isEmpty())
             errors["description"] = true
@@ -45,7 +45,7 @@ class TicketCategoryAddAPI : PanelApi() {
                 if (connection == null)
                     handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 else
-                    addCategoryToDB(connection, name, description, handler) {
+                    addCategoryToDB(connection, title, description, handler) {
                         databaseManager.closeConnection(connection) {
                             handler.invoke(Successful())
                         }
@@ -55,7 +55,7 @@ class TicketCategoryAddAPI : PanelApi() {
 
     private fun addCategoryToDB(
         connection: Connection,
-        name: String,
+        title: String,
         description: String,
         resultHandler: (result: Result) -> Unit,
         handler: () -> Unit
@@ -64,7 +64,7 @@ class TicketCategoryAddAPI : PanelApi() {
             "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category (`title`, `description`) VALUES (?, ?)"
 
         databaseManager.getSQLConnection(connection)
-            .updateWithParams(query, JsonArray().add(name).add(description)) { queryResult ->
+            .updateWithParams(query, JsonArray().add(title).add(description)) { queryResult ->
                 if (queryResult.succeeded())
                     handler.invoke()
                 else
@@ -73,6 +73,4 @@ class TicketCategoryAddAPI : PanelApi() {
                     }
             }
     }
-
-    private class Errors(val errors: Map<String, Any>) : Result()
 }
