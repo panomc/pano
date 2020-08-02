@@ -12,7 +12,7 @@ before_deploy:
 
 deploy:
   provider: releases
-  username: $GITHUB_LOGIN_USERNAME
+  user: $GITHUB_LOGIN_USERNAME
   password: $GITHUB_API_KEY_ENCRYPTED
   file: "Pano Web Platform-1.0-all.jar"
   on:
