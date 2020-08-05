@@ -57,7 +57,7 @@ object DatabaseInitUtil {
             CREATE TABLE IF NOT EXISTS `${tablePrefix}token` (
               `id` int NOT NULL AUTO_INCREMENT,
               `token` text NOT NULL,
-              `created_time` varchar(255) NOT NULL,
+              `created_time` MEDIUMTEXT NOT NULL,
               `user_id` int(11) NOT NULL,
               `subject` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
@@ -236,12 +236,12 @@ object DatabaseInitUtil {
             """
             CREATE TABLE IF NOT EXISTS `${tablePrefix}post` (
               `id` int NOT NULL AUTO_INCREMENT,
-              `title` varchar(255) NOT NULL,
-              `category_id` varchar(11) NOT NULL,
+              `title` MEDIUMTEXT NOT NULL,
+              `category_id` int(11) NOT NULL,
               `writer_user_id` int(11) NOT NULL,
               `post` longblob NOT NULL,
-              `date` int(50) NOT NULL,
-              `move_date` int(50) NOT NULL,
+              `date` MEDIUMTEXT NOT NULL,
+              `move_date` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL,
               `image` longblob NOT NULL,
               PRIMARY KEY (`id`)
@@ -260,7 +260,7 @@ object DatabaseInitUtil {
             """
             CREATE TABLE IF NOT EXISTS `${tablePrefix}post_category` (
               `id` int NOT NULL AUTO_INCREMENT,
-              `title` varchar(255) NOT NULL,
+              `title` MEDIUMTEXT NOT NULL,
               `description` text NOT NULL,
               `url` varchar(255) NOT NULL,
               `color` varchar(6) NOT NULL,
@@ -310,10 +310,10 @@ object DatabaseInitUtil {
             """
             CREATE TABLE IF NOT EXISTS `${tablePrefix}ticket` (
               `id` int NOT NULL AUTO_INCREMENT,
-              `title` varchar(255) NOT NULL,
-              `ticket_category_id` varchar(11) NOT NULL,
+              `title` MEDIUMTEXT NOT NULL,
+              `category_id` int(11) NOT NULL,
               `user_id` int(11) NOT NULL,
-              `date` int(50) NOT NULL,
+              `date` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tickets table.';
@@ -331,7 +331,7 @@ object DatabaseInitUtil {
             """
             CREATE TABLE IF NOT EXISTS `${tablePrefix}ticket_category` (
               `id` int NOT NULL AUTO_INCREMENT,
-              `title` varchar(255) NOT NULL,
+              `title` MEDIUMTEXT NOT NULL,
               `description` text,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket category table.';

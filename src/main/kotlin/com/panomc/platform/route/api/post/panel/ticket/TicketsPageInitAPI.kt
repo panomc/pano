@@ -93,7 +93,7 @@ class TicketsPageInitAPI : PanelApi() {
         handler: (tickets: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, ticket_category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = JsonArray()
 
