@@ -7,6 +7,7 @@ import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
 class CategoriesAPI : PanelApi() {
@@ -79,8 +80,10 @@ class CategoriesAPI : PanelApi() {
                         categories.add(
                             mapOf(
                                 "id" to categoryInDB.getInteger(0),
-                                "title" to categoryInDB.getString(1),
-                                "description" to categoryInDB.getString(2),
+                                "title" to String(
+                                    Base64.getDecoder().decode(categoryInDB.getString(1))
+                                ),
+                                "description" to String(Base64.getDecoder().decode(categoryInDB.getString(2))),
                                 "url" to categoryInDB.getString(3),
                                 "color" to categoryInDB.getString(4)
                             )
