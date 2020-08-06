@@ -244,6 +244,7 @@ object DatabaseInitUtil {
               `move_date` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL,
               `image` longblob NOT NULL,
+              `views` MEDIUMTEXT NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Posts table.';
         """
