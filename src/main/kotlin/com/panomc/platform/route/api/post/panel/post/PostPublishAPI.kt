@@ -30,7 +30,7 @@ class PostPublishAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getValue("id").toString().toInt()
         val title = data.getString("title")
-        val categoryID = data.getInteger("category")
+        val categoryID = data.getValue("category").toString().toInt()
         val post = data.getString("text")
         val imageCode = data.getString("imageCode") ?: ""
 
