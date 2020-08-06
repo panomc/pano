@@ -9,6 +9,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
 class PostCategoryAddAPI : PanelApi() {
@@ -122,8 +123,8 @@ class PostCategoryAddAPI : PanelApi() {
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
             JsonArray()
-                .add(title)
-                .add(description)
+                .add(Base64.getEncoder().encodeToString(title.toByteArray()))
+                .add(Base64.getEncoder().encodeToString(description.toByteArray()))
                 .add(url)
                 .add(color.replace("#", ""))
         ) { queryResult ->

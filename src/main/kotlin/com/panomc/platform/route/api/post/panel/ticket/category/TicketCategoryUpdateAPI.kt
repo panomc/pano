@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
 class TicketCategoryUpdateAPI : PanelApi() {
@@ -66,7 +67,11 @@ class TicketCategoryUpdateAPI : PanelApi() {
             "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category SET title = ?, description = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection)
-            .updateWithParams(query, JsonArray().add(title).add(description).add(id)) { queryResult ->
+            .updateWithParams(
+                query,
+                JsonArray().add(Base64.getEncoder().encodeToString(title.toByteArray()))
+                    .add(Base64.getEncoder().encodeToString(description.toByteArray())).add(id)
+            ) { queryResult ->
                 if (queryResult.succeeded())
                     handler.invoke()
                 else

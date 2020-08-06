@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -96,8 +97,12 @@ class TicketCategoryPageInitAPI : PanelApi() {
                     categories.add(
                         mapOf(
                             "id" to it.getInteger(0),
-                            "title" to it.getString(1),
-                            "description" to it.getString(2)
+                            "title" to String(
+                                Base64.getDecoder().decode(it.getString(1))
+                            ),
+                            "description" to String(
+                                Base64.getDecoder().decode(it.getString(2))
+                            )
                         )
                     )
                 }
