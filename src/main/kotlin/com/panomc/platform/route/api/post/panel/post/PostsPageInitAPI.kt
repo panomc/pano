@@ -89,7 +89,7 @@ class PostsPageInitAPI : PanelApi() {
         handler: (posts: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, writer_user_id, date, views FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ? ORDER BY ${if (pageType == 1) "date DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, category_id, writer_user_id, date, views, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ? ORDER BY ${if (pageType == 1) "date DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -140,7 +140,8 @@ class PostsPageInitAPI : PanelApi() {
                                                         "username" to username
                                                     ),
                                                     "date" to postInDB.getString(4),
-                                                    "views" to postInDB.getString(5)
+                                                    "views" to postInDB.getString(5),
+                                                    "status" to postInDB.getInteger(6)
                                                 )
                                             )
 
