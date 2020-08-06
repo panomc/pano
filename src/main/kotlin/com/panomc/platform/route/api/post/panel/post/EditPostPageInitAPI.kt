@@ -83,7 +83,7 @@ class EditPostPageInitAPI : PanelApi() {
         handler: (post: Map<String, Any>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE  `id` = ?"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE  `id` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -96,7 +96,8 @@ class EditPostPageInitAPI : PanelApi() {
                     "text" to String(Base64.getDecoder().decode(queryResult.result().results[0].getString(4))),
                     "date" to queryResult.result().results[0].getString(5),
                     "status" to queryResult.result().results[0].getInteger(6),
-                    "image" to queryResult.result().results[0].getString(7)
+                    "image" to queryResult.result().results[0].getString(7),
+                    "views" to queryResult.result().results[0].getString(8)
                 )
 
                 handler.invoke(post)
