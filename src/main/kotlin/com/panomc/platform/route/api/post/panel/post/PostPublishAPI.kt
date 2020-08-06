@@ -114,7 +114,7 @@ class PostPublishAPI : PanelApi() {
         handler: (id: Int) -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
@@ -127,6 +127,7 @@ class PostPublishAPI : PanelApi() {
                 .add(System.currentTimeMillis())
                 .add(1)
                 .add(imageCode)
+                .add(0)
         ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().keys.getInteger(0))
