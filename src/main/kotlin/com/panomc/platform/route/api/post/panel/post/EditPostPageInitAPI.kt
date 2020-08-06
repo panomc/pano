@@ -90,11 +90,11 @@ class EditPostPageInitAPI : PanelApi() {
 
                 val post = mapOf(
                     "id" to queryResult.result().results[0].getInteger(0),
-                    "title" to queryResult.result().results[0].getString(1),
-                    "category_id" to queryResult.result().results[0].getString(2),
+                    "title" to String(Base64.getDecoder().decode(queryResult.result().results[0].getString(1))),
+                    "category" to queryResult.result().results[0].getInteger(2),
                     "writer_user_id" to queryResult.result().results[0].getInteger(3),
-                    "post" to String(Base64.getDecoder().decode(queryResult.result().results[0].getString(4))),
-                    "date" to queryResult.result().results[0].getInteger(5),
+                    "text" to String(Base64.getDecoder().decode(queryResult.result().results[0].getString(4))),
+                    "date" to queryResult.result().results[0].getString(5),
                     "status" to queryResult.result().results[0].getInteger(6),
                     "image" to queryResult.result().results[0].getString(7)
                 )

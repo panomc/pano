@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
 class PostPublishAPI : PanelApi() {
@@ -31,7 +32,7 @@ class PostPublishAPI : PanelApi() {
         val title = data.getString("title")
         val categoryID = data.getInteger("category")
         val post = data.getString("text")
-        val imageCode = data.getString("imageCode")
+        val imageCode = data.getString("imageCode") ?: ""
 
         val token = context.getCookie("pano_token").value
 
@@ -118,7 +119,7 @@ class PostPublishAPI : PanelApi() {
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
             JsonArray()
-                .add(title)
+                .add(Base64.getEncoder().encodeToString(title.toByteArray()))
                 .add(categoryId)
                 .add(writerUserID)
                 .add(post)
@@ -153,7 +154,7 @@ class PostPublishAPI : PanelApi() {
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
             JsonArray()
-                .add(title)
+                .add(Base64.getEncoder().encodeToString(title.toByteArray()))
                 .add(categoryId)
                 .add(writerUserID)
                 .add(post)
