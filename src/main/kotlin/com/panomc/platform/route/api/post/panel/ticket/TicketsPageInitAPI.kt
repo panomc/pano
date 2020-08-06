@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -121,10 +122,13 @@ class TicketsPageInitAPI : PanelApi() {
                                             var category: Any = "null"
 
                                             categoryQueryResult.result().results.forEach { categoryInDB ->
-                                                if (categoryInDB.getInteger(0) == ticketInDB.getString(2).toInt())
+                                                if (categoryInDB.getInteger(0) == ticketInDB.getInteger(2).toInt())
                                                     category = mapOf(
                                                         "id" to categoryInDB.getInteger(0),
-                                                        "title" to categoryInDB.getString(1)
+                                                        "title" to String(
+                                                            Base64.getDecoder()
+                                                                .decode(categoryInDB.getString(1).toByteArray())
+                                                        )
                                                     )
                                             }
 
@@ -136,12 +140,15 @@ class TicketsPageInitAPI : PanelApi() {
                                             tickets.add(
                                                 mapOf(
                                                     "id" to ticketInDB.getInteger(0),
-                                                    "title" to ticketInDB.getString(1),
+                                                    "title" to String(
+                                                        Base64.getDecoder()
+                                                            .decode(ticketInDB.getString(1).toByteArray())
+                                                    ),
                                                     "category" to category,
                                                     "writer" to mapOf(
                                                         "username" to username
                                                     ),
-                                                    "date" to ticketInDB.getInteger(4),
+                                                    "date" to ticketInDB.getString(4),
                                                     "status" to ticketInDB.getInteger(5)
                                                 )
                                             )

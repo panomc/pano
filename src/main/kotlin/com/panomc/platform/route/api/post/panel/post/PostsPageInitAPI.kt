@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 import kotlin.math.ceil
 
@@ -111,10 +112,13 @@ class PostsPageInitAPI : PanelApi() {
                                             var category: Any = "null"
 
                                             categoryQueryResult.result().results.forEach { categoryInDB ->
-                                                if (categoryInDB.getInteger(0) == postInDB.getString(2).toInt())
+                                                if (categoryInDB.getInteger(0) == postInDB.getInteger(2).toInt())
                                                     category = mapOf(
                                                         "id" to categoryInDB.getInteger(0),
-                                                        "title" to categoryInDB.getString(1),
+                                                        "title" to String(
+                                                            Base64.getDecoder()
+                                                                .decode(categoryInDB.getString(1).toByteArray())
+                                                        ),
                                                         "url" to categoryInDB.getString(2),
                                                         "color" to categoryInDB.getString(3)
                                                     )
@@ -128,12 +132,14 @@ class PostsPageInitAPI : PanelApi() {
                                             posts.add(
                                                 mapOf(
                                                     "id" to postInDB.getInteger(0),
-                                                    "title" to postInDB.getString(1),
+                                                    "title" to String(
+                                                        Base64.getDecoder().decode(postInDB.getString(1).toByteArray())
+                                                    ),
                                                     "category" to category,
                                                     "writer" to mapOf(
                                                         "username" to username
                                                     ),
-                                                    "date" to postInDB.getInteger(4)
+                                                    "date" to postInDB.getString(4)
                                                 )
                                             )
 

@@ -268,37 +268,7 @@ object DatabaseInitUtil {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Post category table.';
         """
         ) {
-            if (it.succeeded())
-                sqlConnection.updateWithParams(
-                    """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
-            """.trimIndent(),
-                    JsonArray().add("Genel").add("Genel").add("genel").add("48CFAD")
-                ) {
-                    if (it.succeeded())
-                        sqlConnection.updateWithParams(
-                            """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
-            """.trimIndent(),
-                            JsonArray().add("Duyuru").add("Duyuru").add("duyuru").add("5D9CEC")
-                        ) {
-                            if (it.succeeded())
-                                sqlConnection.updateWithParams(
-                                    """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
-            """.trimIndent(),
-                                    JsonArray().add("Haber").add("Haber").add("haber").add("FFCE54")
-                                ) {
-                                    handler.invoke(it)
-                                }
-                            else
-                                handler.invoke(it)
-                        }
-                    else
-                        handler.invoke(it)
-                }
-            else
-                handler.invoke(it)
+            handler.invoke(it)
         }
     }
 
@@ -337,17 +307,7 @@ object DatabaseInitUtil {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket category table.';
         """
         ) {
-            if (it.succeeded())
-                sqlConnection.queryWithParams(
-                    """
-                        INSERT INTO ${tablePrefix}ticket_category (title) VALUES (?)
-            """.trimIndent(),
-                    JsonArray().add("Genel")
-                ) {
-                    handler.invoke(it)
-                }
-            else
-                handler.invoke(it)
+            handler.invoke(it)
         }
     }
 }
