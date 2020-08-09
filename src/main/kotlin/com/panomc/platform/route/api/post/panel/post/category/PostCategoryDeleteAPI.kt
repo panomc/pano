@@ -39,9 +39,11 @@ class PostCategoryDeleteAPI : PanelApi() {
                             handler.invoke(Error(ErrorCode.NOT_EXISTS))
                         }
                     else
-                        deleteCategoryByID(connection, id, handler) {
-                            databaseManager.closeConnection(connection) {
-                                handler.invoke(Successful())
+                        removePostCategoriesByCategoryID(connection, id, handler) {
+                            deleteCategoryByID(connection, id, handler) {
+                                databaseManager.closeConnection(connection) {
+                                    handler.invoke(Successful())
+                                }
                             }
                         }
                 }
@@ -65,6 +67,26 @@ class PostCategoryDeleteAPI : PanelApi() {
                     resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_98))
                 }
         }
+    }
+
+    private fun removePostCategoriesByCategoryID(
+        connection: Connection,
+        categoryID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: () -> Unit
+    ) {
+        val query =
+            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post SET category_id = ? WHERE category_id = ?"
+
+        databaseManager.getSQLConnection(connection)
+            .updateWithParams(query, JsonArray().add(-1).add(categoryID)) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke()
+                else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_121))
+                    }
+            }
     }
 
     private fun deleteCategoryByID(
