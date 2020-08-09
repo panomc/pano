@@ -80,6 +80,59 @@ class PostCategoryPageInitAPI : PanelApi() {
         }
     }
 
+    private fun getPostsByCategory(
+        connection: Connection,
+        categoryID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (posts: List<Map<String, Any>>) -> Unit
+    ) {
+        val query =
+            "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE category_id = ? ORDER BY `date` DESC LIMIT 5"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val posts = mutableListOf<Map<String, Any>>()
+
+                    queryResult.result().results.forEach { postInDB ->
+                        posts.add(
+                            mapOf(
+                                "id" to postInDB.getInteger(0),
+                                "title" to String(
+                                    Base64.getDecoder().decode(postInDB.getString(1).toByteArray())
+                                )
+                            )
+                        )
+                    }
+
+                    handler.invoke(posts)
+                } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_119))
+                    }
+            }
+    }
+
+    private fun getCountOfPostsByCategory(
+        connection: Connection,
+        categoryID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (count: Int) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE category_id = ?"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    handler.invoke(queryResult.result().results[0].getInteger(0))
+                } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_120))
+                    }
+            }
+    }
+
     private fun getCategoriesByPage(
         connection: Connection,
         page: Int,
@@ -93,23 +146,59 @@ class PostCategoryPageInitAPI : PanelApi() {
             if (queryResult.succeeded()) {
                 val categories = mutableListOf<Map<String, Any>>()
 
-                queryResult.result().results.forEach {
-                    categories.add(
-                        mapOf(
-                            "id" to it.getInteger(0),
-                            "title" to String(
-                                Base64.getDecoder().decode(it.getString(1))
-                            ),
-                            "description" to String(
-                                Base64.getDecoder().decode(it.getString(2))
-                            ),
-                            "url" to it.getString(3),
-                            "color" to it.getString(4)
-                        )
-                    )
-                }
+                if (queryResult.result().results.size > 0) {
+                    val handlers: List<(handler: () -> Unit) -> Any> =
+                        queryResult.result().results.map { categoryInDB ->
+                            val localHandler: (handler: () -> Unit) -> Any = { handler ->
+                                getCountOfPostsByCategory(
+                                    connection,
+                                    categoryInDB.getInteger(0),
+                                    resultHandler
+                                ) { count ->
+                                    getPostsByCategory(connection, categoryInDB.getInteger(0), resultHandler) { posts ->
+                                        categories.add(
+                                            mapOf(
+                                                "id" to categoryInDB.getInteger(0),
+                                                "title" to String(
+                                                    Base64.getDecoder().decode(categoryInDB.getString(1))
+                                                ),
+                                                "description" to String(
+                                                    Base64.getDecoder().decode(categoryInDB.getString(2))
+                                                ),
+                                                "url" to categoryInDB.getString(3),
+                                                "color" to categoryInDB.getString(4),
+                                                "post_count" to count,
+                                                "posts" to posts
+                                            )
+                                        )
 
-                handler.invoke(categories)
+                                        handler.invoke()
+                                    }
+                                }
+                            }
+
+                            localHandler
+                        }
+
+                    var currentIndex = -1
+
+                    fun invoke() {
+                        val localHandler: () -> Unit = {
+                            if (currentIndex == handlers.lastIndex)
+                                handler.invoke(categories)
+                            else
+                                invoke()
+                        }
+
+                        currentIndex++
+
+                        if (currentIndex <= handlers.lastIndex)
+                            handlers[currentIndex].invoke(localHandler)
+                    }
+
+                    invoke()
+                } else
+                    handler.invoke(categories)
             } else
                 databaseManager.closeConnection(connection) {
                     resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_85))
