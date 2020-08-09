@@ -80,6 +80,59 @@ class TicketCategoryPageInitAPI : PanelApi() {
         }
     }
 
+    private fun getTicketsByCategory(
+        connection: Connection,
+        categoryID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (posts: List<Map<String, Any>>) -> Unit
+    ) {
+        val query =
+            "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val posts = mutableListOf<Map<String, Any>>()
+
+                    queryResult.result().results.forEach { postInDB ->
+                        posts.add(
+                            mapOf(
+                                "id" to postInDB.getInteger(0),
+                                "title" to String(
+                                    Base64.getDecoder().decode(postInDB.getString(1).toByteArray())
+                                )
+                            )
+                        )
+                    }
+
+                    handler.invoke(posts)
+                } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_122))
+                    }
+            }
+    }
+
+    private fun getCountOfTicketsByCategory(
+        connection: Connection,
+        categoryID: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (count: Int) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ?"
+
+        databaseManager.getSQLConnection(connection)
+            .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    handler.invoke(queryResult.result().results[0].getInteger(0))
+                } else
+                    databaseManager.closeConnection(connection) {
+                        resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_123))
+                    }
+            }
+    }
+
     private fun getCategoriesByPage(
         connection: Connection,
         page: Int,
@@ -93,21 +146,61 @@ class TicketCategoryPageInitAPI : PanelApi() {
             if (queryResult.succeeded()) {
                 val categories = mutableListOf<Map<String, Any>>()
 
-                queryResult.result().results.forEach {
-                    categories.add(
-                        mapOf(
-                            "id" to it.getInteger(0),
-                            "title" to String(
-                                Base64.getDecoder().decode(it.getString(1))
-                            ),
-                            "description" to String(
-                                Base64.getDecoder().decode(it.getString(2))
-                            )
-                        )
-                    )
-                }
+                if (queryResult.result().results.size > 0) {
+                    val handlers: List<(handler: () -> Unit) -> Any> =
+                        queryResult.result().results.map { categoryInDB ->
+                            val localHandler: (handler: () -> Unit) -> Any = { handler ->
+                                getCountOfTicketsByCategory(
+                                    connection,
+                                    categoryInDB.getInteger(0),
+                                    resultHandler
+                                ) { count ->
+                                    getTicketsByCategory(
+                                        connection,
+                                        categoryInDB.getInteger(0),
+                                        resultHandler
+                                    ) { tickets ->
+                                        categories.add(
+                                            mapOf(
+                                                "id" to categoryInDB.getInteger(0),
+                                                "title" to String(
+                                                    Base64.getDecoder().decode(categoryInDB.getString(1))
+                                                ),
+                                                "description" to String(
+                                                    Base64.getDecoder().decode(categoryInDB.getString(2))
+                                                ),
+                                                "ticket_count" to count,
+                                                "tickets" to tickets
+                                            )
+                                        )
 
-                handler.invoke(categories)
+                                        handler.invoke()
+                                    }
+                                }
+                            }
+
+                            localHandler
+                        }
+
+                    var currentIndex = -1
+
+                    fun invoke() {
+                        val localHandler: () -> Unit = {
+                            if (currentIndex == handlers.lastIndex)
+                                handler.invoke(categories)
+                            else
+                                invoke()
+                        }
+
+                        currentIndex++
+
+                        if (currentIndex <= handlers.lastIndex)
+                            handlers[currentIndex].invoke(localHandler)
+                    }
+
+                    invoke()
+                } else
+                    handler.invoke(categories)
             } else
                 databaseManager.closeConnection(connection) {
                     resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_79))
