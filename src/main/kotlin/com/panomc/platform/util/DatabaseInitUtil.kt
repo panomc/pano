@@ -24,7 +24,7 @@ object DatabaseInitUtil {
               `secret_key` text NOT NULL,
               `public_key` text NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='User Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
         """
         ) {
             handler.invoke(it)
@@ -41,7 +41,7 @@ object DatabaseInitUtil {
               `id` int NOT NULL AUTO_INCREMENT,
               `name` varchar(16) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Permission Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permission Table';
         """
         ) {
             handler.invoke(it)
@@ -61,7 +61,7 @@ object DatabaseInitUtil {
               `user_id` int(11) NOT NULL,
               `subject` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Token Table';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
         """
         ) {
             handler.invoke(it)
@@ -80,7 +80,7 @@ object DatabaseInitUtil {
               `option` varchar(255) NOT NULL,
               `value` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Config per player table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Panel Config per player table.';
         """
         ) {
             handler.invoke(it)
@@ -107,7 +107,7 @@ object DatabaseInitUtil {
               `permission_granted` int(1) default 0,
               `status` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Connected server table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connected server table.';
         """
         ) {
             handler.invoke(it)
@@ -122,10 +122,10 @@ object DatabaseInitUtil {
             """
             CREATE TABLE IF NOT EXISTS `${tablePrefix}scheme_version` (
               `when` timestamp not null default CURRENT_TIMESTAMP,
-              `key` varchar(256) not null,
-              `extra` varchar(256),
+              `key` varchar(255) not null,
+              `extra` varchar(255),
               PRIMARY KEY (`key`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database scheme version table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Database scheme version table.';
         """
         ) {
             if (it.succeeded())
@@ -189,7 +189,7 @@ object DatabaseInitUtil {
               `option` text NOT NULL,
               `value` text NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='System Property table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System Property table.';
         """
         ) {
             if (it.succeeded())
@@ -221,7 +221,7 @@ object DatabaseInitUtil {
               `date` MEDIUMTEXT NOT NULL,
               `status` varchar(255) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Notification table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Panel Notification table.';
         """
         ) {
             handler.invoke(it)
@@ -246,7 +246,7 @@ object DatabaseInitUtil {
               `image` longblob NOT NULL,
               `views` MEDIUMTEXT NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Posts table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Posts table.';
         """
         ) {
             handler.invoke(it)
@@ -266,7 +266,7 @@ object DatabaseInitUtil {
               `url` varchar(255) NOT NULL,
               `color` varchar(6) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Post category table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Post category table.';
         """
         ) {
             handler.invoke(it)
@@ -287,7 +287,7 @@ object DatabaseInitUtil {
               `date` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tickets table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tickets table.';
         """
         ) {
             handler.invoke(it)
@@ -305,7 +305,7 @@ object DatabaseInitUtil {
               `title` MEDIUMTEXT NOT NULL,
               `description` text,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket category table.';
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket category table.';
         """
         ) {
             handler.invoke(it)
