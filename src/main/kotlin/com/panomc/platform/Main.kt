@@ -17,10 +17,6 @@ import java.util.jar.Manifest
 import javax.inject.Inject
 
 class Main : AbstractVerticle() {
-    init {
-        System.setProperty("vertx.disableFileCPResolving", "true")
-    }
-
     companion object {
         private val mOptions = VertxOptions()
         private val mVertx = Vertx.vertx(mOptions)
