@@ -18,6 +18,5 @@ deploy:
   on:
     repo: panocms/pano
     branch: dev
-    tags: true
   skip_cleanup: 'true'
   prerelease: "true"
