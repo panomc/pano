@@ -38,7 +38,7 @@ dependencies {
     implementation("io.vertx:vertx-config:$vertxVersionVariable")
     implementation("io.vertx:vertx-lang-kotlin-coroutines:$vertxVersionVariable")
 
-    implementation("com.beust:klaxon:5.2")
+    implementation("com.beust:klaxon:5.4")
     implementation("org.slf4j:slf4j-simple:1.7.30")
 
     // dagger 2x
