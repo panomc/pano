@@ -23,6 +23,7 @@ object DatabaseInitUtil {
               `registered_ip` varchar(255) NOT NULL,
               `secret_key` text NOT NULL,
               `public_key` text NOT NULL,
+              `register_date` MEDIUMTEXT NOT NULL,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
         """

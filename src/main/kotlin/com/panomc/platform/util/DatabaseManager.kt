@@ -28,7 +28,8 @@ class DatabaseManager(
         DatabaseMigration_7_8(),
         DatabaseMigration_8_9(),
         DatabaseMigration_9_10(),
-        DatabaseMigration_10_11()
+        DatabaseMigration_10_11(),
+        DatabaseMigration_11_12()
     )
 
     init {
@@ -103,7 +104,7 @@ class DatabaseManager(
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 11
+        const val DATABASE_SCHEME_VERSION = 12
         const val DATABASE_SCHEME_VERSION_INFO = ""
 
         interface DatabaseMigration {
