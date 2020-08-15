@@ -16,6 +16,7 @@ import com.panomc.platform.route.api.get.setup.step.CheckAPI
 import com.panomc.platform.route.api.post.auth.LogoutAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.post.panel.dashboard.CloseGettingStartedCardAPI
+import com.panomc.platform.route.api.post.panel.players.PlayersPageInitAPI
 import com.panomc.platform.route.api.post.panel.post.*
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryAddAPI
 import com.panomc.platform.route.api.post.panel.post.category.PostCategoryDeleteAPI
@@ -137,4 +138,6 @@ interface ApplicationComponent {
     fun inject(ticketPageCloseTicketsAPI: TicketPageCloseTicketsAPI)
 
     fun inject(ticketPageDeleteTicketsAPI: TicketPageDeleteTicketsAPI)
+
+    fun inject(playersPageInitAPI: PlayersPageInitAPI)
 }
