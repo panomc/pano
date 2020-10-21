@@ -117,8 +117,8 @@ class RegisterSystem : Auth() {
         handler: () -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user (username, email, password, registered_ip, permission_id, secret_key, public_key) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user (username, email, password, registered_ip, permission_id, secret_key, public_key, register_date) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
@@ -132,6 +132,7 @@ class RegisterSystem : Auth() {
                 .add(permissionID)
                 .add(Base64.getEncoder().encodeToString(key.private.encoded))
                 .add(Base64.getEncoder().encodeToString(key.public.encoded))
+                .add(Calendar.getInstance().time.toString())
         ) { queryResult ->
             if (queryResult.failed()) {
                 val errorCode = ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2
