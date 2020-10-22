@@ -1,14 +1,14 @@
 plugins {
     java
-    kotlin("jvm") version "1.3.72"
-    kotlin("kapt") version "1.3.72"
-    id("io.vertx.vertx-plugin") version "1.1.1"
+    kotlin("jvm") version "1.4.10"
+    kotlin("kapt") version "1.4.10"
+    id("io.vertx.vertx-plugin") version "1.1.3"
 }
 
 group = "com.panomc.platform"
 version = "1.0"
 
-val vertxVersionVariable = "3.9.2"
+val vertxVersionVariable = "3.9.4"
 
 repositories {
     jcenter()
@@ -42,14 +42,14 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.30")
 
     // dagger 2x
-    implementation("com.google.dagger:dagger:2.28.3")
-    kapt("com.google.dagger:dagger-compiler:2.28.3")
+    implementation("com.google.dagger:dagger:2.29.1")
+    kapt("com.google.dagger:dagger-compiler:2.29.1")
 
     // recaptcha v2 1.0.3
     implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.4")
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
-    implementation(group = "commons-codec", name = "commons-codec", version = "1.14")
+    implementation(group = "commons-codec", name = "commons-codec", version = "1.15")
 
     implementation("io.jsonwebtoken:jjwt-api:0.11.2")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.2")
