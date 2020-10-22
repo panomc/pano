@@ -132,7 +132,7 @@ class RegisterSystem : Auth() {
                 .add(permissionID)
                 .add(Base64.getEncoder().encodeToString(key.private.encoded))
                 .add(Base64.getEncoder().encodeToString(key.public.encoded))
-                .add(Calendar.getInstance().time.toString())
+                .add(System.currentTimeMillis())
         ) { queryResult ->
             if (queryResult.failed()) {
                 val errorCode = ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2
