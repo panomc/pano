@@ -8,6 +8,7 @@ import com.panomc.platform.util.Connection
 import com.panomc.platform.util.DatabaseManager
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import java.util.*
 import javax.inject.Inject
 
 class DashboardAPI : PanelApi() {
@@ -38,31 +39,34 @@ class DashboardAPI : PanelApi() {
                             getCountOfPosts(connection, handler) { countOfPosts ->
                                 getCountOfTickets(connection, handler) { countOfTickets ->
                                     getCountOfOpenTickets(connection, handler) { countOfOpenTickets ->
-                                        val result = mutableMapOf<String, Any?>(
-                                            "registered_player_count" to countOfUsers,
-                                            "post_count" to countOfPosts,
-                                            "tickets_count" to countOfTickets,
-                                            "open_tickets_count" to countOfOpenTickets
-                                        )
-
-                                        if (!isUserInstalledSystem) {
-                                            result["getting_started_blocks"] = mapOf(
-                                                "welcome_board" to false
+                                        getTickets(connection, handler) { tickets ->
+                                            val result = mutableMapOf<String, Any?>(
+                                                "registered_player_count" to countOfUsers,
+                                                "post_count" to countOfPosts,
+                                                "tickets_count" to countOfTickets,
+                                                "open_tickets_count" to countOfOpenTickets,
+                                                "tickets" to tickets
                                             )
 
-                                            databaseManager.closeConnection(connection) {
-                                                handler.invoke(Successful(result))
-                                            }
-                                        } else
-                                            getWelcomeBoardStatus(connection, handler) { showWelcomeBoard ->
+                                            if (!isUserInstalledSystem) {
                                                 result["getting_started_blocks"] = mapOf(
-                                                    "welcome_board" to showWelcomeBoard
+                                                    "welcome_board" to false
                                                 )
 
                                                 databaseManager.closeConnection(connection) {
                                                     handler.invoke(Successful(result))
                                                 }
-                                            }
+                                            } else
+                                                getWelcomeBoardStatus(connection, handler) { showWelcomeBoard ->
+                                                    result["getting_started_blocks"] = mapOf(
+                                                        "welcome_board" to showWelcomeBoard
+                                                    )
+
+                                                    databaseManager.closeConnection(connection) {
+                                                        handler.invoke(Successful(result))
+                                                    }
+                                                }
+                                        }
                                     }
                                 }
                             }
@@ -203,5 +207,124 @@ class DashboardAPI : PanelApi() {
                         resultHandler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_20))
                     }
             }
+    }
+
+    private fun getTickets(
+        connection: Connection,
+        resultHandler: (result: Result) -> Unit,
+        handler: (tickets: List<Map<String, Any>>) -> Unit
+    ) {
+        var query =
+            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ORDER BY `date` DESC, `id` LIMIT 5"
+
+        val parameters = JsonArray()
+
+        databaseManager.getSQLConnection(connection).queryWithParams(query, parameters) { queryResult ->
+            if (queryResult.succeeded()) {
+                val tickets = mutableListOf<Map<String, Any>>()
+
+                if (queryResult.result().results.size > 0) {
+                    query =
+                        "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
+
+                    databaseManager.getSQLConnection(connection).query(query) { categoryQueryResult ->
+                        if (categoryQueryResult.succeeded()) {
+                            val handlers: List<(handler: () -> Unit) -> Any> =
+                                queryResult.result().results.map { ticketInDB ->
+                                    val localHandler: (handler: () -> Unit) -> Any = { handler ->
+                                        getUserNameFromID(
+                                            connection,
+                                            ticketInDB.getInteger(3),
+                                            resultHandler
+                                        ) { username ->
+                                            var category: Any = "null"
+
+                                            categoryQueryResult.result().results.forEach { categoryInDB ->
+                                                if (categoryInDB.getInteger(0) == ticketInDB.getInteger(2).toInt())
+                                                    category = mapOf(
+                                                        "id" to categoryInDB.getInteger(0),
+                                                        "title" to String(
+                                                            Base64.getDecoder()
+                                                                .decode(categoryInDB.getString(1).toByteArray())
+                                                        )
+                                                    )
+                                            }
+
+                                            if (category == "null")
+                                                category = mapOf(
+                                                    "title" to "-"
+                                                )
+
+                                            tickets.add(
+                                                mapOf(
+                                                    "id" to ticketInDB.getInteger(0),
+                                                    "title" to String(
+                                                        Base64.getDecoder()
+                                                            .decode(ticketInDB.getString(1).toByteArray())
+                                                    ),
+                                                    "category" to category,
+                                                    "writer" to mapOf(
+                                                        "username" to username
+                                                    ),
+                                                    "date" to ticketInDB.getString(4),
+                                                    "status" to ticketInDB.getInteger(5)
+                                                )
+                                            )
+
+                                            handler.invoke()
+                                        }
+                                    }
+
+                                    localHandler
+                                }
+
+                            var currentIndex = -1
+
+                            fun invoke() {
+                                val localHandler: () -> Unit = {
+                                    if (currentIndex == handlers.lastIndex)
+                                        handler.invoke(tickets)
+                                    else
+                                        invoke()
+                                }
+
+                                currentIndex++
+
+                                if (currentIndex <= handlers.lastIndex)
+                                    handlers[currentIndex].invoke(localHandler)
+                            }
+
+                            invoke()
+                        } else
+                            databaseManager.closeConnection(connection) {
+                                resultHandler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_77))
+                            }
+                    }
+                } else
+                    handler.invoke(tickets)
+            } else
+                databaseManager.closeConnection(connection) {
+                    resultHandler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_76))
+                }
+        }
+    }
+
+    private fun getUserNameFromID(
+        connection: Connection,
+        id: Int,
+        resultHandler: (result: Result) -> Unit,
+        handler: (username: String) -> Unit
+    ) {
+        val query =
+            "SELECT username FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+
+        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getString(0))
+            else
+                databaseManager.closeConnection(connection) {
+                    resultHandler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_75))
+                }
+        }
     }
 }
