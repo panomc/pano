@@ -80,9 +80,15 @@ class PostCategoryAddAPI : PanelApi() {
                                 )
                             }
                         } else
-                            addCategoryToDB(connection, title, description, url, color, handler) {
+                            addCategoryToDB(connection, title, description, url, color, handler) { id ->
                                 databaseManager.closeConnection(connection) {
-                                    handler.invoke(Successful())
+                                    handler.invoke(
+                                        Successful(
+                                            mapOf(
+                                                "id" to id
+                                            )
+                                        )
+                                    )
                                 }
                             }
                     }
@@ -115,7 +121,7 @@ class PostCategoryAddAPI : PanelApi() {
         url: String,
         color: String,
         resultHandler: (result: Result) -> Unit,
-        handler: () -> Unit
+        handler: (id: Int) -> Unit
     ) {
         val query =
             "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
@@ -129,7 +135,8 @@ class PostCategoryAddAPI : PanelApi() {
                 .add(color.replace("#", ""))
         ) { queryResult ->
             if (queryResult.succeeded())
-                handler.invoke()
+
+                handler.invoke(queryResult.result().keys.getInteger(0))
             else
                 databaseManager.closeConnection(connection) {
                     resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_93))
