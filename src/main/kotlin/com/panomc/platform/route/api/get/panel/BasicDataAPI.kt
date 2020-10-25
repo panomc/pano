@@ -42,8 +42,8 @@ class BasicDataAPI : PanelApi() {
                                         mapOf(
                                             "user" to getBasicUserData,
                                             "website" to mapOf(
-                                                "name" to configManager.config["website-name"],
-                                                "description" to configManager.config["website-description"]
+                                                "name" to configManager.getConfig()["website-name"],
+                                                "description" to configManager.getConfig()["website-description"]
                                             ),
                                             "platform_server_match_key" to platformCodeManager.getPlatformKey(),
                                             "platform_server_match_key_time_started" to platformCodeManager.getTimeStarted(),
@@ -68,7 +68,7 @@ class BasicDataAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
+            "SELECT `user_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -87,7 +87,7 @@ class BasicDataAPI : PanelApi() {
         handler: (data: Map<String, Any>) -> Unit
     ) {
         val query =
-            "SELECT `username`, `email`, `permission_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where `id` = ?"
+            "SELECT `username`, `email`, `permission_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where `id` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(
             query,
@@ -115,7 +115,7 @@ class BasicDataAPI : PanelApi() {
         handler: (count: Int) -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+            "SELECT count(`id`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->

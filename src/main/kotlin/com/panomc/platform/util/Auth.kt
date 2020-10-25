@@ -56,7 +56,7 @@ open class Auth {
                 handler.invoke(false)
         }) {
             val query =
-                "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+                "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
 
             getConnection().queryWithParams(query, JsonArray().add(token)) { queryResult ->
                 if (!queryResult.succeeded())
@@ -78,7 +78,7 @@ open class Auth {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT user_id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -95,7 +95,7 @@ open class Auth {
         handler: (permissionID: Int) -> Unit
     ) {
         val query =
-            "SELECT permission_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+            "SELECT permission_id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(userID)) { queryResult ->
 
@@ -113,7 +113,7 @@ open class Auth {
         handler: (permission: String?) -> Unit
     ) {
         val query =
-            "SELECT name FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}permission where id = ?"
+            "SELECT name FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}permission where id = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(permissionID)) { queryResult ->
             if (queryResult.succeeded())

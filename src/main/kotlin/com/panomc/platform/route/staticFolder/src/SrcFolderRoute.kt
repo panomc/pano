@@ -39,7 +39,7 @@ class SrcFolderRoute : Route() {
 
     private fun handle(context: RoutingContext, isAdmin: Boolean = false) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var srcFolderRoot = if (setupManager.isSetupDone())
-            "src/main/resources/themes/" + configManager.config.string("current-theme") + "/"
+            "src/main/resources/themes/" + configManager.getConfig().string("current-theme") + "/"
         else
             "src/main/resources/setup/"
 

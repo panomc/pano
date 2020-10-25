@@ -50,7 +50,7 @@ class LogoutAPI : LoggedInApi() {
         handler: () -> Unit
     ) {
         val query =
-            "DELETE from ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token WHERE token = ?"
+            "DELETE from ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token WHERE token = ?"
 
         databaseManager.getSQLConnection(connection)
             .updateWithParams(query, JsonArray().add(token)) { queryResult ->

@@ -83,7 +83,7 @@ class DashboardAPI : PanelApi() {
         handler: (postCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -101,7 +101,7 @@ class DashboardAPI : PanelApi() {
         handler: (ticketsCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -119,7 +119,7 @@ class DashboardAPI : PanelApi() {
         handler: (openTicketsCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE status = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(1)) { queryResult ->
             if (queryResult.succeeded())
@@ -138,7 +138,7 @@ class DashboardAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
+            "SELECT `user_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -157,7 +157,7 @@ class DashboardAPI : PanelApi() {
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`value`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
+            "SELECT COUNT(`value`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("who_installed_user_id").add(userID.toString())) { queryResult ->
@@ -176,7 +176,7 @@ class DashboardAPI : PanelApi() {
         handler: (userCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -194,7 +194,7 @@ class DashboardAPI : PanelApi() {
         handler: (showWelcomeBoard: Boolean) -> Unit
     ) {
         val query =
-            "SELECT value FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ?"
+            "SELECT value FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("show_getting_started")) { queryResult ->
@@ -215,7 +215,7 @@ class DashboardAPI : PanelApi() {
         handler: (tickets: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ORDER BY `date` DESC, `id` LIMIT 5"
+            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket ORDER BY `date` DESC, `id` LIMIT 5"
 
         val parameters = JsonArray()
 
@@ -225,7 +225,7 @@ class DashboardAPI : PanelApi() {
 
                 if (queryResult.result().results.size > 0) {
                     query =
-                        "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
+                        "SELECT id, title FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
 
                     databaseManager.getSQLConnection(connection).query(query) { categoryQueryResult ->
                         if (categoryQueryResult.succeeded()) {
@@ -316,7 +316,7 @@ class DashboardAPI : PanelApi() {
         handler: (username: String) -> Unit
     ) {
         val query =
-            "SELECT username FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+            "SELECT username FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

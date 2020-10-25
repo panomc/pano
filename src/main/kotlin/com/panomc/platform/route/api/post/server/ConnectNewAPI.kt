@@ -112,7 +112,7 @@ class ConnectNewAPI : Api() {
             .compact()
 
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}server (name, player_count, max_player_count, server_type, server_version, favicon, secret_key, public_key, token, status) " +
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}server (name, player_count, max_player_count, server_type, server_version, favicon, secret_key, public_key, token, status) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection).updateWithParams(

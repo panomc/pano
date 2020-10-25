@@ -68,7 +68,7 @@ class PlayersPageInitAPI : PanelApi() {
         handler: (playersCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user ${if (pageType == 2) "WHERE permission_id != ?" else ""}"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user ${if (pageType == 2) "WHERE permission_id != ?" else ""}"
 
         val parameters = JsonArray()
 
@@ -93,7 +93,7 @@ class PlayersPageInitAPI : PanelApi() {
         handler: (players: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT id, username, register_date FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user ${if (pageType == 2) "WHERE permission_id != ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, username, register_date FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user ${if (pageType == 2) "WHERE permission_id != ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = JsonArray()
 
@@ -162,7 +162,7 @@ class PlayersPageInitAPI : PanelApi() {
         handler: (ticketCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket where user_id = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket where user_id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

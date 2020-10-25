@@ -62,7 +62,7 @@ class TicketCategoryAddAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category (`title`, `description`) VALUES (?, ?)"
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category (`title`, `description`) VALUES (?, ?)"
 
         databaseManager.getSQLConnection(connection)
             .updateWithParams(query,

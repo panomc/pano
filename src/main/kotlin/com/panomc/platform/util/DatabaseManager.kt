@@ -36,7 +36,7 @@ class DatabaseManager(
         if (setupManager.isSetupDone())
             createConnection { connection, _ ->
                 if (connection != null) {
-                    val tablePrefix = (mConfigManager.config["database"] as Map<*, *>)["prefix"].toString()
+                    val tablePrefix = (mConfigManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()
 
                     val query = "SELECT MAX(`key`) FROM ${tablePrefix}scheme_version"
 
@@ -166,7 +166,7 @@ class DatabaseManager(
 
     fun createConnection(handler: (connection: Connection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
         if (!::mAsyncSQLClient.isInitialized) {
-            val databaseConfig = (mConfigManager.config["database"] as Map<*, *>)
+            val databaseConfig = (mConfigManager.getConfig()["database"] as Map<*, *>)
 
             var port = 3306
             var host = databaseConfig["host"] as String
@@ -204,7 +204,7 @@ class DatabaseManager(
     fun initDatabaseTables(handler: (asyncResult: AsyncResult<*>) -> Unit) {
         createConnection { connection, asyncResult ->
             if (connection !== null) {
-                val tablePrefix = (mConfigManager.config["database"] as Map<*, *>)["prefix"].toString()
+                val tablePrefix = (mConfigManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()
                 val sqlConnection = connection.getSQLConnection()
 
                 val databaseInitProcessHandlers = listOf(

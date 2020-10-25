@@ -64,7 +64,7 @@ class TicketCategoryUpdateAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category SET title = ?, description = ? WHERE id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category SET title = ?, description = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection)
             .updateWithParams(

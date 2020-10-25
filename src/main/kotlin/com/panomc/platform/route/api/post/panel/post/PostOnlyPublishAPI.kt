@@ -59,7 +59,7 @@ class PostOnlyPublishAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT user_id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -78,7 +78,7 @@ class PostOnlyPublishAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE id = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -98,7 +98,7 @@ class PostOnlyPublishAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post SET writer_user_id = ?, date = ?, move_date = ?, status = ? WHERE id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post SET writer_user_id = ?, date = ?, move_date = ?, status = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,

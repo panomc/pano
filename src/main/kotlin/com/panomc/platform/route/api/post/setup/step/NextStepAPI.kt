@@ -45,8 +45,8 @@ class NextStepAPI : Api() {
             if (clientStep == 0)
                 passStep = true
             else if (clientStep == 1 && !data.getString("websiteName").isNullOrEmpty() && !data.getString("websiteDescription").isNullOrEmpty()) {
-                configManager.config["website-name"] = data.getString("websiteName")
-                configManager.config["website-description"] = data.getString("websiteDescription")
+                configManager.getConfig()["website-name"] = data.getString("websiteName")
+                configManager.getConfig()["website-description"] = data.getString("websiteDescription")
 
                 passStep = true
             } else if (
@@ -56,7 +56,7 @@ class NextStepAPI : Api() {
                 !data.getString("username").isNullOrEmpty()
             ) {
                 @Suppress("UNCHECKED_CAST") val databaseOptions =
-                    (configManager.config["database"] as MutableMap<String, Any>)
+                    (configManager.getConfig()["database"] as MutableMap<String, Any>)
 
                 databaseOptions.replace("host", data.getString("host"))
                 databaseOptions.replace("name", data.getString("dbName"))

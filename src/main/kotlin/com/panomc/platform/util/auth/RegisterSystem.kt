@@ -68,7 +68,7 @@ class RegisterSystem : Auth() {
         handler: () -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where email = ?"
+            "SELECT COUNT(email) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where email = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(formData.getString("email"))) { queryResult ->
             val errorCode: ErrorCode? = if (!queryResult.succeeded())
@@ -92,7 +92,7 @@ class RegisterSystem : Auth() {
         handler: (permissionID: Int) -> Unit
     ) {
         val query =
-            "SELECT id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}permission where name = ?"
+            "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}permission where name = ?"
 
         getConnection().queryWithParams(query, JsonArray().add("admin")) { queryResult ->
             if (queryResult.succeeded())
@@ -117,7 +117,7 @@ class RegisterSystem : Auth() {
         handler: () -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user (username, email, password, registered_ip, permission_id, secret_key, public_key, register_date) " +
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user (username, email, password, registered_ip, permission_id, secret_key, public_key, register_date) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
@@ -151,7 +151,7 @@ class RegisterSystem : Auth() {
         handler: (Successful) -> Unit
     ) {
         val query =
-            "SELECT id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
+            "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
 
         getConnection().queryWithParams(query, JsonArray().add(formData.getString("username"))) { queryResult ->
             if (queryResult.succeeded())
@@ -168,7 +168,7 @@ class RegisterSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
-        val tablePrefix = (configManager.config["database"] as Map<*, *>)["prefix"].toString()
+        val tablePrefix = (configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()
 
         getConnection().queryWithParams(
             """

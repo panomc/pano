@@ -69,7 +69,7 @@ class TicketsPageInitAPI : PanelApi() {
         handler: (ticketsCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ?" else ""}"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ?" else ""}"
 
         val parameters = JsonArray()
 
@@ -94,7 +94,7 @@ class TicketsPageInitAPI : PanelApi() {
         handler: (tickets: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, title, category_id, user_id, date, status FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = JsonArray()
 
@@ -107,7 +107,7 @@ class TicketsPageInitAPI : PanelApi() {
 
                 if (queryResult.result().results.size > 0) {
                     query =
-                        "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
+                        "SELECT id, title FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
 
                     databaseManager.getSQLConnection(connection).query(query) { categoryQueryResult ->
                         if (categoryQueryResult.succeeded()) {
@@ -198,7 +198,7 @@ class TicketsPageInitAPI : PanelApi() {
         handler: (username: String) -> Unit
     ) {
         val query =
-            "SELECT username FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+            "SELECT username FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

@@ -64,7 +64,7 @@ class TicketPageDeleteTicketsAPI : PanelApi() {
             handler.invoke()
         else {
             val query =
-                "DELETE FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE id IN ($selectedTicketsSQLText)"
+                "DELETE FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE id IN ($selectedTicketsSQLText)"
 
             databaseManager.getSQLConnection(connection).updateWithParams(query, parameters) { queryResult ->
                 if (queryResult.succeeded())

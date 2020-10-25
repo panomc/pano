@@ -41,7 +41,7 @@ class CloseConnectServerCardAPI : PanelApi() {
                         } else
                             connection.getSQLConnection().updateWithParams(
                                 """
-                                        UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE `option` = ?
+                                        UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}system_property SET value = ? WHERE `option` = ?
                                     """.trimIndent(),
                                 JsonArray().add("false").add("show_connect_server_info")
                             ) { queryResult ->
@@ -65,7 +65,7 @@ class CloseConnectServerCardAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT user_id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -84,7 +84,7 @@ class CloseConnectServerCardAPI : PanelApi() {
         handler: (isUserInstalledSystem: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`value`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
+            "SELECT COUNT(`value`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}system_property where `option` = ? and value = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add("who_installed_user_id").add(userID.toString())) { queryResult ->

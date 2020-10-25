@@ -30,7 +30,7 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot) 
 
     private fun handle(context: RoutingContext, isAdmin: Boolean) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var assetsFolderRoot = if (setupManager.isSetupDone())
-            "src/main/resources/themes/" + configManager.config.string("current-theme") + "/assets/"
+            "src/main/resources/themes/" + configManager.getConfig().string("current-theme") + "/assets/"
         else
             "src/main/resources/setup/assets/"
 

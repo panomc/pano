@@ -68,7 +68,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
         handler: (ticketCategoryCount: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -87,7 +87,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
         handler: (posts: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT id, title FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
+            "SELECT id, title FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
@@ -120,7 +120,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
         handler: (count: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket WHERE category_id = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(categoryID)) { queryResult ->
@@ -140,7 +140,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
         handler: (categories: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT id, title, description FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket_category ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, description FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded()) {

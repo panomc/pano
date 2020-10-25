@@ -57,7 +57,7 @@ class PostCategoryDeleteAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE id = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -76,7 +76,7 @@ class PostCategoryDeleteAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post SET category_id = ? WHERE category_id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post SET category_id = ? WHERE category_id = ?"
 
         databaseManager.getSQLConnection(connection)
             .updateWithParams(query, JsonArray().add(-1).add(categoryID)) { queryResult ->
@@ -96,7 +96,7 @@ class PostCategoryDeleteAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "DELETE FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE id = ?"
+            "DELETE FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).updateWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

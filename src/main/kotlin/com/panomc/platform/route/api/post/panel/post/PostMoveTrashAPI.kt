@@ -55,7 +55,7 @@ class PostMoveTrashAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE id = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -74,7 +74,7 @@ class PostMoveTrashAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post SET move_date = ?, status = ? WHERE id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post SET move_date = ?, status = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,

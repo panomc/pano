@@ -102,7 +102,7 @@ class PostCategoryAddAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE url = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE url = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(url)) { queryResult ->
             if (queryResult.succeeded())
@@ -124,7 +124,7 @@ class PostCategoryAddAPI : PanelApi() {
         handler: (id: Int) -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,

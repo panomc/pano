@@ -65,7 +65,7 @@ class TicketPageCloseTicketsAPI : PanelApi() {
             handler.invoke()
         else {
             val query =
-                "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}ticket SET status = ? WHERE id IN ($selectedTicketsSQLText)"
+                "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket SET status = ? WHERE id IN ($selectedTicketsSQLText)"
 
             databaseManager.getSQLConnection(connection).updateWithParams(query, parameters) { queryResult ->
                 if (queryResult.succeeded())

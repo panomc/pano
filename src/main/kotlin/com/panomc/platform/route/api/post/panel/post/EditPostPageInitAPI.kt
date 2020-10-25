@@ -63,7 +63,7 @@ class EditPostPageInitAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`id`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE `id` = ?"
+            "SELECT COUNT(`id`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE `id` = ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(id)) { queryResult ->
@@ -83,7 +83,7 @@ class EditPostPageInitAPI : PanelApi() {
         handler: (post: Map<String, Any>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE  `id` = ?"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE  `id` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {

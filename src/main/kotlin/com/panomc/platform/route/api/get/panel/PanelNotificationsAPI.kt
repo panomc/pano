@@ -59,7 +59,7 @@ class PanelNotificationsAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
+            "SELECT `user_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -78,7 +78,7 @@ class PanelNotificationsAPI : PanelApi() {
         handler: (notifications: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
@@ -113,7 +113,7 @@ class PanelNotificationsAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(NotificationStatus.READ).add(userID).add(-1)) { queryResult ->
@@ -133,7 +133,7 @@ class PanelNotificationsAPI : PanelApi() {
         handler: (count: Int) -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+            "SELECT count(`id`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->

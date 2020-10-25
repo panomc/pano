@@ -69,7 +69,7 @@ class PostsPageInitAPI : PanelApi() {
         handler: (postsCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded())
@@ -89,7 +89,7 @@ class PostsPageInitAPI : PanelApi() {
         handler: (posts: List<Map<String, Any>>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, writer_user_id, date, views, status FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ? ORDER BY ${if (pageType == 1) "date DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, category_id, writer_user_id, date, views, status FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post WHERE status = ? ORDER BY ${if (pageType == 1) "date DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -97,7 +97,7 @@ class PostsPageInitAPI : PanelApi() {
 
                 if (queryResult.result().results.size > 0) {
                     query =
-                        "SELECT id, title, url, color FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category"
+                        "SELECT id, title, url, color FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category"
 
                     databaseManager.getSQLConnection(connection).query(query) { categoryQueryResult ->
                         if (categoryQueryResult.succeeded()) {
@@ -190,7 +190,7 @@ class PostsPageInitAPI : PanelApi() {
         handler: (username: String) -> Unit
     ) {
         val query =
-            "SELECT username FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+            "SELECT username FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

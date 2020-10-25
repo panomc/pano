@@ -99,7 +99,7 @@ class PostCategoryUpdateAPI : PanelApi() {
         handler: (exists: Boolean) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE url = ? and id != ?"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE url = ? and id != ?"
 
         databaseManager.getSQLConnection(connection)
             .queryWithParams(query, JsonArray().add(url).add(id)) { queryResult ->
@@ -123,7 +123,7 @@ class PostCategoryUpdateAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category SET title = ?, description = ?, url = ?, color = ? WHERE id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category SET title = ?, description = ?, url = ?, color = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,

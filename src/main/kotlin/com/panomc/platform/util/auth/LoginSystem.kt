@@ -57,7 +57,7 @@ class LoginSystem : Auth() {
         handler: () -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where email = ? and password = ?"
+            "SELECT COUNT(email) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where email = ? and password = ?"
 
         getConnection().queryWithParams(
             query,
@@ -79,7 +79,7 @@ class LoginSystem : Auth() {
     ) {
         createConnection(resultHandler) {
             val query =
-                "SELECT id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
+                "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
 
             getConnection().queryWithParams(query, JsonArray().add(username)) { queryResult ->
                 if (queryResult.succeeded())
@@ -99,7 +99,7 @@ class LoginSystem : Auth() {
     ) {
         createConnection(resultHandler) {
             val query =
-                "SELECT secret_key FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
+                "SELECT secret_key FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
 
             getConnection().queryWithParams(query, JsonArray().add(userID)) { queryResult ->
                 if (queryResult.succeeded())
@@ -131,7 +131,7 @@ class LoginSystem : Auth() {
                     .compact()
 
                 val query =
-                    "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token (token, created_time, user_id, subject) " +
+                    "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token (token, created_time, user_id, subject) " +
                             "VALUES (?, ?, ?, ?)"
 
                 getConnection().updateWithParams(

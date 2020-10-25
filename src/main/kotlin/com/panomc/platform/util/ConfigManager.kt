@@ -15,7 +15,7 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     private val mMigrations = listOf<ConfigMigration>(
     )
 
-    val config = com.beust.klaxon.JsonObject()
+    private val mConfig = com.beust.klaxon.JsonObject()
 
     private val mConfigFile = File("config.json")
 
@@ -86,22 +86,22 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
             loadConfigFromFile(retriever)
 
             retriever.listen { change ->
-                config.clear()
+                mConfig.clear()
 
-                config.putAll(change.newConfiguration.map)
+                mConfig.putAll(change.newConfiguration.map)
             }
         } else {
-            config.clear()
+            mConfig.clear()
 
-            config.putAll(DEFAULT_CONFIG.map)
+            mConfig.putAll(DEFAULT_CONFIG.map)
         }
     }
 
     private fun loadConfigFromFile(retriever: ConfigRetriever) {
         runBlocking {
-            config.clear()
+            mConfig.clear()
 
-            config.putAll(retriever.getConfigAwait().map)
+            mConfig.putAll(retriever.getConfigAwait().map)
         }
     }
 
@@ -120,8 +120,10 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     }
 
     fun saveConfig() {
-        mConfigFile.writeText(config.toJsonString(true))
+        mConfigFile.writeText(mConfig.toJsonString(true))
     }
 
-    fun getConfigVersion() = config["config-version"] as Int
+    fun getConfigVersion() = mConfig["config-version"] as Int
+
+    fun getConfig() = mConfig
 }

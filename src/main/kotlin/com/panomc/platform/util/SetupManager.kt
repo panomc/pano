@@ -14,15 +14,15 @@ class SetupManager(private val mConfigManager: ConfigManager) {
         data["step"] = step
 
         if (step == 1 || step == 3) {
-            data["websiteName"] = mConfigManager.config.string("website-name")
-            data["websiteDescription"] = mConfigManager.config.string("website-description")
+            data["websiteName"] = mConfigManager.getConfig().string("website-name")
+            data["websiteDescription"] = mConfigManager.getConfig().string("website-description")
         } else if (step == 2) {
             data["db"] = mapOf(
-                "host" to ((mConfigManager.config["database"] as Map<*, *>)["host"] as String),
-                "dbName" to ((mConfigManager.config["database"] as Map<*, *>)["name"] as String),
-                "username" to ((mConfigManager.config["database"] as Map<*, *>)["username"] as String),
-                "password" to ((mConfigManager.config["database"] as Map<*, *>)["password"] as String),
-                "prefix" to ((mConfigManager.config["database"] as Map<*, *>)["prefix"] as String)
+                "host" to ((mConfigManager.getConfig()["database"] as Map<*, *>)["host"] as String),
+                "dbName" to ((mConfigManager.getConfig()["database"] as Map<*, *>)["name"] as String),
+                "username" to ((mConfigManager.getConfig()["database"] as Map<*, *>)["username"] as String),
+                "password" to ((mConfigManager.getConfig()["database"] as Map<*, *>)["password"] as String),
+                "prefix" to ((mConfigManager.getConfig()["database"] as Map<*, *>)["prefix"] as String)
             )
         }
 
@@ -33,9 +33,9 @@ class SetupManager(private val mConfigManager: ConfigManager) {
             data["ip"] = localHost.hostAddress
 
             data["panoAccount"] = mapOf(
-                "username" to ((mConfigManager.config["pano-account"] as Map<*, *>)["username"] as String),
-                "email" to ((mConfigManager.config["pano-account"] as Map<*, *>)["email"] as String),
-                "access_token" to ((mConfigManager.config["pano-account"] as Map<*, *>)["access_token"] as String)
+                "username" to ((mConfigManager.getConfig()["pano-account"] as Map<*, *>)["username"] as String),
+                "email" to ((mConfigManager.getConfig()["pano-account"] as Map<*, *>)["email"] as String),
+                "access_token" to ((mConfigManager.getConfig()["pano-account"] as Map<*, *>)["access_token"] as String)
             )
         }
 
@@ -64,11 +64,11 @@ class SetupManager(private val mConfigManager: ConfigManager) {
         setStep(4)
     }
 
-    fun getStep() = (mConfigManager.config["setup"] as Map<*, *>)["step"] as Int
+    fun getStep() = (mConfigManager.getConfig()["setup"] as Map<*, *>)["step"] as Int
 
     private fun setStep(step: Int) {
         @Suppress("UNCHECKED_CAST")
-        (mConfigManager.config["setup"] as MutableMap<String, Any>).replace("step", step)
+        (mConfigManager.getConfig()["setup"] as MutableMap<String, Any>).replace("step", step)
 
         mConfigManager.saveConfig()
     }

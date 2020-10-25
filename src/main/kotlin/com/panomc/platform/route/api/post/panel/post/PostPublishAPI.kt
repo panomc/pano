@@ -87,7 +87,7 @@ class PostPublishAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
+            "SELECT user_id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where token = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -114,7 +114,7 @@ class PostPublishAPI : PanelApi() {
         handler: (id: Int) -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,
@@ -150,7 +150,7 @@ class PostPublishAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "UPDATE ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post SET title = ?, category_id = ?, writer_user_id = ?, post = ?, date = ?, move_date = ?, status = ?, image = ? WHERE id = ?"
+            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post SET title = ?, category_id = ?, writer_user_id = ?, post = ?, date = ?, move_date = ?, status = ?, image = ? WHERE id = ?"
 
         databaseManager.getSQLConnection(connection).updateWithParams(
             query,

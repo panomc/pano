@@ -51,7 +51,7 @@ class CategoriesAPI : PanelApi() {
         handler: (postsCountByPageType: Int) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category"
+            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category"
 
         databaseManager.getSQLConnection(connection).query(query) { queryResult ->
             if (queryResult.succeeded())
@@ -69,7 +69,7 @@ class CategoriesAPI : PanelApi() {
         handler: (categories: List<Map<String, Any>>) -> Unit
     ) {
         val query =
-            "SELECT id, title, description, url, color FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}post_category ORDER BY id DESC"
+            "SELECT id, title, description, url, color FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category ORDER BY id DESC"
 
         databaseManager.getSQLConnection(connection).query(query) { queryResult ->
             if (queryResult.succeeded()) {

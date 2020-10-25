@@ -50,7 +50,7 @@ class TestSendNotificationAPI : PanelApi() {
         handler: (userID: Int) -> Unit
     ) {
         val query =
-            "SELECT `user_id` FROM ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
+            "SELECT `user_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
 
         databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -69,7 +69,7 @@ class TestSendNotificationAPI : PanelApi() {
         handler: () -> Unit
     ) {
         val query =
-            "INSERT INTO ${(configManager.config["database"] as Map<*, *>)["prefix"].toString()}panel_notification (user_id, type_ID, date, status) " +
+            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification (user_id, type_ID, date, status) " +
                     "VALUES (?, ?, ?, ?)"
 
         databaseManager.getSQLConnection(connection)
