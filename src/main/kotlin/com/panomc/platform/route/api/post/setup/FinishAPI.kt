@@ -3,12 +3,11 @@ package com.panomc.platform.route.api.post.setup
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.Api
 import com.panomc.platform.model.Error
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Successful
-import com.panomc.platform.util.ConfigManager
-import com.panomc.platform.util.DatabaseManager
 import com.panomc.platform.util.SetupManager
 import com.panomc.platform.util.auth.LoginSystem
 import com.panomc.platform.util.auth.RegisterSystem
@@ -30,9 +29,6 @@ class FinishAPI : Api() {
     lateinit var setupManager: SetupManager
 
     @Inject
-    lateinit var configManager: ConfigManager
-
-    @Inject
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler() = Handler<RoutingContext> { context ->
@@ -51,7 +47,7 @@ class FinishAPI : Api() {
             response
                 .putHeader("content-type", "application/json; charset=utf-8")
 
-            databaseManager.initDatabaseTables {
+            databaseManager.initDatabase {
                 if (it.failed() && it.cause() is ConnectException)
                     response.end(
                         JsonObject(
@@ -83,13 +79,7 @@ class FinishAPI : Api() {
                                         if (it is Successful) {
                                             setupManager.finishSetup()
 
-                                            response.end(
-                                                JsonObject(
-                                                    mapOf(
-                                                        "result" to "ok"
-                                                    )
-                                                ).toJsonString()
-                                            )
+                                            response.end(JsonObject(mapOf("result" to "ok")).toJsonString())
                                         } else if (it is Error)
                                             response.end(
                                                 JsonObject(

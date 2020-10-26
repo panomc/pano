@@ -1,12 +1,12 @@
 package com.panomc.platform.migration.database
 
-import com.panomc.platform.util.DatabaseManager.Companion.DatabaseMigration
+import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_7_8 : DatabaseMigration {
+class DatabaseMigration_7_8 : DatabaseMigration() {
     override val FROM_SCHEME_VERSION = 7
     override val SCHEME_VERSION = 8
     override val SCHEME_VERSION_INFO = "Restore post, postCategory, ticket and ticketCategory tables."

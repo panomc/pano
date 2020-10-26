@@ -3,13 +3,9 @@ package com.panomc.platform.route.api.post.panel.post.category
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.*
-import com.panomc.platform.util.ConfigManager
-import com.panomc.platform.util.Connection
-import com.panomc.platform.util.DatabaseManager
-import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
-import java.util.*
 import javax.inject.Inject
 
 class PostCategoryAddAPI : PanelApi() {
@@ -23,9 +19,6 @@ class PostCategoryAddAPI : PanelApi() {
 
     @Inject
     lateinit var databaseManager: DatabaseManager
-
-    @Inject
-    lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
@@ -57,90 +50,64 @@ class PostCategoryAddAPI : PanelApi() {
         if (url.isEmpty() || url.length < 3 || url.length > 32 || !url.matches(Regex("^[a-zA-Z0-9]+\$")))
             errors["url"] = true
 
-        if (errors.isNotEmpty())
+        if (errors.isNotEmpty()) {
             handler.invoke(
                 Errors(
                     errors
                 )
             )
-        else
-            databaseManager.createConnection { connection, _ ->
-                if (connection == null)
-                    handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-                else
-                    isUrlExists(connection, url, handler) { exists ->
-                        if (exists) {
-                            errors["url"] = true
 
+            return
+        }
+
+        databaseManager.createConnection { connection, _ ->
+            if (connection == null) {
+                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+                return@createConnection
+            }
+
+            databaseManager.getDatabase().postCategoryDao.isExistsByURL(
+                url,
+                databaseManager.getSQLConnection(connection)
+            ) { exists, _ ->
+                when {
+                    exists == null -> databaseManager.closeConnection(connection) {
+                        handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_94))
+                    }
+                    exists -> {
+                        errors["url"] = true
+
+                        databaseManager.closeConnection(connection) {
+                            handler.invoke(
+                                Errors(
+                                    errors
+                                )
+                            )
+                        }
+                    }
+                    else -> databaseManager.getDatabase().postCategoryDao.add(
+                        PostCategory(-1, title, description, url, color),
+                        databaseManager.getSQLConnection(connection)
+                    ) { id, _ ->
+                        if (id == null)
+                            databaseManager.closeConnection(connection) {
+                                handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_93))
+                            }
+                        else
                             databaseManager.closeConnection(connection) {
                                 handler.invoke(
-                                    Errors(
-                                        errors
+                                    Successful(
+                                        mapOf(
+                                            "id" to id
+                                        )
                                     )
                                 )
                             }
-                        } else
-                            addCategoryToDB(connection, title, description, url, color, handler) { id ->
-                                databaseManager.closeConnection(connection) {
-                                    handler.invoke(
-                                        Successful(
-                                            mapOf(
-                                                "id" to id
-                                            )
-                                        )
-                                    )
-                                }
-                            }
                     }
+                }
+
             }
-    }
-
-    private fun isUrlExists(
-        connection: Connection,
-        url: String,
-        resultHandler: (result: Result) -> Unit,
-        handler: (exists: Boolean) -> Unit
-    ) {
-        val query =
-            "SELECT COUNT(id) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category WHERE url = ?"
-
-        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(url)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1)
-            else
-                databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_94))
-                }
-        }
-    }
-
-    private fun addCategoryToDB(
-        connection: Connection,
-        title: String,
-        description: String,
-        url: String,
-        color: String,
-        resultHandler: (result: Result) -> Unit,
-        handler: (id: Int) -> Unit
-    ) {
-        val query =
-            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}post_category (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
-
-        databaseManager.getSQLConnection(connection).updateWithParams(
-            query,
-            JsonArray()
-                .add(Base64.getEncoder().encodeToString(title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(description.toByteArray()))
-                .add(url)
-                .add(color.replace("#", ""))
-        ) { queryResult ->
-            if (queryResult.succeeded())
-
-                handler.invoke(queryResult.result().keys.getInteger(0))
-            else
-                databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_93))
-                }
         }
     }
 }

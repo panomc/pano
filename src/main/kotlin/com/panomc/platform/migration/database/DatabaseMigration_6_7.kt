@@ -1,11 +1,11 @@
 package com.panomc.platform.migration.database
 
-import com.panomc.platform.util.DatabaseManager.Companion.DatabaseMigration
+import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_6_7 : DatabaseMigration {
+class DatabaseMigration_6_7 : DatabaseMigration() {
     override val FROM_SCHEME_VERSION = 6
     override val SCHEME_VERSION = 7
     override val SCHEME_VERSION_INFO = "Change date field in table panel_notifications to LONG type."

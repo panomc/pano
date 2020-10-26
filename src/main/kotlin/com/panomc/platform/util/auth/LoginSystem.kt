@@ -4,11 +4,11 @@ import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.Error
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
+import com.panomc.platform.model.Token
 import com.panomc.platform.util.Auth
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.http.Cookie
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.codec.digest.DigestUtils
@@ -26,7 +26,8 @@ class LoginSystem : Auth() {
             formData.getString("email").isNullOrEmpty() -> ErrorCode.LOGIN_EMAIL_EMPTY
             formData.getString("password").isNullOrEmpty() -> ErrorCode.LOGIN_PASSWORD_EMPTY
 
-            formData.getString("email")!!.length < 5 || (!formData.getString("email")!!.matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) -> ErrorCode.LOGIN_INVALID_EMAIL
+            formData.getString("email")!!.length < 5 || (!formData.getString("email")!!
+                .matches(Regex("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}\$"))) -> ErrorCode.LOGIN_INVALID_EMAIL
             formData.getString("password")!!.length < 6 || formData.getString("password")!!.length > 128 -> ErrorCode.LOGIN_INVALID_PASSWORD
 
 //            !checkRecaptcha && recaptchaValue.isNullOrEmpty() -> {
@@ -56,19 +57,20 @@ class LoginSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
-        val query =
-            "SELECT COUNT(email) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where email = ? and password = ?"
-
-        getConnection().queryWithParams(
-            query,
-            JsonArray().add(formData.getString("email")).add(DigestUtils.md5Hex(formData.getString("password")))
-        ) { queryResult ->
-            if (queryResult.result().results[0].getInteger(0) == 0)
-                closeConnection {
+        databaseManager.getDatabase().userDao.isLoginCorrect(
+            formData.getString("email"),
+            DigestUtils.md5Hex(formData.getString("password")),
+            getConnection()
+        ) { result, _ ->
+            when {
+                result == null -> closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_127))
+                }
+                result -> handler.invoke()
+                else -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.LOGIN_WRONG_EMAIL_OR_PASSWORD))
                 }
-            else
-                handler.invoke()
+            }
         }
     }
 
@@ -78,16 +80,16 @@ class LoginSystem : Auth() {
         handler: (userID: Int) -> Unit
     ) {
         createConnection(resultHandler) {
-            val query =
-                "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
-
-            getConnection().queryWithParams(query, JsonArray().add(username)) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke(queryResult.result().results[0].getInteger(0))
-                else
+            databaseManager.getDatabase().userDao.getUserIDFromUsername(
+                username,
+                getConnection()
+            ) { result, _ ->
+                if (result == null)
                     closeConnection {
                         resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_4))
                     }
+                else
+                    handler.invoke(result)
             }
         }
     }
@@ -97,18 +99,13 @@ class LoginSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: (secretKey: String) -> Unit
     ) {
-        createConnection(resultHandler) {
-            val query =
-                "SELECT secret_key FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where id = ?"
-
-            getConnection().queryWithParams(query, JsonArray().add(userID)) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke(queryResult.result().results[0].getString(0))
-                else
-                    closeConnection {
-                        resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_6))
-                    }
-            }
+        databaseManager.getDatabase().userDao.getSecretKeyByID(userID, getConnection()) { result, _ ->
+            if (result == null)
+                closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_6))
+                }
+            else
+                handler.invoke(result)
         }
     }
 
@@ -130,20 +127,16 @@ class LoginSystem : Auth() {
                     )
                     .compact()
 
-                val query =
-                    "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token (token, created_time, user_id, subject) " +
-                            "VALUES (?, ?, ?, ?)"
-
-                getConnection().updateWithParams(
-                    query,
-                    JsonArray().add(token).add(Calendar.getInstance().time.toString()).add(userID).add("LOGIN_SESSION")
-                ) { queryResult ->
-                    if (queryResult.succeeded())
-                        handler.invoke(token)
-                    else
+                databaseManager.getDatabase().tokenDao.add(
+                    Token(-1, token, userID, "LOGIN_SESSION"),
+                    getConnection()
+                ) { result, _ ->
+                    if (result == null)
                         closeConnection {
                             resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_5))
                         }
+                    else
+                        handler.invoke(token)
                 }
             }
         }

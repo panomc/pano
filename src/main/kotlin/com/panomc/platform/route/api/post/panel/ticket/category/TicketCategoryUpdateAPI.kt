@@ -2,13 +2,9 @@ package com.panomc.platform.route.api.post.panel.ticket.category
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.*
-import com.panomc.platform.util.ConfigManager
-import com.panomc.platform.util.Connection
-import com.panomc.platform.util.DatabaseManager
-import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
-import java.util.*
 import javax.inject.Inject
 
 class TicketCategoryUpdateAPI : PanelApi() {
@@ -22,9 +18,6 @@ class TicketCategoryUpdateAPI : PanelApi() {
 
     @Inject
     lateinit var databaseManager: DatabaseManager
-
-    @Inject
-    lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
@@ -44,40 +37,25 @@ class TicketCategoryUpdateAPI : PanelApi() {
             handler.invoke(Errors(errors))
         else
             databaseManager.createConnection { connection, _ ->
-                if (connection == null)
+                if (connection == null) {
                     handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-                else
-                    updateCategoryInDB(connection, id, title, description, handler) {
+
+                    return@createConnection
+                }
+
+                databaseManager.getDatabase().ticketCategoryDao.update(
+                    TicketCategory(id, title, description),
+                    databaseManager.getSQLConnection(connection)
+                ) { result, _ ->
+                    if (result == null)
+                        databaseManager.closeConnection(connection) {
+                            handler.invoke(Error(ErrorCode.TICKET_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_92))
+                        }
+                    else
                         databaseManager.closeConnection(connection) {
                             handler.invoke(Successful())
                         }
-                    }
-            }
-    }
-
-    private fun updateCategoryInDB(
-        connection: Connection,
-        id: Int,
-        title: String,
-        description: String,
-        resultHandler: (result: Result) -> Unit,
-        handler: () -> Unit
-    ) {
-        val query =
-            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}ticket_category SET title = ?, description = ? WHERE id = ?"
-
-        databaseManager.getSQLConnection(connection)
-            .updateWithParams(
-                query,
-                JsonArray().add(Base64.getEncoder().encodeToString(title.toByteArray()))
-                    .add(Base64.getEncoder().encodeToString(description.toByteArray())).add(id)
-            ) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke()
-                else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.TICKET_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_92))
-                    }
+                }
             }
     }
 }

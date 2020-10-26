@@ -1,6 +1,8 @@
 package com.panomc.platform.di.component
 
 import com.panomc.platform.Main
+import com.panomc.platform.db.DaoImpl
+import com.panomc.platform.db.DatabaseMigration
 import com.panomc.platform.di.module.*
 import com.panomc.platform.model.LoggedInApi
 import com.panomc.platform.model.PanelApi
@@ -140,4 +142,8 @@ interface ApplicationComponent {
     fun inject(ticketPageDeleteTicketsAPI: TicketPageDeleteTicketsAPI)
 
     fun inject(playersPageInitAPI: PlayersPageInitAPI)
+
+    fun inject(daoImpl: DaoImpl)
+
+    fun inject(databaseMigration: DatabaseMigration)
 }

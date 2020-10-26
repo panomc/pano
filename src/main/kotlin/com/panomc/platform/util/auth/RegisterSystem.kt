@@ -1,16 +1,10 @@
 package com.panomc.platform.util.auth
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.model.Error
-import com.panomc.platform.model.Result
-import com.panomc.platform.model.Successful
+import com.panomc.platform.model.*
 import com.panomc.platform.util.Auth
-import io.jsonwebtoken.SignatureAlgorithm
-import io.jsonwebtoken.security.Keys
-import io.vertx.core.json.JsonArray
 import io.vertx.core.json.JsonObject
 import org.apache.commons.codec.digest.DigestUtils
-import java.util.*
 
 class RegisterSystem : Auth() {
     private fun isValidRegisterData(
@@ -67,23 +61,19 @@ class RegisterSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
-        val query =
-            "SELECT COUNT(email) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where email = ?"
-
-        getConnection().queryWithParams(query, JsonArray().add(formData.getString("email"))) { queryResult ->
-            val errorCode: ErrorCode? = if (!queryResult.succeeded())
-                ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_1
-            else if (queryResult.result().results[0].getInteger(0) == 1)
-                ErrorCode.REGISTER_EMAIL_NOT_AVAILABLE
-            else
-                null
-
-            if (errorCode == null)
-                handler.invoke()
-            else
-                closeConnection {
-                    resultHandler.invoke(Error(errorCode))
+        databaseManager.getDatabase().userDao.isEmailExists(
+            formData.getString("email"),
+            getConnection()
+        ) { result, _ ->
+            when {
+                result == null -> closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_1))
                 }
+                result -> closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_NOT_AVAILABLE))
+                }
+                else -> handler.invoke()
+            }
         }
     }
 
@@ -91,14 +81,16 @@ class RegisterSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: (permissionID: Int) -> Unit
     ) {
-        val query =
-            "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}permission where name = ?"
-
-        getConnection().queryWithParams(query, JsonArray().add("admin")) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0))
+        databaseManager.getDatabase().permissionDao.getPermissionID(
+            Permission(-1, "admin"),
+            getConnection()
+        ) { result, _ ->
+            if (result == null)
+                closeConnection {
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_3))
+                }
             else
-                resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_3))
+                handler.invoke(result)
         }
     }
 
@@ -116,31 +108,22 @@ class RegisterSystem : Auth() {
         permissionID: Int,
         handler: () -> Unit
     ) {
-        val query =
-            "INSERT INTO ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user (username, email, password, registered_ip, permission_id, secret_key, public_key, register_date) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-
-        val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
-
-        getConnection().updateWithParams(
-            query,
-            JsonArray()
-                .add(formData.getString("username"))
-                .add(formData.getString("email"))
-                .add(DigestUtils.md5Hex(formData.getString("password")))
-                .add(ipAddress)
-                .add(permissionID)
-                .add(Base64.getEncoder().encodeToString(key.private.encoded))
-                .add(Base64.getEncoder().encodeToString(key.public.encoded))
-                .add(System.currentTimeMillis())
-        ) { queryResult ->
-            if (queryResult.failed()) {
-                val errorCode = ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2
-
+        databaseManager.getDatabase().userDao.add(
+            getConnection(),
+            User(
+                -1,
+                formData.getString("username"),
+                formData.getString("email"),
+                DigestUtils.md5Hex(formData.getString("password")),
+                ipAddress!!,
+                permissionID
+            )
+        ) { result, _ ->
+            if (result == null || result !is Successful)
                 closeConnection {
-                    resultHandler.invoke(Error(errorCode))
+                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2))
                 }
-            } else
+            else
                 handler.invoke()
         }
     }
@@ -148,18 +131,18 @@ class RegisterSystem : Auth() {
     private fun getUserIDFromUsername(
         formData: JsonObject,
         resultHandler: (Result) -> Unit,
-        handler: (Successful) -> Unit
+        handler: (userID: Int) -> Unit
     ) {
-        val query =
-            "SELECT id FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}user where username = ?"
-
-        getConnection().queryWithParams(query, JsonArray().add(formData.getString("username"))) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(mapOf("user_id" to queryResult.result().results[0].getInteger(0))))
-            else
+        databaseManager.getDatabase().userDao.getUserIDFromUsername(
+            formData.getString("username"),
+            getConnection()
+        ) { result, _ ->
+            if (result == null)
                 closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_12))
                 }
+            else
+                handler.invoke(result)
         }
     }
 
@@ -168,43 +151,34 @@ class RegisterSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: () -> Unit
     ) {
-        val tablePrefix = (configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()
+        val property = SystemProperty(-1, "who_installed_user_id", userID.toString())
 
-        getConnection().queryWithParams(
-            """
-                SELECT COUNT(`value`) FROM ${tablePrefix}system_property where `option` = ?
-            """,
-            JsonArray().add("who_installed_user_id")
-        ) {
+        databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, getConnection()) { result, _ ->
             when {
-                it.failed() -> closeConnection {
+                result == null -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_13))
                 }
-                it.result().results[0].getInteger(0) == 0 -> getConnection().updateWithParams(
-                    """
-                        INSERT INTO ${tablePrefix}system_property (`option`, `value`) VALUES (?, ?)
-                    """.trimIndent(),
-                    JsonArray().add("who_installed_user_id").add(userID.toString())
-                ) {
-                    if (it.succeeded())
-                        handler.invoke()
-                    else
-                        closeConnection {
-                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_14))
-                        }
-                }
-                else -> getConnection().updateWithParams(
-                    """
-                        UPDATE ${tablePrefix}system_property SET value = ? WHERE `option` = ?
-                    """.trimIndent(),
-                    JsonArray().add("who_installed_user_id").add(userID.toString())
-                ) {
-                    if (it.succeeded())
-                        handler.invoke()
-                    else
+                result -> databaseManager.getDatabase().systemPropertyDao.update(
+                    property,
+                    getConnection()
+                ) { resultOfUpdate, _ ->
+                    if (resultOfUpdate == null)
                         closeConnection {
                             resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_15))
                         }
+                    else
+                        handler.invoke()
+                }
+                else -> databaseManager.getDatabase().systemPropertyDao.add(
+                    property,
+                    getConnection()
+                ) { resultOfAdd, _ ->
+                    if (resultOfAdd == null)
+                        closeConnection {
+                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_14))
+                        }
+                    else
+                        handler.invoke()
                 }
             }
         }
@@ -234,7 +208,7 @@ class RegisterSystem : Auth() {
                             registerNew(formData, resultHandler, it) {
                                 getUserIDFromUsername(formData, resultHandler) { getUserIDFromUsername ->
                                     setWhoInstalledSystem(
-                                        getUserIDFromUsername.map["user_id"] as Int,
+                                        getUserIDFromUsername,
                                         resultHandler
                                     ) {
                                         closeConnection {

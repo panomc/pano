@@ -2,12 +2,8 @@ package com.panomc.platform.route.api.get.panel
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.*
-import com.panomc.platform.util.ConfigManager
-import com.panomc.platform.util.Connection
-import com.panomc.platform.util.DatabaseManager
-import com.panomc.platform.util.NotificationStatus
-import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -23,126 +19,67 @@ class PanelNotificationsAPI : PanelApi() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
-    @Inject
-    lateinit var configManager: ConfigManager
-
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
         databaseManager.createConnection { connection, _ ->
-            if (connection == null)
+            if (connection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-            else
-                getUserIDFromToken(connection, token, handler) { userID ->
-                    getNotificationsCount(connection, userID, handler) { notificationsCount ->
-                        getNotifications(connection, userID, handler) { notifications ->
-                            markNotificationsRead(connection, userID, handler) {
-                                val result = mutableMapOf<String, Any?>(
-                                    "notifications" to notifications,
-                                    "notifications_count" to notificationsCount
-                                )
+                return@createConnection
+            }
 
-                                databaseManager.closeConnection(connection) {
-                                    handler.invoke(Successful(result))
-                                }
+            databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+                token,
+                databaseManager.getSQLConnection(connection)
+            ) { userID, _ ->
+                if (userID == null)
+                    databaseManager.closeConnection(connection) {
+                        handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
+                    }
+                else
+                    databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
+                        userID,
+                        databaseManager.getSQLConnection(connection)
+                    ) { count, _ ->
+                        if (count == null)
+                            databaseManager.closeConnection(connection) {
+                                handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
                             }
-                        }
+                        else
+                            databaseManager.getDatabase().panelNotificationDao.getAllByUserID(
+                                userID,
+                                databaseManager.getSQLConnection(connection)
+                            ) { notifications, _ ->
+                                if (notifications == null)
+                                    databaseManager.closeConnection(connection) {
+                                        handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_110))
+                                    }
+                                else
+                                    databaseManager.getDatabase().panelNotificationDao.markReadAll(
+                                        userID,
+                                        databaseManager.getSQLConnection(connection)
+                                    ) { result, _ ->
+                                        if (result == null)
+                                            databaseManager.closeConnection(connection) {
+                                                handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_111))
+                                            }
+                                        else {
+                                            databaseManager.closeConnection(connection) {
+                                                handler.invoke(
+                                                    Successful(
+                                                        mutableMapOf<String, Any?>(
+                                                            "notifications" to notifications,
+                                                            "notifications_count" to count
+                                                        )
+                                                    )
+                                                )
+                                            }
+                                        }
+                                    }
+                            }
                     }
-                }
+
+            }
         }
-    }
-
-    private fun getUserIDFromToken(
-        connection: Connection,
-        token: String,
-        resultHandler: (result: Result) -> Unit,
-        handler: (userID: Int) -> Unit
-    ) {
-        val query =
-            "SELECT `user_id` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}token where `token` = ?"
-
-        databaseManager.getSQLConnection(connection).queryWithParams(query, JsonArray().add(token)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0))
-            else
-                databaseManager.closeConnection(connection) {
-                    resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
-                }
-        }
-    }
-
-    private fun getNotifications(
-        connection: Connection,
-        userID: Int,
-        resultHandler: (result: Result) -> Unit,
-        handler: (notifications: List<Map<String, Any>>) -> Unit
-    ) {
-        val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
-
-        databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
-                if (queryResult.succeeded()) {
-                    val notifications = mutableListOf<Map<String, Any>>()
-
-                    if (queryResult.result().results.size > 0)
-                        queryResult.result().results.forEach { categoryInDB ->
-                            notifications.add(
-                                mapOf(
-                                    "id" to categoryInDB.getInteger(0),
-                                    "type_ID" to categoryInDB.getString(2),
-                                    "date" to categoryInDB.getString(3).toLong(),
-                                    "status" to categoryInDB.getString(4),
-                                    "isPersonal" to (categoryInDB.getInteger(1) == userID)
-                                )
-                            )
-                        }
-
-                    handler.invoke(notifications)
-                } else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_110))
-                    }
-            }
-    }
-
-    private fun markNotificationsRead(
-        connection: Connection,
-        userID: Int,
-        resultHandler: (result: Result) -> Unit,
-        handler: () -> Unit
-    ) {
-        val query =
-            "UPDATE ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
-
-        databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add(NotificationStatus.READ).add(userID).add(-1)) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke()
-                else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_111))
-                    }
-            }
-    }
-
-    private fun getNotificationsCount(
-        connection: Connection,
-        userID: Int,
-        resultHandler: (result: Result) -> Unit,
-        handler: (count: Int) -> Unit
-    ) {
-        val query =
-            "SELECT count(`id`) FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
-
-        databaseManager.getSQLConnection(connection)
-            .queryWithParams(query, JsonArray().add(userID).add(-1).add(NotificationStatus.NOT_READ)) { queryResult ->
-                if (queryResult.succeeded())
-                    handler.invoke(queryResult.result().results[0].getInteger(0))
-                else
-                    databaseManager.closeConnection(connection) {
-                        resultHandler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
-                    }
-            }
     }
 }

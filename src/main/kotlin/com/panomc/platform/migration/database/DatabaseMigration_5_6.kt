@@ -1,11 +1,11 @@
 package com.panomc.platform.migration.database
 
-import com.panomc.platform.util.DatabaseManager.Companion.DatabaseMigration
+import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_5_6 : DatabaseMigration {
+class DatabaseMigration_5_6 : DatabaseMigration() {
     override val FROM_SCHEME_VERSION = 5
     override val SCHEME_VERSION = 6
     override val SCHEME_VERSION_INFO = "Drop post, post_category, ticket and ticket_category."

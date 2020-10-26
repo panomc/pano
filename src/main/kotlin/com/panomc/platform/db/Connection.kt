@@ -1,4 +1,4 @@
-package com.panomc.platform.util
+package com.panomc.platform.db
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.logging.Logger
@@ -18,7 +18,7 @@ class Connection(private val mSqlConnection: SQLConnection) {
                     if (getConnection.succeeded())
                         Connection(getConnection.result())
                     else {
-                        logger.error("Failed to connect database! Error is: ${getConnection.result()}")
+                        logger.error("Failed to connect database! Please check your configuration! Error is: ${getConnection.result()}")
 
                         null
                     },

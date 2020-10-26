@@ -1,11 +1,11 @@
 package com.panomc.platform.migration.database
 
-import com.panomc.platform.util.DatabaseManager.Companion.DatabaseMigration
+import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_9_10 : DatabaseMigration {
+class DatabaseMigration_9_10 : DatabaseMigration() {
     override val FROM_SCHEME_VERSION = 9
     override val SCHEME_VERSION = 10
     override val SCHEME_VERSION_INFO = "Update post, ticket and few other tables to be better."
