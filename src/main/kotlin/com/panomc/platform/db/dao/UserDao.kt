@@ -69,4 +69,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUserIDFromUsernameOrEmail(
+        usernameOrEmail: String,
+        sqlConnection: SQLConnection,
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
