@@ -20,7 +20,7 @@ class DatabaseMigration_8_9 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.updateWithParams(
                 """
-                   DELETE FROM ${databaseManager.getTablePrefix()}system_property WHERE `option` = ?
+                   DELETE FROM ${getTablePrefix()}system_property WHERE `option` = ?
             """.trimIndent(),
                 JsonArray()
                     .add("platformCode")

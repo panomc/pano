@@ -19,7 +19,7 @@ class DatabaseMigration_4_5 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    ALTER TABLE `${databaseManager.getTablePrefix()}panel_notification` 
+                    ALTER TABLE `${getTablePrefix()}panel_notification` 
                     ADD date MEDIUMTEXT, ADD status varchar(255);
                 """
             ) {

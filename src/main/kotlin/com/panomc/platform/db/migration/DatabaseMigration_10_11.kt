@@ -19,7 +19,7 @@ class DatabaseMigration_10_11 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    ALTER TABLE `${databaseManager.getTablePrefix()}post` 
+                    ALTER TABLE `${getTablePrefix()}post` 
                     ADD `views` MEDIUMTEXT;
                 """
             ) {

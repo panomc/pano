@@ -20,7 +20,7 @@ class DatabaseMigration_1_2 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}system_property` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}system_property` (
               `id` int NOT NULL AUTO_INCREMENT,
               `option` text NOT NULL,
               `value` text NOT NULL,
@@ -31,7 +31,7 @@ class DatabaseMigration_1_2 : DatabaseMigration() {
                 if (it.succeeded())
                     sqlConnection.updateWithParams(
                         """
-                    INSERT INTO ${databaseManager.getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
+                    INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
             """.trimIndent(),
                         JsonArray()
                             .add("show_getting_started")
@@ -40,7 +40,7 @@ class DatabaseMigration_1_2 : DatabaseMigration() {
                         if (it.succeeded())
                             sqlConnection.updateWithParams(
                                 """
-                    INSERT INTO ${databaseManager.getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
+                    INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
             """.trimIndent(),
                                 JsonArray()
                                     .add("show_connect_server_info")

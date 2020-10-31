@@ -23,7 +23,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}post` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}post` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `category_id` varchar(11) NOT NULL,
@@ -45,7 +45,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}post_category` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}post_category` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `description` text NOT NULL,
@@ -58,21 +58,21 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
             if (it.succeeded())
                 sqlConnection.updateWithParams(
                     """
-                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                     JsonArray().add("Genel").add("Genel").add("genel").add("48CFAD")
                 ) {
                     if (it.succeeded())
                         sqlConnection.updateWithParams(
                             """
-                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                             JsonArray().add("Duyuru").add("Duyuru").add("duyuru").add("5D9CEC")
                         ) {
                             if (it.succeeded())
                                 sqlConnection.updateWithParams(
                                     """
-                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                                     JsonArray().add("Haber").add("Haber").add("haber").add("FFCE54")
                                 ) {
@@ -93,7 +93,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}ticket` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}ticket` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `ticket_category_id` varchar(11) NOT NULL,
@@ -112,7 +112,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}ticket_category` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}ticket_category` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `description` text,
@@ -123,7 +123,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
             if (it.succeeded())
                 sqlConnection.queryWithParams(
                     """
-                        INSERT INTO ${databaseManager.getTablePrefix()}ticket_category (title) VALUES (?)
+                        INSERT INTO ${getTablePrefix()}ticket_category (title) VALUES (?)
             """.trimIndent(),
                     JsonArray().add("Genel")
                 ) {

@@ -19,7 +19,7 @@ class DatabaseMigration_11_12 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    ALTER TABLE `${databaseManager.getTablePrefix()}user` 
+                    ALTER TABLE `${getTablePrefix()}user` 
                     ADD `register_date` MEDIUMTEXT;
                 """
             ) {

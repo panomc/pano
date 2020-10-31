@@ -22,7 +22,7 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}post`;
+                    DROP TABLE IF EXISTS `${getTablePrefix()}post`;
                 """
             ) {
                 handler.invoke(it)
@@ -33,7 +33,7 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}post_category`;
+                    DROP TABLE IF EXISTS `${getTablePrefix()}post_category`;
                 """
             ) {
                 handler.invoke(it)
@@ -44,7 +44,7 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}ticket`;
+                    DROP TABLE IF EXISTS `${getTablePrefix()}ticket`;
                 """
             ) {
                 handler.invoke(it)
@@ -55,7 +55,7 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}ticket_category`;
+                    DROP TABLE IF EXISTS `${getTablePrefix()}ticket_category`;
                 """
             ) {
                 handler.invoke(it)

@@ -58,4 +58,6 @@ abstract class DatabaseMigration {
             handler.invoke(asyncResult)
         }
     }
+
+    fun getTablePrefix() = databaseManager.getTablePrefix()
 }

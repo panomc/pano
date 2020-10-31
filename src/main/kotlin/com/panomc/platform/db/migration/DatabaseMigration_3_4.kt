@@ -19,7 +19,7 @@ class DatabaseMigration_3_4 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}panel_notification` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}panel_notification` (
               `id` int NOT NULL AUTO_INCREMENT,
               `user_id` int NOT NULL,
               `type_ID` varchar(255) NOT NULL,

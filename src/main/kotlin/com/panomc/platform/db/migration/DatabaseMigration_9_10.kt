@@ -28,7 +28,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `date` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}post` MODIFY `date` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -39,7 +39,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `move_date` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}post` MODIFY `move_date` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -50,7 +50,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `title` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}post` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -61,7 +61,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `category_id` int(11);
+               ALTER TABLE `${getTablePrefix()}post` MODIFY `category_id` int(11);
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -72,7 +72,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}post_category` MODIFY `title` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}post_category` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -83,7 +83,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` MODIFY `date` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}ticket` MODIFY `date` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -94,7 +94,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` CHANGE `ticket_category_id` `category_id` int(11);
+               ALTER TABLE `${getTablePrefix()}ticket` CHANGE `ticket_category_id` `category_id` int(11);
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -105,7 +105,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` MODIFY `title` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}ticket` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -116,7 +116,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}ticket_category` MODIFY `title` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}ticket_category` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
@@ -127,7 +127,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
         { sqlConnection, handler ->
             sqlConnection.query(
                 """
-               ALTER TABLE `${databaseManager.getTablePrefix()}token` MODIFY `created_time` MEDIUMTEXT;
+               ALTER TABLE `${getTablePrefix()}token` MODIFY `created_time` MEDIUMTEXT;
             """.trimIndent()
             ) {
                 handler.invoke(it)
