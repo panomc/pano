@@ -1,9 +1,9 @@
 package com.panomc.platform.route.api.post.setup.step
 
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.model.Api
 import com.panomc.platform.model.RouteType
-import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext

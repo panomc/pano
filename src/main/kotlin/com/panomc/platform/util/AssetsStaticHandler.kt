@@ -1,6 +1,7 @@
 package com.panomc.platform.util
 
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.config.ConfigManager
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.panomc.platform.util
+package com.panomc.platform.config
 
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions

@@ -1,9 +1,9 @@
 package com.panomc.platform.route.staticFolder.src
 
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.model.Route
 import com.panomc.platform.util.Auth
-import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.core.impl.StringEscapeUtils

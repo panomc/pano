@@ -2,9 +2,9 @@ package com.panomc.platform.route.api.get.panel
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
+import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.*
-import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.PlatformCodeManager
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject

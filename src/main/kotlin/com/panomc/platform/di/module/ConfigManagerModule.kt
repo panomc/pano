@@ -1,6 +1,6 @@
 package com.panomc.platform.di.module
 
-import com.panomc.platform.util.ConfigManager
+import com.panomc.platform.config.ConfigManager
 import dagger.Module
 import dagger.Provides
 import io.vertx.core.Vertx

@@ -1,7 +1,7 @@
 package com.panomc.platform.db
 
+import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.migration.database.*
-import com.panomc.platform.util.ConfigManager
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx

@@ -1,6 +1,7 @@
 package com.panomc.platform.util
 
 import com.beust.klaxon.JsonObject
+import com.panomc.platform.config.ConfigManager
 import java.net.InetAddress
 
 class SetupManager(private val mConfigManager: ConfigManager) {
