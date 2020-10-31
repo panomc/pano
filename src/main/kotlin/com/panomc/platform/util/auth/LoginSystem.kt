@@ -61,12 +61,12 @@ class LoginSystem : Auth() {
             formData.getString("email"),
             DigestUtils.md5Hex(formData.getString("password")),
             getConnection()
-        ) { result, _ ->
+        ) { isLoginCorrect, _ ->
             when {
-                result == null -> closeConnection {
+                isLoginCorrect == null -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_127))
                 }
-                result -> handler.invoke()
+                isLoginCorrect -> handler.invoke()
                 else -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.LOGIN_WRONG_EMAIL_OR_PASSWORD))
                 }
@@ -83,13 +83,13 @@ class LoginSystem : Auth() {
             databaseManager.getDatabase().userDao.getUserIDFromUsername(
                 username,
                 getConnection()
-            ) { result, _ ->
-                if (result == null)
+            ) { userID, _ ->
+                if (userID == null)
                     closeConnection {
                         resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_4))
                     }
                 else
-                    handler.invoke(result)
+                    handler.invoke(userID)
             }
         }
     }
@@ -99,13 +99,13 @@ class LoginSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: (secretKey: String) -> Unit
     ) {
-        databaseManager.getDatabase().userDao.getSecretKeyByID(userID, getConnection()) { result, _ ->
-            if (result == null)
+        databaseManager.getDatabase().userDao.getSecretKeyByID(userID, getConnection()) { secretKey, _ ->
+            if (secretKey == null)
                 closeConnection {
                     resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_6))
                 }
             else
-                handler.invoke(result)
+                handler.invoke(secretKey)
         }
     }
 

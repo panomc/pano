@@ -33,12 +33,12 @@ class EditPostPageInitAPI : PanelApi() {
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
                 databaseManager.getSQLConnection(connection)
-            ) { result, _ ->
+            ) { exists, _ ->
                 when {
-                    result == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(connection) {
                         handler.invoke(Error(ErrorCode.EDIT_POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_100))
                     }
-                    result -> databaseManager.getDatabase().postDao.getByID(
+                    exists -> databaseManager.getDatabase().postDao.getByID(
                         id,
                         databaseManager.getSQLConnection(connection)
                     ) { post, _ ->

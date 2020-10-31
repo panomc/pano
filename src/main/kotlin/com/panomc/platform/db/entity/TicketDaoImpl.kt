@@ -32,7 +32,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         }
     }
 
-    override fun count(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
@@ -45,7 +45,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
 
     override fun countOfOpenTickets(
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` WHERE status = ?"
 

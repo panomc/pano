@@ -83,7 +83,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
     override fun isPropertyExists(
         systemProperty: SystemProperty,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT COUNT(`value`) FROM `${databaseManager.getTablePrefix() + tableName}` where `option` = ?"
 
@@ -98,7 +98,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
     override fun isUserInstalledSystemByUserID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isUserInstalledSystem: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(`value`) FROM `${databaseManager.getTablePrefix() + tableName}` where `option` = ? and `value` = ?"

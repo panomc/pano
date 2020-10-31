@@ -34,7 +34,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
     override fun isExistsByID(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
@@ -63,7 +63,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         }
     }
 
-    override fun getCount(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun getCount(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
 
@@ -194,7 +194,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
     override fun isExistsByURL(
         url: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `url` = ?"
@@ -211,7 +211,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         url: String,
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `url` = ? and id != ?"

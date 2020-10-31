@@ -11,7 +11,7 @@ interface PostCategoryDao : Dao<PostCategory> {
     fun isExistsByID(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun deleteByID(
@@ -20,7 +20,7 @@ interface PostCategoryDao : Dao<PostCategory> {
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun getCount(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun getCount(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getCategories(
         sqlConnection: SQLConnection,
@@ -36,14 +36,14 @@ interface PostCategoryDao : Dao<PostCategory> {
     fun isExistsByURL(
         url: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isExistsByURLNotByID(
         url: String,
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun add(

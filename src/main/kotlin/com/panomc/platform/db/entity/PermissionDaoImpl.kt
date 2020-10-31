@@ -34,7 +34,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     override fun isTherePermission(
         permission: Permission,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         sqlConnection.queryWithParams(
             """
@@ -70,7 +70,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     override fun getPermissionID(
         permission: Permission,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id FROM `${databaseManager.getTablePrefix() + tableName}` where name = ?"
@@ -86,7 +86,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     override fun getPermissionByID(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Permission?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permission: Permission?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `name` FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
@@ -103,10 +103,10 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         sqlConnection: SQLConnection,
         handler: (asyncResult: AsyncResult<*>) -> Unit
     ) {
-        isTherePermission(Permission(-1, "admin"), sqlConnection) { result, asyncResult ->
+        isTherePermission(Permission(-1, "admin"), sqlConnection) { isTherePermission, asyncResult ->
             when {
-                result == null -> handler.invoke(asyncResult)
-                result -> handler.invoke(asyncResult)
+                isTherePermission == null -> handler.invoke(asyncResult)
+                isTherePermission -> handler.invoke(asyncResult)
                 else -> add(Permission(-1, "admin"), sqlConnection) { _, asyncResultAdd ->
                     handler.invoke(asyncResultAdd)
                 }

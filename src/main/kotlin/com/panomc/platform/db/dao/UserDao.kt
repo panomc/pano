@@ -15,35 +15,35 @@ interface UserDao : Dao<User> {
     fun isEmailExists(
         email: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isEmailExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getUserIDFromUsername(
         username: String,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getPermissionIDFromUserID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getSecretKeyByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isLoginCorrect(
         email: String,
         password: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun count(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getUsernameFromUserID(
         userID: Int,
@@ -54,13 +54,13 @@ interface UserDao : Dao<User> {
     fun getByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: User?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun countByPageType(
         pageType: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getAllByPageAndPageType(
@@ -69,5 +69,4 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
-
 }

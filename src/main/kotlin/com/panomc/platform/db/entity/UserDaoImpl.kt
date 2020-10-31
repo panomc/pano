@@ -75,7 +75,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun isEmailExists(
         email: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isEmailExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(email) FROM `${databaseManager.getTablePrefix() + tableName}` where email = ?"
@@ -91,7 +91,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun getUserIDFromUsername(
         username: String,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id FROM `${databaseManager.getTablePrefix() + tableName}` where username = ?"
@@ -107,7 +107,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun getPermissionIDFromUserID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT permission_id FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
@@ -123,7 +123,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun getSecretKeyByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: String?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT secret_key FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
@@ -140,7 +140,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         email: String,
         password: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(email) FROM `${databaseManager.getTablePrefix() + tableName}` where email = ? and password = ?"
@@ -153,7 +153,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         }
     }
 
-    override fun count(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
@@ -183,7 +183,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun getByID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: User?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `username`, `email`, `password`, `registered_ip`, `permission_id` FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
@@ -212,7 +212,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun countByPageType(
         pageType: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ?" else ""}"

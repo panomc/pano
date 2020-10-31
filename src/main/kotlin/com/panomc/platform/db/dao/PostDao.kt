@@ -17,7 +17,7 @@ interface PostDao : Dao<Post> {
     fun isExistsByID(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getByID(
@@ -58,18 +58,18 @@ interface PostDao : Dao<Post> {
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun count(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun countByCategory(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun countByPageType(
         pageType: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun delete(id: Int, sqlConnection: SQLConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)

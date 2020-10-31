@@ -11,7 +11,7 @@ interface PermissionDao : Dao<Permission> {
     fun isTherePermission(
         permission: Permission,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun add(
@@ -23,12 +23,12 @@ interface PermissionDao : Dao<Permission> {
     fun getPermissionID(
         permission: Permission,
         sqlConnection: SQLConnection,
-        handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getPermissionByID(
         id: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Permission?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permission: Permission?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

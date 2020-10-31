@@ -23,13 +23,13 @@ interface SystemPropertyDao : Dao<SystemProperty> {
     fun isPropertyExists(
         systemProperty: SystemProperty,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isUserInstalledSystemByUserID(
         userID: Int,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isUserInstalledSystem: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getValue(

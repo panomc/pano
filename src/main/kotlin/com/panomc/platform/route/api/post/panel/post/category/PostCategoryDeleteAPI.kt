@@ -33,12 +33,12 @@ class PostCategoryDeleteAPI : PanelApi() {
             databaseManager.getDatabase().postCategoryDao.isExistsByID(
                 id,
                 databaseManager.getSQLConnection(connection)
-            ) { result, _ ->
+            ) { exists, _ ->
                 when {
-                    result == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(connection) {
                         handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_98))
                     }
-                    result -> databaseManager.getDatabase().postDao.removePostCategoriesByCategoryID(
+                    exists -> databaseManager.getDatabase().postDao.removePostCategoriesByCategoryID(
                         id,
                         databaseManager.getSQLConnection(connection)
                     ) { removeResult, _ ->

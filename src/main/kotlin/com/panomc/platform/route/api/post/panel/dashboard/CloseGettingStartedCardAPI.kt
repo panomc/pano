@@ -41,8 +41,8 @@ class CloseGettingStartedCardAPI : PanelApi() {
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
                         userID,
                         databaseManager.getSQLConnection(connection)
-                    ) { result, _ ->
-                        if (result == null)
+                    ) { isUserInstalledSystem, _ ->
+                        if (isUserInstalledSystem == null)
                             databaseManager.closeConnection(connection) {
                                 handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_24))
                             }

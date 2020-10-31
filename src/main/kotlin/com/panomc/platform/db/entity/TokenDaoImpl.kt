@@ -70,7 +70,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
     override fun isTokenExists(
         token: String,
         sqlConnection: SQLConnection,
-        handler: (result: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isTokenExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"

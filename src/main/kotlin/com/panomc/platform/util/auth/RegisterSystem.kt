@@ -64,12 +64,12 @@ class RegisterSystem : Auth() {
         databaseManager.getDatabase().userDao.isEmailExists(
             formData.getString("email"),
             getConnection()
-        ) { result, _ ->
+        ) { isEmailExists, _ ->
             when {
-                result == null -> closeConnection {
+                isEmailExists == null -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_1))
                 }
-                result -> closeConnection {
+                isEmailExists -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_NOT_AVAILABLE))
                 }
                 else -> handler.invoke()
@@ -84,13 +84,13 @@ class RegisterSystem : Auth() {
         databaseManager.getDatabase().permissionDao.getPermissionID(
             Permission(-1, "admin"),
             getConnection()
-        ) { result, _ ->
-            if (result == null)
+        ) { permissionID, _ ->
+            if (permissionID == null)
                 closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_3))
                 }
             else
-                handler.invoke(result)
+                handler.invoke(permissionID)
         }
     }
 
@@ -136,13 +136,13 @@ class RegisterSystem : Auth() {
         databaseManager.getDatabase().userDao.getUserIDFromUsername(
             formData.getString("username"),
             getConnection()
-        ) { result, _ ->
-            if (result == null)
+        ) { userID, _ ->
+            if (userID == null)
                 closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_12))
                 }
             else
-                handler.invoke(result)
+                handler.invoke(userID)
         }
     }
 
@@ -153,12 +153,12 @@ class RegisterSystem : Auth() {
     ) {
         val property = SystemProperty(-1, "who_installed_user_id", userID.toString())
 
-        databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, getConnection()) { result, _ ->
+        databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, getConnection()) { exists, _ ->
             when {
-                result == null -> closeConnection {
+                exists == null -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_13))
                 }
-                result -> databaseManager.getDatabase().systemPropertyDao.update(
+                exists -> databaseManager.getDatabase().systemPropertyDao.update(
                     property,
                     getConnection()
                 ) { resultOfUpdate, _ ->

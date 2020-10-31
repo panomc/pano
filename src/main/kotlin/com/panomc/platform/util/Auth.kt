@@ -59,12 +59,12 @@ open class Auth {
                 if (it is Error)
                     handler.invoke(false)
             }) {
-                databaseManager.getDatabase().tokenDao.isTokenExists(token, getConnection()) { result, _ ->
+                databaseManager.getDatabase().tokenDao.isTokenExists(token, getConnection()) { isTokenExists, _ ->
                     when {
-                        result == null -> closeConnection {
+                        isTokenExists == null -> closeConnection {
                             handler.invoke(false)
                         }
-                        result -> handler.invoke(true)
+                        isTokenExists -> handler.invoke(true)
                         else -> closeConnection {
                             handler.invoke(false)
                         }

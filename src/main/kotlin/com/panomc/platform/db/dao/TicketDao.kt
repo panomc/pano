@@ -9,9 +9,9 @@ import io.vertx.ext.sql.SQLConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface TicketDao : Dao<Ticket> {
-    fun count(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
-    fun countOfOpenTickets(sqlConnection: SQLConnection, handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun countOfOpenTickets(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getLast5Tickets(
         sqlConnection: SQLConnection,
