@@ -63,10 +63,6 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                 )
             )
         }
-
-        abstract class ConfigMigration(configManager: ConfigManager) {
-            abstract fun migrate()
-        }
     }
 
     init {
@@ -106,8 +102,19 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     }
 
     private fun migrate() {
-        mMigrations.forEach {
-            it.migrate()
+        if (getConfigVersion() != CONFIG_VERSION) {
+            val listOfMigratableMigrations = mMigrations
+                .filter { configMigration -> configMigration.isMigratable(getConfigVersion()) }
+
+            listOfMigratableMigrations
+                .forEach {
+                    getConfig()["config-version"] = it.VERSION
+
+                    it.migrate(this)
+                }
+
+            if (listOfMigratableMigrations.isNotEmpty())
+                saveConfig()
         }
     }
 
