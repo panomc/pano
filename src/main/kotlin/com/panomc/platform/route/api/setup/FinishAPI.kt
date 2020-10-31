@@ -1,17 +1,12 @@
 package com.panomc.platform.route.api.setup
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.db.DatabaseManager
-import com.panomc.platform.model.Api
-import com.panomc.platform.model.Error
-import com.panomc.platform.model.RouteType
-import com.panomc.platform.model.Successful
+import com.panomc.platform.model.*
 import com.panomc.platform.util.SetupManager
 import com.panomc.platform.util.auth.LoginSystem
 import com.panomc.platform.util.auth.RegisterSystem
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import java.net.ConnectException
 import javax.inject.Inject
@@ -31,88 +26,43 @@ class FinishAPI : Api() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (setupManager.isSetupDone()) {
             context.reroute("/")
 
-            return@Handler
+            return
         }
-
-        val response = context.response()
 
         if (setupManager.getStep() == 3) {
             val data = context.bodyAsJson
             val remoteIP = context.request().remoteAddress().host()
 
-            response
-                .putHeader("content-type", "application/json; charset=utf-8")
-
             databaseManager.initDatabase {
                 if (it.failed() && it.cause() is ConnectException)
-                    response.end(
-                        JsonObject(
-                            mapOf(
-                                "result" to "error",
-                                "error" to ErrorCode.FINISH_API_CANT_CONNECT_DATABASE_PLEASE_CHECK_YOUR_INFO
-                            )
-                        ).toJsonString()
-                    )
+                    handler.invoke(Error(ErrorCode.FINISH_API_CANT_CONNECT_DATABASE_PLEASE_CHECK_YOUR_INFO))
                 else if (it.failed())
-                    response.end(
-                        JsonObject(
-                            mapOf(
-                                "result" to "error",
-                                "error" to ErrorCode.FINISH_API_SOMETHING_WENT_WRONG_IN_DATABASE
-                            )
-                        ).toJsonString()
-                    )
+                    handler.invoke(Error(ErrorCode.FINISH_API_SOMETHING_WENT_WRONG_IN_DATABASE))
                 else {
                     val registerSystem = RegisterSystem()
 
-                    registerSystem.register(data, remoteIP, true) {
-                        if (it is Successful) {
+                    registerSystem.register(data, remoteIP, true) { registerResult ->
+                        if (registerResult is Successful) {
                             val loginSystem = LoginSystem()
 
-                            loginSystem.login(data, remoteIP) {
-                                if (it is Successful)
-                                    loginSystem.createSession(data.getString("username"), context) {
-                                        if (it is Successful) {
-                                            setupManager.finishSetup()
-
-                                            response.end(JsonObject(mapOf("result" to "ok")).toJsonString())
-                                        } else if (it is Error)
-                                            response.end(
-                                                JsonObject(
-                                                    mapOf(
-                                                        "result" to "error",
-                                                        "error" to it.errorCode
-                                                    )
-                                                ).toJsonString()
-                                            )
+                            loginSystem.login(data, remoteIP) { loginResult ->
+                                if (loginResult is Successful)
+                                    loginSystem.createSession(data.getString("username"), context) { result ->
+                                        handler.invoke(result)
                                     }
-                                else if (it is Error)
-                                    response.end(
-                                        JsonObject(
-                                            mapOf(
-                                                "result" to "error",
-                                                "error" to it.errorCode
-                                            )
-                                        ).toJsonString()
-                                    )
+                                else if (loginResult is Error)
+                                    handler.invoke(loginResult)
                             }
-                        } else if (it is Error)
-                            response.end(
-                                JsonObject(
-                                    mapOf(
-                                        "result" to "error",
-                                        "error" to it.errorCode
-                                    )
-                                ).toJsonString()
-                            )
+                        } else if (registerResult is Error)
+                            handler.invoke(registerResult)
                     }
                 }
             }
         } else
-            response.end(setupManager.getCurrentStepData().toJsonString())
+            handler.invoke(Successful(setupManager.getCurrentStepData()))
     }
 }

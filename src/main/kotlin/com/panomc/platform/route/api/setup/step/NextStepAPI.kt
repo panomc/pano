@@ -3,9 +3,10 @@ package com.panomc.platform.route.api.setup.step
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.model.Api
+import com.panomc.platform.model.Result
 import com.panomc.platform.model.RouteType
+import com.panomc.platform.model.Successful
 import com.panomc.platform.util.SetupManager
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -24,18 +25,14 @@ class NextStepAPI : Api() {
     @Inject
     lateinit var configManager: ConfigManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (setupManager.isSetupDone()) {
             context.reroute("/")
 
-            return@Handler
+            return
         }
 
-        val response = context.response()
         val data = context.bodyAsJson
-
-        response
-            .putHeader("content-type", "application/json; charset=utf-8")
 
         val clientStep = data.getInteger("step")
 
@@ -80,6 +77,6 @@ class NextStepAPI : Api() {
                 setupManager.nextStep()
         }
 
-        response.end(setupManager.getCurrentStepData().toJsonString())
+        handler.invoke(Successful(setupManager.getCurrentStepData()))
     }
 }

@@ -23,8 +23,6 @@ abstract class LoggedInApi : Api() {
             return@Handler
         }
 
-        val response = context.response()
-
         val auth = Auth()
 
         auth.isLoggedIn(context) { isLoggedIn ->
@@ -34,14 +32,7 @@ abstract class LoggedInApi : Api() {
                 return@isLoggedIn
             }
 
-            response
-                .putHeader("content-type", "application/json; charset=utf-8")
-
-            getHandler(context) { result ->
-                getResultHandler(result, context)
-            }
+            getHandler(context)
         }
     }
-
-    abstract fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit)
 }

@@ -1,12 +1,9 @@
 package com.panomc.platform.route.api.setup
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.model.Api
-import com.panomc.platform.model.RouteType
+import com.panomc.platform.model.*
 import com.panomc.platform.util.SetupManager
-import io.vertx.core.Handler
 import io.vertx.ext.asyncsql.MySQLClient
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.jsonObjectOf
@@ -24,18 +21,14 @@ class DBConnectionTestAPI : Api() {
     @Inject
     lateinit var setupManager: SetupManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (setupManager.isSetupDone()) {
             context.reroute("/")
 
-            return@Handler
+            return
         }
 
-        val response = context.response()
         val data = context.bodyAsJson
-
-        response
-            .putHeader("content-type", "application/json; charset=utf-8")
 
         var port = 3306
         var host = data.getString("host")
@@ -62,25 +55,12 @@ class DBConnectionTestAPI : Api() {
             if (connection.succeeded())
                 connection.result().close {
                     mySQLClient.close {
-                        response.end(
-                            JsonObject(
-                                mapOf(
-                                    "result" to "ok"
-                                )
-                            ).toJsonString()
-                        )
+                        handler.invoke(Successful())
                     }
                 }
             else
                 mySQLClient.close {
-                    response.end(
-                        JsonObject(
-                            mapOf(
-                                "result" to "error",
-                                "error" to ErrorCode.INVALID_DATA
-                            )
-                        ).toJsonString()
-                    )
+                    handler.invoke(Error(ErrorCode.INVALID_DATA))
                 }
         }
     }

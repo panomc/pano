@@ -1,6 +1,5 @@
 package com.panomc.platform.route.api.server
 
-import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.db.DatabaseManager
@@ -8,7 +7,6 @@ import com.panomc.platform.db.model.Server
 import com.panomc.platform.model.*
 import com.panomc.platform.util.PlatformCodeManager
 import com.panomc.platform.util.SetupManager
-import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -30,40 +28,15 @@ class ConnectNewAPI : Api() {
     @Inject
     lateinit var platformCodeManager: PlatformCodeManager
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
+    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (!setupManager.isSetupDone()) {
             context.reroute("/")
 
-            return@Handler
+            return
         }
 
-        val response = context.response()
-
-        response
-            .putHeader("content-type", "application/json; charset=utf-8")
-
         connectNew(context) { result ->
-            if (result is Successful) {
-                val responseMap = mutableMapOf<String, Any?>(
-                    "result" to "ok"
-                )
-
-                responseMap.putAll(result.map)
-
-                response.end(
-                    JsonObject(
-                        responseMap
-                    ).toJsonString()
-                )
-            } else if (result is Error)
-                response.end(
-                    JsonObject(
-                        mapOf(
-                            "result" to "error",
-                            "error" to result.errorCode
-                        )
-                    ).toJsonString()
-                )
+            handler.invoke(result)
         }
     }
 
