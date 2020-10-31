@@ -6,6 +6,7 @@ import com.panomc.platform.db.DatabaseMigration
 import com.panomc.platform.di.module.*
 import com.panomc.platform.model.LoggedInApi
 import com.panomc.platform.model.PanelApi
+import com.panomc.platform.model.SetupApi
 import com.panomc.platform.route.api.TestSendNotificationAPI
 import com.panomc.platform.route.api.auth.LogoutAPI
 import com.panomc.platform.route.api.panel.*
@@ -26,9 +27,7 @@ import com.panomc.platform.route.api.panel.ticket.category.TicketCategoryDeleteA
 import com.panomc.platform.route.api.panel.ticket.category.TicketCategoryUpdateAPI
 import com.panomc.platform.route.api.server.ConnectNewAPI
 import com.panomc.platform.route.api.setup.CheckAPI
-import com.panomc.platform.route.api.setup.DBConnectionTestAPI
 import com.panomc.platform.route.api.setup.FinishAPI
-import com.panomc.platform.route.api.setup.step.BackStepAPI
 import com.panomc.platform.route.api.setup.step.NextStepAPI
 import com.panomc.platform.route.staticFolder.src.SrcFolderRoute
 import com.panomc.platform.route.template.IndexTemplate
@@ -63,11 +62,7 @@ interface ApplicationComponent {
 
     fun inject(checkAPI: CheckAPI)
 
-    fun inject(backStepAPI: BackStepAPI)
-
     fun inject(nextStepAPI: NextStepAPI)
-
-    fun inject(dbConnectionTestAPI: DBConnectionTestAPI)
 
     fun inject(finishAPI: FinishAPI)
 
@@ -142,4 +137,6 @@ interface ApplicationComponent {
     fun inject(daoImpl: DaoImpl)
 
     fun inject(databaseMigration: DatabaseMigration)
+
+    fun inject(setupApi: SetupApi)
 }

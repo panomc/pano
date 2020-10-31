@@ -2,15 +2,14 @@ package com.panomc.platform.route.api.setup.step
 
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
-import com.panomc.platform.model.Api
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.RouteType
+import com.panomc.platform.model.SetupApi
 import com.panomc.platform.model.Successful
-import com.panomc.platform.util.SetupManager
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
-class NextStepAPI : Api() {
+class NextStepAPI : SetupApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/setup/step/nextStep")
@@ -20,18 +19,9 @@ class NextStepAPI : Api() {
     }
 
     @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
     lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        if (setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return
-        }
-
         val data = context.bodyAsJson
 
         val clientStep = data.getInteger("step")

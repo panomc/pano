@@ -1,33 +1,17 @@
 package com.panomc.platform.route.api.setup
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.SetupManager
 import io.vertx.ext.asyncsql.MySQLClient
 import io.vertx.ext.web.RoutingContext
 import io.vertx.kotlin.core.json.jsonObjectOf
-import javax.inject.Inject
 
-class DBConnectionTestAPI : Api() {
+class DBConnectionTestAPI : SetupApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/setup/dbConnectionTest")
 
-    init {
-        getComponent().inject(this)
-    }
-
-    @Inject
-    lateinit var setupManager: SetupManager
-
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        if (setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return
-        }
-
         val data = context.bodyAsJson
 
         var port = 3306

@@ -4,14 +4,13 @@ import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.*
-import com.panomc.platform.util.SetupManager
 import com.panomc.platform.util.auth.LoginSystem
 import com.panomc.platform.util.auth.RegisterSystem
 import io.vertx.ext.web.RoutingContext
 import java.net.ConnectException
 import javax.inject.Inject
 
-class FinishAPI : Api() {
+class FinishAPI : SetupApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/setup/finish")
@@ -21,18 +20,9 @@ class FinishAPI : Api() {
     }
 
     @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        if (setupManager.isSetupDone()) {
-            context.reroute("/")
-
-            return
-        }
-
         if (setupManager.getStep() == 3) {
             val data = context.bodyAsJson
             val remoteIP = context.request().remoteAddress().host()
