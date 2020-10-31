@@ -8,7 +8,6 @@ import io.vertx.ext.sql.SQLConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface UserDao : Dao<User> {
-    fun add(user: User, handler: (result: Result?) -> Unit)
 
     fun add(sqlConnection: SQLConnection, user: User, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
 
