@@ -40,8 +40,8 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     }
 
     override fun add(
-        sqlConnection: SQLConnection,
         user: User,
+        sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =

@@ -114,7 +114,6 @@ class RegisterSystem : Auth() {
         handler: () -> Unit
     ) {
         databaseManager.getDatabase().userDao.add(
-            sqlConnection,
             User(
                 -1,
                 formData.getString("username"),
@@ -122,7 +121,8 @@ class RegisterSystem : Auth() {
                 DigestUtils.md5Hex(formData.getString("password")),
                 ipAddress!!,
                 permissionID
-            )
+            ),
+            sqlConnection
         ) { result, _ ->
             if (result == null || result !is Successful)
                 closeConnection {
