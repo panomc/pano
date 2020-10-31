@@ -10,7 +10,7 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
     override val SCHEME_VERSION = 10
     override val SCHEME_VERSION_INFO = "Update post, ticket and few other tables to be better."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             updatePostTableDateColumn(),
             updateTicketTableDateColumn(),
@@ -24,143 +24,113 @@ class DatabaseMigration_9_10 : DatabaseMigration() {
             updateTokenTableCreatedTimeColumn()
         )
 
-    private fun updatePostTableDateColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}post` MODIFY `date` MEDIUMTEXT;
+    private fun updatePostTableDateColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `date` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updatePostTableMoveDateColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}post` MODIFY `move_date` MEDIUMTEXT;
+    private fun updatePostTableMoveDateColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `move_date` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updatePostTableTitleColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}post` MODIFY `title` MEDIUMTEXT;
+    private fun updatePostTableTitleColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updatePostTableCategoryIDColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}post` MODIFY `category_id` int(11);
+    private fun updatePostTableCategoryIDColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}post` MODIFY `category_id` int(11);
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updatePostCategoryTableTitleColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}post_category` MODIFY `title` MEDIUMTEXT;
+    private fun updatePostCategoryTableTitleColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}post_category` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updateTicketTableDateColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}ticket` MODIFY `date` MEDIUMTEXT;
+    private fun updateTicketTableDateColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` MODIFY `date` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updateTicketTableTicketCategoryIDColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}ticket` CHANGE `ticket_category_id` `category_id` int(11);
+    private fun updateTicketTableTicketCategoryIDColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` CHANGE `ticket_category_id` `category_id` int(11);
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updateTicketTableTitleColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}ticket` MODIFY `title` MEDIUMTEXT;
+    private fun updateTicketTableTitleColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}ticket` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updateTicketCategoryTableTitleColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}ticket_category` MODIFY `title` MEDIUMTEXT;
+    private fun updateTicketCategoryTableTitleColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}ticket_category` MODIFY `title` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun updateTokenTableCreatedTimeColumn(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-               ALTER TABLE `${tablePrefix}token` MODIFY `created_time` MEDIUMTEXT;
+    private fun updateTokenTableCreatedTimeColumn(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+               ALTER TABLE `${databaseManager.getTablePrefix()}token` MODIFY `created_time` MEDIUMTEXT;
             """.trimIndent()
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 }

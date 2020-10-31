@@ -23,8 +23,8 @@ class PostCategoryDeleteAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -32,32 +32,32 @@ class PostCategoryDeleteAPI : PanelApi() {
 
             databaseManager.getDatabase().postCategoryDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 when {
-                    exists == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_98))
                     }
                     exists -> databaseManager.getDatabase().postDao.removePostCategoriesByCategoryID(
                         id,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { removeResult, _ ->
-                        if (removeResult == null) databaseManager.closeConnection(connection) {
+                        if (removeResult == null) databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_121))
                         }
                         else databaseManager.getDatabase().postCategoryDao.deleteByID(
                             id,
-                            databaseManager.getSQLConnection(connection)
+                            sqlConnection
                         ) { deleteResult, _ ->
                             if (deleteResult == null)
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_97))
                                 }
                             else
                                 handler.invoke(Successful())
                         }
                     }
-                    else -> databaseManager.closeConnection(connection) {
+                    else -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.NOT_EXISTS))
                     }
                 }

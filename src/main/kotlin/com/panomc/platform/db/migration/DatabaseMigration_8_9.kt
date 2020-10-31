@@ -11,24 +11,21 @@ class DatabaseMigration_8_9 : DatabaseMigration() {
     override val SCHEME_VERSION = 9
     override val SCHEME_VERSION_INFO = "Delete platformCode system property."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             deletePlatformCode()
         )
 
-    private fun deletePlatformCode(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.updateWithParams(
-            """
-                   DELETE FROM ${tablePrefix}system_property WHERE `option` = ?
+    private fun deletePlatformCode(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.updateWithParams(
+                """
+                   DELETE FROM ${databaseManager.getTablePrefix()}system_property WHERE `option` = ?
             """.trimIndent(),
-            JsonArray()
-                .add("platformCode")
-        ) {
-            handler.invoke(it)
+                JsonArray()
+                    .add("platformCode")
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 }

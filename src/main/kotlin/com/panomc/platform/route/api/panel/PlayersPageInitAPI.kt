@@ -25,8 +25,8 @@ class PlayersPageInitAPI : PanelApi() {
         val pageType = data.getInteger("page_type")
         val page = data.getInteger("page")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -34,16 +34,15 @@ class PlayersPageInitAPI : PanelApi() {
 
             databaseManager.getDatabase().userDao.countByPageType(
                 pageType,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { count, _ ->
                 if (count == null) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PLAYERS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_124))
                     }
 
                     return@countByPageType
                 }
-
 
                 var totalPage = ceil(count.toDouble() / 10).toInt()
 
@@ -51,7 +50,7 @@ class PlayersPageInitAPI : PanelApi() {
                     totalPage = 1
 
                 if (page > totalPage || page < 1) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
                     }
 
@@ -61,10 +60,10 @@ class PlayersPageInitAPI : PanelApi() {
                 databaseManager.getDatabase().userDao.getAllByPageAndPageType(
                     page,
                     pageType,
-                    databaseManager.getSQLConnection(connection)
+                    sqlConnection
                 ) { userList, _ ->
                     if (userList == null) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.PLAYERS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_125))
                         }
 
@@ -78,7 +77,7 @@ class PlayersPageInitAPI : PanelApi() {
                         "total_page" to totalPage
                     )
 
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Successful(result))
                     }
                 }

@@ -25,8 +25,8 @@ class PostOnlyPublishAPI : PanelApi() {
 
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -34,10 +34,10 @@ class PostOnlyPublishAPI : PanelApi() {
 
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 if (exists == null) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_104))
                     }
 
@@ -45,7 +45,7 @@ class PostOnlyPublishAPI : PanelApi() {
                 }
 
                 if (!exists) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.NOT_EXISTS))
                     }
 
@@ -54,10 +54,10 @@ class PostOnlyPublishAPI : PanelApi() {
 
                 databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                     token,
-                    databaseManager.getSQLConnection(connection)
+                    sqlConnection
                 ) { userID, _ ->
                     if (userID == null) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_105))
                         }
 
@@ -67,17 +67,17 @@ class PostOnlyPublishAPI : PanelApi() {
                     databaseManager.getDatabase().postDao.publishByID(
                         id,
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { result, _ ->
                         if (result == null) {
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_103))
                             }
 
                             return@publishByID
                         }
 
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Successful())
                         }
                     }

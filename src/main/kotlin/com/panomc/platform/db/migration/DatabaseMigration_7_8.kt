@@ -11,7 +11,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
     override val SCHEME_VERSION = 8
     override val SCHEME_VERSION_INFO = "Restore post, postCategory, ticket and ticketCategory tables."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             createPostTable(),
             createPostCategoryTable(),
@@ -19,14 +19,11 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
             createTicketCategoryTable()
         )
 
-    private fun createPostTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-            CREATE TABLE IF NOT EXISTS `${tablePrefix}post` (
+    private fun createPostTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}post` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `category_id` varchar(11) NOT NULL,
@@ -39,19 +36,16 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Posts table.';
         """
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun createPostCategoryTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-            CREATE TABLE IF NOT EXISTS `${tablePrefix}post_category` (
+    private fun createPostCategoryTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}post_category` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `description` text NOT NULL,
@@ -60,25 +54,25 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Post category table.';
         """
-        ) {
+            ) {
             if (it.succeeded())
                 sqlConnection.updateWithParams(
                     """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                     JsonArray().add("Genel").add("Genel").add("genel").add("48CFAD")
                 ) {
                     if (it.succeeded())
                         sqlConnection.updateWithParams(
                             """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                             JsonArray().add("Duyuru").add("Duyuru").add("duyuru").add("5D9CEC")
                         ) {
                             if (it.succeeded())
                                 sqlConnection.updateWithParams(
                                     """
-                        INSERT INTO ${tablePrefix}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
+                        INSERT INTO ${databaseManager.getTablePrefix()}post_category (title, description, url, color) VALUES (?, ?, ?, ?)
             """.trimIndent(),
                                     JsonArray().add("Haber").add("Haber").add("haber").add("FFCE54")
                                 ) {
@@ -92,17 +86,14 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
                 }
             else
                 handler.invoke(it)
+            }
         }
-    }
 
-    private fun createTicketTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-            CREATE TABLE IF NOT EXISTS `${tablePrefix}ticket` (
+    private fun createTicketTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}ticket` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `ticket_category_id` varchar(11) NOT NULL,
@@ -112,30 +103,27 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Tickets table.';
         """
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun createTicketCategoryTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-            CREATE TABLE IF NOT EXISTS `${tablePrefix}ticket_category` (
+    private fun createTicketCategoryTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix()}ticket_category` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` varchar(255) NOT NULL,
               `description` text,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Ticket category table.';
         """
-        ) {
+            ) {
             if (it.succeeded())
                 sqlConnection.queryWithParams(
                     """
-                        INSERT INTO ${tablePrefix}ticket_category (title) VALUES (?)
+                        INSERT INTO ${databaseManager.getTablePrefix()}ticket_category (title) VALUES (?)
             """.trimIndent(),
                     JsonArray().add("Genel")
                 ) {

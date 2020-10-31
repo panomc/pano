@@ -23,8 +23,8 @@ class TicketCategoryDeleteAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -32,29 +32,29 @@ class TicketCategoryDeleteAPI : PanelApi() {
 
             databaseManager.getDatabase().ticketCategoryDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 if (exists == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_90))
                     }
                 else
                     if (!exists)
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.NOT_EXISTS))
                         }
                     else
 
                         databaseManager.getDatabase().ticketCategoryDao.deleteByID(
                             id,
-                            databaseManager.getSQLConnection(connection)
+                            sqlConnection
                         ) { result, _ ->
                             if (result == null)
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_89))
                                 }
                             else
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Successful())
                                 }
                         }

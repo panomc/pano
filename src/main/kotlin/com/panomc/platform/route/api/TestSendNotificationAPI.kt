@@ -24,8 +24,8 @@ class TestSendNotificationAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -33,10 +33,10 @@ class TestSendNotificationAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.UNKNOWN))
                     }
                 else
@@ -48,10 +48,10 @@ class TestSendNotificationAPI : PanelApi() {
                             System.currentTimeMillis(),
                             NotificationStatus.NOT_READ
                         ),
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { result, _ ->
                         if (result == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.UNKNOWN))
                             }
                         else

@@ -60,7 +60,7 @@ class LoginSystem : Auth() {
         databaseManager.getDatabase().userDao.isLoginCorrect(
             formData.getString("email"),
             DigestUtils.md5Hex(formData.getString("password")),
-            getConnection()
+            sqlConnection
         ) { isLoginCorrect, _ ->
             when {
                 isLoginCorrect == null -> closeConnection {
@@ -82,7 +82,7 @@ class LoginSystem : Auth() {
         createConnection(resultHandler) {
             databaseManager.getDatabase().userDao.getUserIDFromUsername(
                 username,
-                getConnection()
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
                     closeConnection {
@@ -99,7 +99,7 @@ class LoginSystem : Auth() {
         resultHandler: (authResult: Result) -> Unit,
         handler: (secretKey: String) -> Unit
     ) {
-        databaseManager.getDatabase().userDao.getSecretKeyByID(userID, getConnection()) { secretKey, _ ->
+        databaseManager.getDatabase().userDao.getSecretKeyByID(userID, sqlConnection) { secretKey, _ ->
             if (secretKey == null)
                 closeConnection {
                     resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_6))
@@ -129,7 +129,7 @@ class LoginSystem : Auth() {
 
                 databaseManager.getDatabase().tokenDao.add(
                     Token(-1, token, userID, "LOGIN_SESSION"),
-                    getConnection()
+                    sqlConnection
                 ) { result, _ ->
                     if (result == null)
                         closeConnection {

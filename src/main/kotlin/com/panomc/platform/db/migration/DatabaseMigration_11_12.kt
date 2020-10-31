@@ -10,23 +10,20 @@ class DatabaseMigration_11_12 : DatabaseMigration() {
     override val SCHEME_VERSION = 12
     override val SCHEME_VERSION_INFO = "Add register_date field to user table."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             addRegisterDateFieldToUserTable()
         )
 
-    private fun addRegisterDateFieldToUserTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    ALTER TABLE `${tablePrefix}user` 
+    private fun addRegisterDateFieldToUserTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+                    ALTER TABLE `${databaseManager.getTablePrefix()}user` 
                     ADD `register_date` MEDIUMTEXT;
                 """
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 }

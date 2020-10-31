@@ -61,8 +61,8 @@ class PostCategoryAddAPI : PanelApi() {
             return
         }
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -70,16 +70,16 @@ class PostCategoryAddAPI : PanelApi() {
 
             databaseManager.getDatabase().postCategoryDao.isExistsByURL(
                 url,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 when {
-                    exists == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_94))
                     }
                     exists -> {
                         errors["url"] = true
 
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(
                                 Errors(
                                     errors
@@ -89,14 +89,14 @@ class PostCategoryAddAPI : PanelApi() {
                     }
                     else -> databaseManager.getDatabase().postCategoryDao.add(
                         PostCategory(-1, title, description, url, color),
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { id, _ ->
                         if (id == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_93))
                             }
                         else
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(
                                     Successful(
                                         mapOf(

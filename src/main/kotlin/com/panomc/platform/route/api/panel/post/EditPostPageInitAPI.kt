@@ -24,30 +24,30 @@ class EditPostPageInitAPI : PanelApi() {
 
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
             }
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 when {
-                    exists == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.EDIT_POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_100))
                     }
                     exists -> databaseManager.getDatabase().postDao.getByID(
                         id,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { post, _ ->
                         if (post == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.EDIT_POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_99))
                             }
                         else
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(
                                     Successful(
                                         mapOf(
@@ -57,7 +57,7 @@ class EditPostPageInitAPI : PanelApi() {
                                 )
                             }
                     }
-                    else -> databaseManager.closeConnection(connection) {
+                    else -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.POST_NOT_FOUND))
                     }
                 }

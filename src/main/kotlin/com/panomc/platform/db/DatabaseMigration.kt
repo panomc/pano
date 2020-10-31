@@ -14,11 +14,8 @@ abstract class DatabaseMigration {
         Main.getComponent().inject(this)
     }
 
-    abstract val handlers: List<(
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection>
+    abstract val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection>
+
 
     abstract val FROM_SCHEME_VERSION: Int
     abstract val SCHEME_VERSION: Int
@@ -27,8 +24,7 @@ abstract class DatabaseMigration {
     fun isMigratable(version: Int) = version == FROM_SCHEME_VERSION
 
     fun migrate(
-        sqlConnection: SQLConnection,
-        tablePrefix: String
+        sqlConnection: SQLConnection
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit = { handler ->
         var currentIndex = 0
 
@@ -46,7 +42,7 @@ abstract class DatabaseMigration {
             }
 
             if (currentIndex <= handlers.lastIndex)
-                handlers[currentIndex].invoke(sqlConnection, tablePrefix, localHandler)
+                handlers[currentIndex].invoke(sqlConnection, localHandler)
         }
 
         invoke()

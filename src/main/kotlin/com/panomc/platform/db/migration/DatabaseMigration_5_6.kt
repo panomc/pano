@@ -10,7 +10,7 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
     override val SCHEME_VERSION = 6
     override val SCHEME_VERSION_INFO = "Drop post, post_category, ticket and ticket_category."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             dropPanelPostTable(),
             dropPanelPostCategoryTable(),
@@ -18,59 +18,47 @@ class DatabaseMigration_5_6 : DatabaseMigration() {
             dropPanelTicketCategoryTable()
         )
 
-    private fun dropPanelPostTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    DROP TABLE IF EXISTS `${tablePrefix}post`;
+    private fun dropPanelPostTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
                 """
-        ) {
-            handler.invoke(it)
+                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}post`;
+                """
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun dropPanelPostCategoryTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    DROP TABLE IF EXISTS `${tablePrefix}post_category`;
+    private fun dropPanelPostCategoryTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
                 """
-        ) {
-            handler.invoke(it)
+                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}post_category`;
+                """
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun dropPanelTicketTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    DROP TABLE IF EXISTS `${tablePrefix}ticket`;
+    private fun dropPanelTicketTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
                 """
-        ) {
-            handler.invoke(it)
+                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}ticket`;
+                """
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 
-    private fun dropPanelTicketCategoryTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    DROP TABLE IF EXISTS `${tablePrefix}ticket_category`;
+    private fun dropPanelTicketCategoryTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
                 """
-        ) {
-            handler.invoke(it)
+                    DROP TABLE IF EXISTS `${databaseManager.getTablePrefix()}ticket_category`;
+                """
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 }

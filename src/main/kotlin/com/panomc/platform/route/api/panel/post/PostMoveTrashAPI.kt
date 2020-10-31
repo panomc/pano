@@ -23,8 +23,8 @@ class PostMoveTrashAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -32,24 +32,24 @@ class PostMoveTrashAPI : PanelApi() {
 
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 when {
-                    exists == null -> databaseManager.closeConnection(connection) {
+                    exists == null -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.MOVE_TRASH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_107))
                     }
                     exists -> databaseManager.getDatabase().postDao.moveTrashByID(
                         id,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { result, _ ->
                         if (result == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.MOVE_TRASH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_106))
                             }
                         else
                             handler.invoke(Successful())
                     }
-                    else -> databaseManager.closeConnection(connection) {
+                    else -> databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.NOT_EXISTS))
                     }
                 }

@@ -21,8 +21,8 @@ class CloseConnectServerCardAPI : PanelApi() {
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -32,19 +32,19 @@ class CloseConnectServerCardAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_26))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { isUserInstalledSystem, _ ->
                         if (isUserInstalledSystem == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_27))
                             }
                         else
@@ -53,9 +53,9 @@ class CloseConnectServerCardAPI : PanelApi() {
                                     -1,
                                     "false",
                                     "show_connect_server_info"
-                                ), databaseManager.getSQLConnection(connection)
+                                ), sqlConnection
                             ) { updateResult, _ ->
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     if (updateResult == null)
                                         handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_25))
                                     else

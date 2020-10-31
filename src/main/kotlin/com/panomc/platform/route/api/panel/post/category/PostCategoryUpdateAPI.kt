@@ -63,8 +63,8 @@ class PostCategoryUpdateAPI : PanelApi() {
             return
         }
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -73,10 +73,10 @@ class PostCategoryUpdateAPI : PanelApi() {
             databaseManager.getDatabase().postCategoryDao.isExistsByURLNotByID(
                 url,
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 if (exists == null) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.POST_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_96))
                     }
 
@@ -86,7 +86,7 @@ class PostCategoryUpdateAPI : PanelApi() {
                 if (exists) {
                     errors["url"] = true
 
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(
                             Errors(
                                 errors
@@ -99,17 +99,17 @@ class PostCategoryUpdateAPI : PanelApi() {
 
                 databaseManager.getDatabase().postCategoryDao.update(
                     PostCategory(id, title, description, url, color),
-                    databaseManager.getSQLConnection(connection)
+                    sqlConnection
                 ) { result, _ ->
                     if (result == null) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.POST_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_95))
                         }
 
                         return@update
                     }
 
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Successful())
                     }
                 }

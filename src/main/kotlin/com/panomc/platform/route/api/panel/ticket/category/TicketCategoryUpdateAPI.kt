@@ -37,8 +37,8 @@ class TicketCategoryUpdateAPI : PanelApi() {
         if (errors.isNotEmpty())
             handler.invoke(Errors(errors))
         else
-            databaseManager.createConnection { connection, _ ->
-                if (connection == null) {
+            databaseManager.createConnection { sqlConnection, _ ->
+                if (sqlConnection == null) {
                     handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                     return@createConnection
@@ -46,14 +46,14 @@ class TicketCategoryUpdateAPI : PanelApi() {
 
                 databaseManager.getDatabase().ticketCategoryDao.update(
                     TicketCategory(id, title, description),
-                    databaseManager.getSQLConnection(connection)
+                    sqlConnection
                 ) { result, _ ->
                     if (result == null)
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.TICKET_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_92))
                         }
                     else
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Successful())
                         }
                 }

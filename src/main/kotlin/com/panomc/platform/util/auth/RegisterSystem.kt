@@ -68,7 +68,7 @@ class RegisterSystem : Auth() {
     ) {
         databaseManager.getDatabase().userDao.isEmailExists(
             formData.getString("email"),
-            getConnection()
+            sqlConnection
         ) { isEmailExists, _ ->
             when {
                 isEmailExists == null -> closeConnection {
@@ -88,7 +88,7 @@ class RegisterSystem : Auth() {
     ) {
         databaseManager.getDatabase().permissionDao.getPermissionID(
             Permission(-1, "admin"),
-            getConnection()
+            sqlConnection
         ) { permissionID, _ ->
             if (permissionID == null)
                 closeConnection {
@@ -114,7 +114,7 @@ class RegisterSystem : Auth() {
         handler: () -> Unit
     ) {
         databaseManager.getDatabase().userDao.add(
-            getConnection(),
+            sqlConnection,
             User(
                 -1,
                 formData.getString("username"),
@@ -140,7 +140,7 @@ class RegisterSystem : Auth() {
     ) {
         databaseManager.getDatabase().userDao.getUserIDFromUsername(
             formData.getString("username"),
-            getConnection()
+            sqlConnection
         ) { userID, _ ->
             if (userID == null)
                 closeConnection {
@@ -158,14 +158,14 @@ class RegisterSystem : Auth() {
     ) {
         val property = SystemProperty(-1, "who_installed_user_id", userID.toString())
 
-        databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, getConnection()) { exists, _ ->
+        databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, sqlConnection) { exists, _ ->
             when {
                 exists == null -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_13))
                 }
                 exists -> databaseManager.getDatabase().systemPropertyDao.update(
                     property,
-                    getConnection()
+                    sqlConnection
                 ) { resultOfUpdate, _ ->
                     if (resultOfUpdate == null)
                         closeConnection {
@@ -176,7 +176,7 @@ class RegisterSystem : Auth() {
                 }
                 else -> databaseManager.getDatabase().systemPropertyDao.add(
                     property,
-                    getConnection()
+                    sqlConnection
                 ) { resultOfAdd, _ ->
                     if (resultOfAdd == null)
                         closeConnection {

@@ -22,8 +22,8 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -31,41 +31,41 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_72))
                     }
                 else
                     databaseManager.getDatabase().panelNotificationDao.getLast5ByUserID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { notifications, _ ->
                         if (notifications == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_71))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
                                 userID,
-                                databaseManager.getSQLConnection(connection)
+                                sqlConnection
                             ) { count, _ ->
                                 if (count == null)
-                                    databaseManager.closeConnection(connection) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_70))
                                     }
                                 else
                                     databaseManager.getDatabase().panelNotificationDao.markReadLat5ByUserID(
                                         userID,
-                                        databaseManager.getSQLConnection(connection)
+                                        sqlConnection
                                     ) { result, _ ->
                                         if (result == null)
-                                            databaseManager.closeConnection(connection) {
+                                            databaseManager.closeConnection(sqlConnection) {
                                                 handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_69))
                                             }
                                         else
-                                            databaseManager.closeConnection(connection) {
+                                            databaseManager.closeConnection(sqlConnection) {
                                                 handler.invoke(
                                                     Successful(
                                                         mutableMapOf<String, Any?>(

@@ -21,8 +21,8 @@ class DashboardAPI : PanelApi() {
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 return@createConnection
             }
@@ -31,61 +31,57 @@ class DashboardAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_16))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { isUserInstalled, _ ->
                         if (isUserInstalled == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_17))
                             }
                         else
-                            databaseManager.getDatabase().userDao.count(databaseManager.getSQLConnection(connection)) { countOfUsers, _ ->
+                            databaseManager.getDatabase().userDao.count(sqlConnection) { countOfUsers, _ ->
                                 if (countOfUsers == null)
-                                    databaseManager.closeConnection(connection) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_18))
                                     }
                                 else
                                     databaseManager.getDatabase().postDao.count(
-                                        databaseManager.getSQLConnection(
-                                            connection
-                                        )
+                                        sqlConnection
                                     ) { countOfPosts, _ ->
                                         if (countOfPosts == null)
-                                            databaseManager.closeConnection(connection) {
+                                            databaseManager.closeConnection(sqlConnection) {
                                                 handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_19))
                                             }
                                         else
                                             databaseManager.getDatabase().ticketDao.count(
-                                                databaseManager.getSQLConnection(
-                                                    connection
-                                                )
+                                                sqlConnection
                                             ) { countOfTickets, _ ->
                                                 if (countOfTickets == null)
-                                                    databaseManager.closeConnection(connection) {
+                                                    databaseManager.closeConnection(sqlConnection) {
                                                         handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_112))
                                                     }
                                                 else
                                                     databaseManager.getDatabase().ticketDao.countOfOpenTickets(
-                                                        databaseManager.getSQLConnection(connection)
+                                                        sqlConnection
                                                     ) { countOfOpenTickets, _ ->
                                                         if (countOfOpenTickets == null)
-                                                            databaseManager.closeConnection(connection) {
+                                                            databaseManager.closeConnection(sqlConnection) {
                                                                 handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_118))
                                                             }
                                                         else
                                                             databaseManager.getDatabase().ticketDao.getLast5Tickets(
-                                                                databaseManager.getSQLConnection(connection)
+                                                                sqlConnection
                                                             ) { tickets, _ ->
                                                                 if (tickets == null)
-                                                                    databaseManager.closeConnection(connection) {
+                                                                    databaseManager.closeConnection(sqlConnection) {
                                                                         handler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_76))
                                                                     }
                                                                 else {
@@ -102,7 +98,7 @@ class DashboardAPI : PanelApi() {
                                                                             "welcome_board" to false
                                                                         )
 
-                                                                        databaseManager.closeConnection(connection) {
+                                                                        databaseManager.closeConnection(sqlConnection) {
                                                                             handler.invoke(Successful(result))
                                                                         }
                                                                     } else
@@ -112,11 +108,11 @@ class DashboardAPI : PanelApi() {
                                                                                 "show_getting_started",
                                                                                 ""
                                                                             ),
-                                                                            databaseManager.getSQLConnection(connection)
+                                                                            sqlConnection
                                                                         ) { systemProperty, _ ->
                                                                             if (systemProperty == null)
                                                                                 databaseManager.closeConnection(
-                                                                                    connection
+                                                                                    sqlConnection
                                                                                 ) {
                                                                                     handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_20))
                                                                                 }
@@ -127,7 +123,7 @@ class DashboardAPI : PanelApi() {
                                                                                     )
 
                                                                                 databaseManager.closeConnection(
-                                                                                    connection
+                                                                                    sqlConnection
                                                                                 ) {
                                                                                     handler.invoke(Successful(result))
                                                                                 }

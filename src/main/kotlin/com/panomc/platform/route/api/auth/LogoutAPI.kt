@@ -23,22 +23,22 @@ class LogoutAPI : LoggedInApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 return@createConnection
             }
 
             databaseManager.getDatabase().tokenDao.delete(
                 Token(-1, token, -1, ""),
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { result, _ ->
                 if (result == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.LOGOUT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_28))
                     }
                 else
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         deleteCookies(context)
 
                         handler.invoke(Successful())

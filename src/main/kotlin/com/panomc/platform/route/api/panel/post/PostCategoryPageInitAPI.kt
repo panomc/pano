@@ -24,16 +24,16 @@ class PostCategoryPageInitAPI : PanelApi() {
         val data = context.bodyAsJson
         val page = data.getInteger("page")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
             }
 
-            databaseManager.getDatabase().postCategoryDao.getCount(databaseManager.getSQLConnection(connection)) { count, _ ->
+            databaseManager.getDatabase().postCategoryDao.getCount(sqlConnection) { count, _ ->
                 if (count == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_86))
                     }
                 else {
@@ -43,7 +43,7 @@ class PostCategoryPageInitAPI : PanelApi() {
                         totalPage = 1
 
                     if (page > totalPage || page < 1) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
                         }
 
@@ -52,10 +52,10 @@ class PostCategoryPageInitAPI : PanelApi() {
 
                     databaseManager.getDatabase().postCategoryDao.getCategories(
                         page,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { categories, _ ->
                         if (categories == null) {
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_85))
                             }
 
@@ -69,7 +69,7 @@ class PostCategoryPageInitAPI : PanelApi() {
                             "host" to "http://"
                         )
 
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Successful(result))
                         }
                     }

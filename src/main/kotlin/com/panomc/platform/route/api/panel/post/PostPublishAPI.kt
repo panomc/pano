@@ -30,8 +30,8 @@ class PostPublishAPI : PanelApi() {
 
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -39,10 +39,10 @@ class PostPublishAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(
                             Error(
                                 ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_116
@@ -55,14 +55,14 @@ class PostPublishAPI : PanelApi() {
                     if (id == -1)
                         databaseManager.getDatabase().postDao.insertAndPublish(
                             post,
-                            databaseManager.getSQLConnection(connection)
+                            sqlConnection
                         ) { postID, _ ->
                             if (postID == null)
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_114))
                                 }
                             else
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(
                                         Successful(
                                             mapOf(
@@ -76,10 +76,10 @@ class PostPublishAPI : PanelApi() {
                         databaseManager.getDatabase().postDao.updateAndPublish(
                             userID,
                             post,
-                            databaseManager.getSQLConnection(connection)
+                            sqlConnection
                         ) { result, _ ->
                             if (result == null)
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_115))
                                 }
                             else

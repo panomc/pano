@@ -28,8 +28,8 @@ class BasicDataAPI : PanelApi() {
     lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -39,32 +39,32 @@ class BasicDataAPI : PanelApi() {
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_8))
                     }
                 else
                     databaseManager.getDatabase().userDao.getByID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { user, _ ->
                         if (user == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_7))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
                                 userID,
-                                databaseManager.getSQLConnection(connection)
+                                sqlConnection
                             ) { count, _ ->
                                 if (count == null)
-                                    databaseManager.closeConnection(connection) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_68))
                                     }
                                 else
-                                    databaseManager.closeConnection(connection) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(
                                             Successful(
                                                 mapOf(

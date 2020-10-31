@@ -23,8 +23,8 @@ class PostMoveDraftAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -32,10 +32,10 @@ class PostMoveDraftAPI : PanelApi() {
 
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { exists, _ ->
                 if (exists == null) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.MOVE_DRAFT_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_109))
                     }
 
@@ -43,7 +43,7 @@ class PostMoveDraftAPI : PanelApi() {
                 }
 
                 if (!exists) {
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.NOT_EXISTS))
                     }
 
@@ -52,17 +52,17 @@ class PostMoveDraftAPI : PanelApi() {
 
                 databaseManager.getDatabase().postDao.moveDraftByID(
                     id,
-                    databaseManager.getSQLConnection(connection)
+                    sqlConnection
                 ) { result, _ ->
                     if (result == null) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.MOVE_DRAFT_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_108))
                         }
 
                         return@moveDraftByID
                     }
 
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Successful())
                     }
                 }

@@ -21,30 +21,30 @@ class CloseGettingStartedCardAPI : PanelApi() {
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        val token = context.getCookie("pano_token").value
+
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
             }
 
-            val token = context.getCookie("pano_token").value
-
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_23))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { isUserInstalledSystem, _ ->
                         if (isUserInstalledSystem == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_24))
                             }
                         else
@@ -53,9 +53,9 @@ class CloseGettingStartedCardAPI : PanelApi() {
                                     -1,
                                     "false",
                                     "show_getting_started"
-                                ), databaseManager.getSQLConnection(connection)
+                                ), sqlConnection
                             ) { updateResult, _ ->
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     if (updateResult == null)
                                         handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_22))
                                     else

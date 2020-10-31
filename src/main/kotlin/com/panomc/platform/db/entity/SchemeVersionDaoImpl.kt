@@ -71,10 +71,10 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
     }!!
 
     override fun add(schemeVersion: SchemeVersion, handler: (result: Result?) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection != null) {
-                add(databaseManager.getSQLConnection(connection), schemeVersion) { result, _ ->
-                    databaseManager.closeConnection(connection) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection != null) {
+                add(sqlConnection, schemeVersion) { result, _ ->
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(result)
                     }
                 }

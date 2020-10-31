@@ -319,10 +319,10 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     }
 
     override fun add(user: User, handler: (result: Result?) -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection != null) {
-                add(databaseManager.getSQLConnection(connection), user) { result, _ ->
-                    databaseManager.closeConnection(connection) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection != null) {
+                add(sqlConnection, user) { result, _ ->
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(result)
                     }
                 }

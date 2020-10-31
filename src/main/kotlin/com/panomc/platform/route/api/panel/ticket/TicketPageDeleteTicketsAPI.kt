@@ -29,22 +29,22 @@ class TicketPageDeleteTicketsAPI : PanelApi() {
             return
         }
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 return@createConnection
             }
 
             databaseManager.getDatabase().ticketDao.delete(
                 selectedTickets,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { result, _ ->
                 if (result == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.TICKET_DELETE_TICKETS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_117))
                     }
                 else
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Successful())
                     }
             }

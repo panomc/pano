@@ -31,8 +31,8 @@ class TicketPageCloseTicketsAPI : PanelApi() {
             return
         }
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
@@ -40,14 +40,14 @@ class TicketPageCloseTicketsAPI : PanelApi() {
 
             databaseManager.getDatabase().ticketDao.closeTickets(
                 selectedTickets,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { result, _ ->
                 if (result == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.TICKET_CLOSE_TICKETS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_113))
                     }
                 else
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Successful())
                     }
             }

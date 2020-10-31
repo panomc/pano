@@ -10,23 +10,20 @@ class DatabaseMigration_4_5 : DatabaseMigration() {
     override val SCHEME_VERSION = 5
     override val SCHEME_VERSION_INFO = "Add new status and date field to panel notifications table."
 
-    override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
             updatePanelNotificationsTable()
         )
 
-    private fun updatePanelNotificationsTable(): (
-        sqlConnection: SQLConnection,
-        tablePrefix: String,
-        handler: (asyncResult: AsyncResult<*>) -> Unit
-    ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
-            """
-                    ALTER TABLE `${tablePrefix}panel_notification` 
+    private fun updatePanelNotificationsTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
+                    ALTER TABLE `${databaseManager.getTablePrefix()}panel_notification` 
                     ADD date MEDIUMTEXT, ADD status varchar(255);
                 """
-        ) {
-            handler.invoke(it)
+            ) {
+                handler.invoke(it)
+            }
         }
-    }
 }

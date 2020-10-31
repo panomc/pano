@@ -43,9 +43,9 @@ class ConnectNewAPI : Api() {
     private fun connectNew(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
-        databaseManager.createConnection { connection, _ ->
+        databaseManager.createConnection { sqlConnection, _ ->
             when {
-                connection == null -> handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+                sqlConnection == null -> handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 data.getString("platformCode", "") == platformCodeManager.getPlatformKey()
                     .toString() -> databaseManager.getDatabase().serverDao.add(
                     Server(
@@ -58,17 +58,17 @@ class ConnectNewAPI : Api() {
                         data.getString("favicon"),
                         data.getString("status")
                     ),
-                    databaseManager.getSQLConnection(connection),
+                    sqlConnection,
                 ) { token, _ ->
                     if (token == null) {
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_29))
                         }
 
                         return@add
                     }
 
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(
                             Successful(
                                 mapOf(
@@ -78,7 +78,7 @@ class ConnectNewAPI : Api() {
                         )
                     }
                 }
-                else -> databaseManager.closeConnection(connection) {
+                else -> databaseManager.closeConnection(sqlConnection) {
                     handler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_PLATFORM_CODE_WRONG))
                 }
             }

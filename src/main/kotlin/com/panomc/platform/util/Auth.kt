@@ -2,11 +2,11 @@ package com.panomc.platform.util
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.Connection
 import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.Error
 import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
+import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -29,18 +29,16 @@ open class Auth {
 
     var ipAddress: String? = null
 
-    lateinit var connection: Connection
-
-    fun getConnection() = databaseManager.getSQLConnection(connection)
+    lateinit var sqlConnection: SQLConnection
 
     fun closeConnection(handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
-        databaseManager.closeConnection(connection, handler)
+        databaseManager.closeConnection(sqlConnection, handler)
     }
 
     fun createConnection(resultHandler: (authResult: Result) -> Unit, handler: () -> Unit) {
-        databaseManager.createConnection { connection, _ ->
-            if (connection != null) {
-                this.connection = connection
+        databaseManager.createConnection { sqlConnection1, _ ->
+            if (sqlConnection1 != null) {
+                this.sqlConnection = sqlConnection1
 
                 handler.invoke()
             } else
@@ -59,7 +57,7 @@ open class Auth {
                 if (it is Error)
                     handler.invoke(false)
             }) {
-                databaseManager.getDatabase().tokenDao.isTokenExists(token, getConnection()) { isTokenExists, _ ->
+                databaseManager.getDatabase().tokenDao.isTokenExists(token, sqlConnection) { isTokenExists, _ ->
                     when {
                         isTokenExists == null -> closeConnection {
                             handler.invoke(false)
@@ -78,7 +76,7 @@ open class Auth {
             if (isLoggedIn) {
                 val token = context.getCookie("pano_token").value
 
-                databaseManager.getDatabase().tokenDao.getUserIDFromToken(token, getConnection()) { userID, _ ->
+                databaseManager.getDatabase().tokenDao.getUserIDFromToken(token, sqlConnection) { userID, _ ->
                     if (userID == null || userID == 0)
                         closeConnection {
                             handler.invoke(false)
@@ -86,7 +84,7 @@ open class Auth {
                     else
                         databaseManager.getDatabase().userDao.getPermissionIDFromUserID(
                             userID,
-                            getConnection()
+                            sqlConnection
                         ) { permissionID, _ ->
                             if (permissionID == null || permissionID == 0)
                                 closeConnection {
@@ -95,7 +93,7 @@ open class Auth {
                             else
                                 databaseManager.getDatabase().permissionDao.getPermissionByID(
                                     permissionID,
-                                    getConnection()
+                                    sqlConnection
                                 ) { permission, _ ->
                                     closeConnection {
                                         when {

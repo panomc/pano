@@ -22,49 +22,49 @@ class PanelNotificationsAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
                 return@createConnection
             }
 
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
-                databaseManager.getSQLConnection(connection)
+                sqlConnection
             ) { userID, _ ->
                 if (userID == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
                     }
                 else
                     databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
                         userID,
-                        databaseManager.getSQLConnection(connection)
+                        sqlConnection
                     ) { count, _ ->
                         if (count == null)
-                            databaseManager.closeConnection(connection) {
+                            databaseManager.closeConnection(sqlConnection) {
                                 handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getAllByUserID(
                                 userID,
-                                databaseManager.getSQLConnection(connection)
+                                sqlConnection
                             ) { notifications, _ ->
                                 if (notifications == null)
-                                    databaseManager.closeConnection(connection) {
+                                    databaseManager.closeConnection(sqlConnection) {
                                         handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_110))
                                     }
                                 else
                                     databaseManager.getDatabase().panelNotificationDao.markReadAll(
                                         userID,
-                                        databaseManager.getSQLConnection(connection)
+                                        sqlConnection
                                     ) { result, _ ->
                                         if (result == null)
-                                            databaseManager.closeConnection(connection) {
+                                            databaseManager.closeConnection(sqlConnection) {
                                                 handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_111))
                                             }
                                         else {
-                                            databaseManager.closeConnection(connection) {
+                                            databaseManager.closeConnection(sqlConnection) {
                                                 handler.invoke(
                                                     Successful(
                                                         mutableMapOf<String, Any?>(

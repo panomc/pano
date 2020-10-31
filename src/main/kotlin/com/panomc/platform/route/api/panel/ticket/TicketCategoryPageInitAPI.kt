@@ -24,17 +24,16 @@ class TicketCategoryPageInitAPI : PanelApi() {
         val data = context.bodyAsJson
         val page = data.getInteger("page")
 
-        databaseManager.createConnection { connection, _ ->
-            if (connection == null) {
+        databaseManager.createConnection { sqlConnection, _ ->
+            if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
                 return@createConnection
             }
 
-
-            databaseManager.getDatabase().ticketCategoryDao.count(databaseManager.getSQLConnection(connection)) { count, _ ->
+            databaseManager.getDatabase().ticketCategoryDao.count(sqlConnection) { count, _ ->
                 if (count == null)
-                    databaseManager.closeConnection(connection) {
+                    databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_80))
                     }
                 else {
@@ -44,20 +43,20 @@ class TicketCategoryPageInitAPI : PanelApi() {
                         totalPage = 1
 
                     if (page > totalPage || page < 1)
-                        databaseManager.closeConnection(connection) {
+                        databaseManager.closeConnection(sqlConnection) {
                             handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
                         }
                     else
                         databaseManager.getDatabase().ticketCategoryDao.getByPage(
                             page,
-                            databaseManager.getSQLConnection(connection)
+                            sqlConnection
                         ) { categories, _ ->
                             if (categories == null)
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_79))
                                 }
                             else
-                                databaseManager.closeConnection(connection) {
+                                databaseManager.closeConnection(sqlConnection) {
                                     handler.invoke(
                                         Successful(
                                             mutableMapOf<String, Any?>(
