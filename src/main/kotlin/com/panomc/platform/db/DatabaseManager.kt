@@ -35,13 +35,14 @@ class DatabaseManager(
             DatabaseMigration_8_9(),
             DatabaseMigration_9_10(),
             DatabaseMigration_10_11(),
-            DatabaseMigration_11_12()
+            DatabaseMigration_11_12(),
+            DatabaseMigration_12_13()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 12
-        const val DATABASE_SCHEME_VERSION_INFO = ""
+        const val DATABASE_SCHEME_VERSION = 13
+        const val DATABASE_SCHEME_VERSION_INFO = "Add email_verified field to user table."
     }
 
     init {
@@ -161,37 +162,32 @@ class DatabaseManager(
         }
     }
 
-    fun initDatabase(handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
-        createConnection { sqlConnection, asyncResult ->
-            if (sqlConnection != null) {
-                val databaseInitProcessHandlers = mDatabase.init(sqlConnection)
+    fun initDatabase(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
+        val databaseInitProcessHandlers = mDatabase.init(sqlConnection)
 
-                var currentIndex = 0
+        var currentIndex = 0
 
-                fun invoke() {
-                    val localHandler: (AsyncResult<*>) -> Unit = {
-                        when {
-                            it.failed() || currentIndex == databaseInitProcessHandlers.lastIndex -> closeConnection(
-                                sqlConnection
-                            ) { _ ->
-                                handler.invoke(it)
-                            }
-                            else -> {
-                                currentIndex++
-
-                                invoke()
-                            }
-                        }
+        fun invoke() {
+            val localHandler: (AsyncResult<*>) -> Unit = {
+                when {
+                    it.failed() || currentIndex == databaseInitProcessHandlers.lastIndex -> closeConnection(
+                        sqlConnection
+                    ) { _ ->
+                        handler.invoke(it)
                     }
+                    else -> {
+                        currentIndex++
 
-                    if (currentIndex <= databaseInitProcessHandlers.lastIndex)
-                        databaseInitProcessHandlers[currentIndex].invoke(localHandler)
+                        invoke()
+                    }
                 }
+            }
 
-                invoke()
-            } else
-                handler.invoke(asyncResult)
+            if (currentIndex <= databaseInitProcessHandlers.lastIndex)
+                databaseInitProcessHandlers[currentIndex].invoke(localHandler)
         }
+
+        invoke()
     }
 
     fun getDatabase() = mDatabase
