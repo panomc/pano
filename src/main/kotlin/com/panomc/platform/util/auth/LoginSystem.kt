@@ -1,10 +1,10 @@
 package com.panomc.platform.util.auth
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.Token
 import com.panomc.platform.model.Error
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
-import com.panomc.platform.model.Token
 import com.panomc.platform.util.Auth
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys

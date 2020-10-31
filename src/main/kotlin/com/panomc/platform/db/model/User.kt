@@ -1,4 +1,4 @@
-package com.panomc.platform.model
+package com.panomc.platform.db.model
 
 data class User(
     val id: Int,

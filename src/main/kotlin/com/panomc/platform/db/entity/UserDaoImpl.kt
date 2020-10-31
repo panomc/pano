@@ -3,10 +3,10 @@ package com.panomc.platform.db.entity
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.UserDao
+import com.panomc.platform.db.model.User
 import com.panomc.platform.model.Error
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
-import com.panomc.platform.model.User
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult

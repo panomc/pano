@@ -2,7 +2,7 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.PanelNotificationDao
-import com.panomc.platform.model.PanelNotification
+import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import com.panomc.platform.util.NotificationStatus

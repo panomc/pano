@@ -2,9 +2,9 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.TicketDao
+import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
-import com.panomc.platform.model.TicketCategory
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection

@@ -1,7 +1,12 @@
 package com.panomc.platform.util.auth
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.model.*
+import com.panomc.platform.db.model.Permission
+import com.panomc.platform.db.model.SystemProperty
+import com.panomc.platform.db.model.User
+import com.panomc.platform.model.Error
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.Successful
 import com.panomc.platform.util.Auth
 import io.vertx.core.json.JsonObject
 import org.apache.commons.codec.digest.DigestUtils

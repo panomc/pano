@@ -4,8 +4,8 @@ import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION
 import com.panomc.platform.db.DatabaseManager.Companion.DATABASE_SCHEME_VERSION_INFO
 import com.panomc.platform.db.dao.SchemeVersionDao
+import com.panomc.platform.db.model.SchemeVersion
 import com.panomc.platform.model.Result
-import com.panomc.platform.model.SchemeVersion
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray

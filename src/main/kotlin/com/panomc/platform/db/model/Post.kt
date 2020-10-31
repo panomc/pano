@@ -1,4 +1,4 @@
-package com.panomc.platform.model
+package com.panomc.platform.db.model
 
 data class Post(
     val id: Int,

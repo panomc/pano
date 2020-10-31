@@ -2,7 +2,7 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.PostCategoryDao
-import com.panomc.platform.model.PostCategory
+import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult

@@ -2,7 +2,7 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.PermissionDao
-import com.panomc.platform.model.Permission
+import com.panomc.platform.db.model.Permission
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult

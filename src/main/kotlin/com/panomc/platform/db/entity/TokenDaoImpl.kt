@@ -2,9 +2,9 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.TokenDao
+import com.panomc.platform.db.model.Token
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
-import com.panomc.platform.model.Token
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection

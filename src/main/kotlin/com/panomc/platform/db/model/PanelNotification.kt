@@ -1,4 +1,4 @@
-package com.panomc.platform.model
+package com.panomc.platform.db.model
 
 import com.panomc.platform.util.NotificationStatus
 

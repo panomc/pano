@@ -1,29 +1,29 @@
-package com.panomc.platform.migration.database
+package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_10_11 : DatabaseMigration() {
-    override val FROM_SCHEME_VERSION = 10
-    override val SCHEME_VERSION = 11
-    override val SCHEME_VERSION_INFO = "Add views field to post table."
+class DatabaseMigration_11_12 : DatabaseMigration() {
+    override val FROM_SCHEME_VERSION = 11
+    override val SCHEME_VERSION = 12
+    override val SCHEME_VERSION_INFO = "Add register_date field to user table."
 
     override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
-            addViewsFieldToPostTable()
+            addRegisterDateFieldToUserTable()
         )
 
-    private fun addViewsFieldToPostTable(): (
+    private fun addRegisterDateFieldToUserTable(): (
         sqlConnection: SQLConnection,
         tablePrefix: String,
         handler: (asyncResult: AsyncResult<*>) -> Unit
     ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
         sqlConnection.query(
             """
-                    ALTER TABLE `${tablePrefix}post` 
-                    ADD `views` MEDIUMTEXT;
+                    ALTER TABLE `${tablePrefix}user` 
+                    ADD `register_date` MEDIUMTEXT;
                 """
         ) {
             handler.invoke(it)

@@ -1,4 +1,4 @@
-package com.panomc.platform.migration.database
+package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult

@@ -1,29 +1,32 @@
-package com.panomc.platform.migration.database
+package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_6_7 : DatabaseMigration() {
-    override val FROM_SCHEME_VERSION = 6
-    override val SCHEME_VERSION = 7
-    override val SCHEME_VERSION_INFO = "Change date field in table panel_notifications to LONG type."
+class DatabaseMigration_2_3 : DatabaseMigration() {
+    override val FROM_SCHEME_VERSION = 2
+    override val SCHEME_VERSION = 3
+    override val SCHEME_VERSION_INFO = "Removed connect_board feature."
 
     override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
-            changeField()
+            deleteConnectBoardFeature()
         )
 
-    private fun changeField(): (
+    private fun deleteConnectBoardFeature(): (
         sqlConnection: SQLConnection,
         tablePrefix: String,
         handler: (asyncResult: AsyncResult<*>) -> Unit
     ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
-        sqlConnection.query(
+        sqlConnection.updateWithParams(
             """
-                    ALTER TABLE `${tablePrefix}panel_notification` MODIFY `date` MEDIUMTEXT;
-                """
+                   DELETE FROM ${tablePrefix}system_property WHERE `option` = ?
+            """.trimIndent(),
+            JsonArray()
+                .add("show_connect_server_info")
         ) {
             handler.invoke(it)
         }

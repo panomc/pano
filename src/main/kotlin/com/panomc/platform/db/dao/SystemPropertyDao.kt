@@ -1,8 +1,8 @@
 package com.panomc.platform.db.dao
 
 import com.panomc.platform.db.Dao
+import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.model.Result
-import com.panomc.platform.model.SystemProperty
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 

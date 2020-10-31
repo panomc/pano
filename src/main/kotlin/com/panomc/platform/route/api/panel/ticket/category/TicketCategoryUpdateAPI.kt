@@ -3,6 +3,7 @@ package com.panomc.platform.route.api.panel.ticket.category
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.db.DatabaseManager
+import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.*
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject

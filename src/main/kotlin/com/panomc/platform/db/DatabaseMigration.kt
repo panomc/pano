@@ -1,7 +1,7 @@
 package com.panomc.platform.db
 
 import com.panomc.platform.Main
-import com.panomc.platform.model.SchemeVersion
+import com.panomc.platform.db.model.SchemeVersion
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 import javax.inject.Inject

@@ -3,6 +3,7 @@ package com.panomc.platform.route.api
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main
 import com.panomc.platform.db.DatabaseManager
+import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
 import com.panomc.platform.util.NotificationStatus
 import io.vertx.ext.web.RoutingContext

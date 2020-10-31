@@ -2,7 +2,7 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.ServerDao
-import com.panomc.platform.model.Server
+import com.panomc.platform.db.model.Server
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys

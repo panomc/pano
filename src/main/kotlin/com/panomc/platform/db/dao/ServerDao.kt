@@ -1,7 +1,7 @@
 package com.panomc.platform.db.dao
 
 import com.panomc.platform.db.Dao
-import com.panomc.platform.model.Server
+import com.panomc.platform.db.model.Server
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 

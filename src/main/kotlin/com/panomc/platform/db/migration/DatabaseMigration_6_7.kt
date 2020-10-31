@@ -1,29 +1,28 @@
-package com.panomc.platform.migration.database
+package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 @Suppress("ClassName")
-class DatabaseMigration_11_12 : DatabaseMigration() {
-    override val FROM_SCHEME_VERSION = 11
-    override val SCHEME_VERSION = 12
-    override val SCHEME_VERSION_INFO = "Add register_date field to user table."
+class DatabaseMigration_6_7 : DatabaseMigration() {
+    override val FROM_SCHEME_VERSION = 6
+    override val SCHEME_VERSION = 7
+    override val SCHEME_VERSION_INFO = "Change date field in table panel_notifications to LONG type."
 
     override val handlers: List<(sqlConnection: SQLConnection, tablePrefix: String, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
         listOf(
-            addRegisterDateFieldToUserTable()
+            changeField()
         )
 
-    private fun addRegisterDateFieldToUserTable(): (
+    private fun changeField(): (
         sqlConnection: SQLConnection,
         tablePrefix: String,
         handler: (asyncResult: AsyncResult<*>) -> Unit
     ) -> SQLConnection = { sqlConnection, tablePrefix, handler ->
         sqlConnection.query(
             """
-                    ALTER TABLE `${tablePrefix}user` 
-                    ADD `register_date` MEDIUMTEXT;
+                    ALTER TABLE `${tablePrefix}panel_notification` MODIFY `date` MEDIUMTEXT;
                 """
         ) {
             handler.invoke(it)

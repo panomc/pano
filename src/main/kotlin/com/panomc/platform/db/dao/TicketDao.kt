@@ -1,8 +1,8 @@
 package com.panomc.platform.db.dao
 
 import com.panomc.platform.db.Dao
+import com.panomc.platform.db.model.Ticket
 import com.panomc.platform.model.Result
-import com.panomc.platform.model.Ticket
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
