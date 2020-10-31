@@ -17,7 +17,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
               `description` text NOT NULL,
@@ -37,7 +37,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -53,7 +53,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "DELETE FROM `${databaseManager.getTablePrefix() + tableName}` WHERE id = ?"
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE id = ?"
 
         sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -65,7 +65,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
 
     override fun getCount(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
         sqlConnection.query(query) { queryResult ->
             if (queryResult.succeeded())
@@ -80,7 +80,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, description, url, color FROM `${databaseManager.getTablePrefix() + tableName}` ORDER BY id DESC"
+            "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC"
 
         sqlConnection.query(query) { queryResult ->
             if (queryResult.succeeded()) {
@@ -113,7 +113,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, description, url, color FROM `${databaseManager.getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded()) {
@@ -197,7 +197,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `url` = ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `url` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(url)) { queryResult ->
             if (queryResult.succeeded())
@@ -214,7 +214,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `url` = ? and id != ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `url` = ? and id != ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(url).add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -230,7 +230,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (id: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
+            "INSERT INTO `${getTablePrefix() + tableName}` (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
 
         sqlConnection.updateWithParams(
             query,
@@ -253,7 +253,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET title = ?, description = ?, url = ?, color = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET title = ?, description = ?, url = ?, color = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,

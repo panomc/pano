@@ -15,7 +15,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `token` text NOT NULL,
               `created_time` MEDIUMTEXT NOT NULL,
@@ -36,7 +36,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
     ) {
         sqlConnection.updateWithParams(
             """
-                INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (token, created_time, user_id, subject) VALUES (?, ?, ?, ?)
+                INSERT INTO `${getTablePrefix() + tableName}` (token, created_time, user_id, subject) VALUES (?, ?, ?, ?)
             """.trimIndent(),
             JsonArray()
                 .add(token.token)
@@ -57,7 +57,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT user_id FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+            "SELECT user_id FROM `${getTablePrefix() + tableName}` where `token` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -73,7 +73,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         handler: (isTokenExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `token` = ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `token` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
             if (queryResult.succeeded())
@@ -89,7 +89,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE token = ?"
+            "DELETE from `${getTablePrefix() + tableName}` WHERE token = ?"
 
         sqlConnection.updateWithParams(query, JsonArray().add(token.token)) { queryResult ->
             if (queryResult.succeeded())

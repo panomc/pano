@@ -17,7 +17,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
               `category_id` int(title11) NOT NULL,
@@ -33,7 +33,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
     }
 
     override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -47,7 +47,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         sqlConnection: SQLConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` WHERE status = ?"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` WHERE status = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(1)) { queryResult ->
             if (queryResult.succeeded())
@@ -62,7 +62,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, date, status FROM `${databaseManager.getTablePrefix() + tableName}` ORDER BY `date` DESC, `id` LIMIT 5"
+            "SELECT id, title, category_id, user_id, date, status FROM `${getTablePrefix() + tableName}` ORDER BY `date` DESC, `id` LIMIT 5"
 
         val parameters = JsonArray()
 
@@ -156,7 +156,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
     ) {
 
         val query =
-            "SELECT id, title, category_id, user_id, date, status FROM `${databaseManager.getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, title, category_id, user_id, date, status FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = JsonArray()
 
@@ -253,7 +253,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
     ) {
 
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ?" else ""}"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ?" else ""}"
 
         val parameters = JsonArray()
 
@@ -274,7 +274,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title FROM `${databaseManager.getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
+            "SELECT id, title FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -318,7 +318,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         }
 
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET status = ? WHERE id IN ($selectedTicketsSQLText)"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE id IN ($selectedTicketsSQLText)"
 
         sqlConnection.updateWithParams(query, parameters) { queryResult ->
             if (queryResult.succeeded())
@@ -333,7 +333,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         sqlConnection: SQLConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` WHERE category_id = ?"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` WHERE category_id = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -363,7 +363,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         }
 
         val query =
-            "DELETE FROM `${databaseManager.getTablePrefix() + tableName}` WHERE id IN ($selectedTicketsSQLText)"
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE id IN ($selectedTicketsSQLText)"
 
         sqlConnection.updateWithParams(query, parameters) { queryResult ->
             if (queryResult.succeeded())
@@ -379,7 +379,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where user_id = ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where user_id = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())

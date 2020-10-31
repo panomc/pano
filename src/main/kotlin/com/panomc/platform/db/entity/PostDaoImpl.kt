@@ -17,7 +17,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
               `category_id` int(11) NOT NULL,
@@ -41,7 +41,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET category_id = ? WHERE category_id = ?"
+        val query = "UPDATE `${getTablePrefix() + tableName}` SET category_id = ? WHERE category_id = ?"
 
         sqlConnection.updateWithParams(query, JsonArray().add(-1).add(categoryID)) { queryResult ->
             if (queryResult.succeeded())
@@ -56,7 +56,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         sqlConnection: SQLConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -72,7 +72,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (post: Map<String, Any>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM `${databaseManager.getTablePrefix() + tableName}` WHERE  `id` = ?"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -101,7 +101,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET move_date = ?, status = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET move_date = ?, status = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -123,7 +123,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET move_date = ?, status = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET move_date = ?, status = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -146,7 +146,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET writer_user_id = ?, `date` = ?, move_date = ?, status = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET writer_user_id = ?, `date` = ?, move_date = ?, status = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -170,7 +170,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (postID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `${getTablePrefix() + tableName}` (`title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         sqlConnection.updateWithParams(
             query,
@@ -199,7 +199,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET title = ?, category_id = ?, writer_user_id = ?, post = ?, `date` = ?, move_date = ?, status = ?, image = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET title = ?, category_id = ?, writer_user_id = ?, post = ?, `date` = ?, move_date = ?, status = ?, image = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -222,7 +222,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     }
 
     override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -237,7 +237,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         sqlConnection: SQLConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where category_id = ?"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where category_id = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -253,7 +253,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` WHERE status = ?"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` WHERE status = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded())
@@ -269,7 +269,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "DELETE from `${databaseManager.getTablePrefix() + tableName}` WHERE id = ?"
+            "DELETE from `${getTablePrefix() + tableName}` WHERE id = ?"
 
         sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -285,7 +285,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title FROM `${databaseManager.getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `date` DESC LIMIT 5"
+            "SELECT id, title FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `date` DESC LIMIT 5"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -315,7 +315,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, writer_user_id, `date`, views, status FROM `${databaseManager.getTablePrefix() + tableName}` WHERE status = ? ORDER BY ${if (pageType == 1) "`date` DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, category_id, writer_user_id, `date`, views, status FROM `${getTablePrefix() + tableName}` WHERE status = ? ORDER BY ${if (pageType == 1) "`date` DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         sqlConnection.queryWithParams(query, JsonArray().add(pageType)) { queryResult ->
             if (queryResult.succeeded()) {

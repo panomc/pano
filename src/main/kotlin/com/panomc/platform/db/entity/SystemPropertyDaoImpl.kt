@@ -16,7 +16,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `option` text NOT NULL,
               `value` text NOT NULL,
@@ -40,7 +40,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
     ) {
         sqlConnection.updateWithParams(
             """
-                INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`option`, `value`) VALUES (?, ?)
+                INSERT INTO `${getTablePrefix() + tableName}` (`option`, `value`) VALUES (?, ?)
             """.trimIndent(),
             JsonArray()
                 .add(systemProperty.option)
@@ -68,7 +68,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
 
         sqlConnection.updateWithParams(
             """
-                UPDATE `${databaseManager.getTablePrefix() + tableName}` SET value = ? ${if (systemProperty.id != -1) ", option = ?" else ""} WHERE `${if (systemProperty.id == -1) "option" else "id"}` = ?
+                UPDATE `${getTablePrefix() + tableName}` SET value = ? ${if (systemProperty.id != -1) ", option = ?" else ""} WHERE `${if (systemProperty.id == -1) "option" else "id"}` = ?
             """.trimIndent(),
             params
         ) {
@@ -85,7 +85,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
         sqlConnection: SQLConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(`value`) FROM `${databaseManager.getTablePrefix() + tableName}` where `option` = ?"
+        val query = "SELECT COUNT(`value`) FROM `${getTablePrefix() + tableName}` where `option` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(systemProperty.option)) { queryResult ->
             if (queryResult.succeeded())
@@ -101,7 +101,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
         handler: (isUserInstalledSystem: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`value`) FROM `${databaseManager.getTablePrefix() + tableName}` where `option` = ? and `value` = ?"
+            "SELECT COUNT(`value`) FROM `${getTablePrefix() + tableName}` where `option` = ? and `value` = ?"
 
         sqlConnection.queryWithParams(
             query,
@@ -119,7 +119,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
         sqlConnection: SQLConnection,
         handler: (systemProperty: SystemProperty?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT `value` FROM `${databaseManager.getTablePrefix() + tableName}` where `option` = ?"
+        val query = "SELECT `value` FROM `${getTablePrefix() + tableName}` where `option` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(systemProperty.option)) { queryResult ->
             if (queryResult.succeeded())

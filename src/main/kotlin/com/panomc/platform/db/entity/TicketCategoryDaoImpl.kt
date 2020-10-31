@@ -17,7 +17,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
               `description` text,
@@ -33,7 +33,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         sqlConnection: SQLConnection,
         handler: (categories: List<TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT id, title FROM `${databaseManager.getTablePrefix() + tableName}`"
+        val query = "SELECT id, title FROM `${getTablePrefix() + tableName}`"
         val categories = mutableListOf<TicketCategory>()
 
         sqlConnection.query(query) { categoryQueryResult ->
@@ -56,7 +56,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         sqlConnection: SQLConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -71,7 +71,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         sqlConnection: SQLConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "DELETE FROM `${databaseManager.getTablePrefix() + tableName}` WHERE `id` = ?"
+        val query = "DELETE FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
 
         sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
@@ -88,7 +88,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
     ) {
 
         val query =
-            "INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`title`, `description`) VALUES (?, ?)"
+            "INSERT INTO `${getTablePrefix() + tableName}` (`title`, `description`) VALUES (?, ?)"
 
         sqlConnection.updateWithParams(
             query,
@@ -108,7 +108,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET title = ?, description = ? WHERE `id` = ?"
+            "UPDATE `${getTablePrefix() + tableName}` SET title = ?, description = ? WHERE `id` = ?"
 
         sqlConnection.updateWithParams(
             query,
@@ -126,7 +126,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
 
     override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query =
-            "SELECT COUNT(id) FROM `${databaseManager.getTablePrefix() + tableName}`"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded())
@@ -142,7 +142,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, description FROM `${databaseManager.getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT id, title, description FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded()) {

@@ -18,7 +18,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `user_id` int NOT NULL,
               `type_ID` varchar(255) NOT NULL,
@@ -38,7 +38,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (user_id, type_ID, date, status) " +
+            "INSERT INTO `${getTablePrefix() + tableName}` (user_id, type_ID, date, status) " +
                     "VALUES (?, ?, ?, ?)"
 
         sqlConnection.updateWithParams(
@@ -62,7 +62,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM `${databaseManager.getTablePrefix() + tableName}` WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
 
         sqlConnection.queryWithParams(
             query,
@@ -81,7 +81,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${databaseManager.getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
 
         sqlConnection.queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -112,7 +112,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC"
 
         sqlConnection.queryWithParams(
             query,
@@ -131,7 +131,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${databaseManager.getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         sqlConnection.queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
             if (queryResult.succeeded()) {
@@ -198,7 +198,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${databaseManager.getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         sqlConnection.queryWithParams(
             query,

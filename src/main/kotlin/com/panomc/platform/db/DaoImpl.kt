@@ -12,4 +12,6 @@ abstract class DaoImpl {
     init {
         Main.getComponent().inject(this)
     }
+
+    fun getTablePrefix() = databaseManager.getTablePrefix()
 }

@@ -18,7 +18,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `when` timestamp not null default CURRENT_TIMESTAMP,
               `key` varchar(255) not null,
               `extra` varchar(255),
@@ -61,7 +61,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) = sqlConnection.updateWithParams(
         """
-            INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (`key`, `extra`) VALUES (?, ?)
+            INSERT INTO `${getTablePrefix() + tableName}` (`key`, `extra`) VALUES (?, ?)
         """.trimIndent(),
         JsonArray()
             .add(schemeVersion.key)
@@ -86,7 +86,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
         sqlConnection: SQLConnection,
         handler: (schemeVersion: SchemeVersion?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "SELECT MAX(`key`) FROM `${databaseManager.getTablePrefix() + tableName}`"
+        val query = "SELECT MAX(`key`) FROM `${getTablePrefix() + tableName}`"
 
         sqlConnection.query(
             query

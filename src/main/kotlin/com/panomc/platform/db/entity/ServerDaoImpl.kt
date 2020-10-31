@@ -18,7 +18,7 @@ class ServerDaoImpl(override val tableName: String = "server") : DaoImpl(), Serv
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
               `player_count` int(11) NOT NULL,
@@ -54,7 +54,7 @@ class ServerDaoImpl(override val tableName: String = "server") : DaoImpl(), Serv
             .compact()
 
         val query =
-            "INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (name, player_count, max_player_count, server_type, server_version, favicon, secret_key, public_key, token, status) " +
+            "INSERT INTO `${getTablePrefix() + tableName}` (name, player_count, max_player_count, server_type, server_version, favicon, secret_key, public_key, token, status) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         sqlConnection.updateWithParams(

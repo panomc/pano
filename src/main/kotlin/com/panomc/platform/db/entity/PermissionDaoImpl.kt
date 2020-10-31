@@ -15,7 +15,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
         sqlConnection.query(
             """
-            CREATE TABLE IF NOT EXISTS `${databaseManager.getTablePrefix() + tableName}` (
+            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `name` varchar(16) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
@@ -38,7 +38,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     ) {
         sqlConnection.queryWithParams(
             """
-            SELECT COUNT(name) FROM `${databaseManager.getTablePrefix() + tableName}` where name = ?
+            SELECT COUNT(name) FROM `${getTablePrefix() + tableName}` where name = ?
         """,
             JsonArray().add(permission.name)
         ) {
@@ -56,7 +56,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
     ) {
         sqlConnection.updateWithParams(
             """
-                INSERT INTO `${databaseManager.getTablePrefix() + tableName}` (name) VALUES (?)
+                INSERT INTO `${getTablePrefix() + tableName}` (name) VALUES (?)
             """.trimIndent(),
             JsonArray().add(permission.name)
         ) {
@@ -73,7 +73,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id FROM `${databaseManager.getTablePrefix() + tableName}` where name = ?"
+            "SELECT id FROM `${getTablePrefix() + tableName}` where name = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(permission.name)) { queryResult ->
             if (queryResult.succeeded())
@@ -89,7 +89,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         handler: (permission: Permission?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `name` FROM `${databaseManager.getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT `name` FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
             if (queryResult.succeeded())
