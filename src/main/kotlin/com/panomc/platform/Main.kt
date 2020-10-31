@@ -3,10 +3,7 @@ package com.panomc.platform
 import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.di.component.ApplicationComponent
 import com.panomc.platform.di.component.DaggerApplicationComponent
-import com.panomc.platform.di.module.ConfigManagerModule
-import com.panomc.platform.di.module.LoggerModule
-import com.panomc.platform.di.module.RouterModule
-import com.panomc.platform.di.module.VertxModule
+import com.panomc.platform.di.module.*
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -57,6 +54,7 @@ class Main : AbstractVerticle() {
                 .loggerModule(LoggerModule(mLogger))
                 .routerModule(RouterModule(mVertx))
                 .configManagerModule(ConfigManagerModule(mConfigManager))
+                .mailClientModule(MailClientModule(mConfigManager))
                 .build()
         }
 
