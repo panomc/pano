@@ -1,7 +1,9 @@
 package com.panomc.platform
 
+import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.di.component.ApplicationComponent
 import com.panomc.platform.di.component.DaggerApplicationComponent
+import com.panomc.platform.di.module.ConfigManagerModule
 import com.panomc.platform.di.module.LoggerModule
 import com.panomc.platform.di.module.RouterModule
 import com.panomc.platform.di.module.VertxModule
@@ -21,6 +23,7 @@ class Main : AbstractVerticle() {
         private val mOptions = VertxOptions()
         private val mVertx = Vertx.vertx(mOptions)
         private val mLogger = LoggerFactory.getLogger("Pano Platform")
+        private val mConfigManager = ConfigManager(mLogger, mVertx)
 
         private val mURLClassLoader = Main::class.java.classLoader as URLClassLoader
         private val mMode by lazy {
@@ -53,6 +56,7 @@ class Main : AbstractVerticle() {
                 .vertxModule(VertxModule(mVertx))
                 .loggerModule(LoggerModule(mLogger))
                 .routerModule(RouterModule(mVertx))
+                .configManagerModule(ConfigManagerModule(mConfigManager))
                 .build()
         }
 
