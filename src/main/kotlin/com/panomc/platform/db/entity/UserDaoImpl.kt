@@ -16,11 +16,10 @@ import java.util.*
 
 class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `username` varchar(16) NOT NULL UNIQUE,
@@ -35,7 +34,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
         """
-        ) {
+            ) {
             handler.invoke(it)
         }
     }

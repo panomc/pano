@@ -4,7 +4,5 @@ import io.vertx.core.AsyncResult
 import io.vertx.ext.sql.SQLConnection
 
 interface Dao<T> {
-    fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection
+    fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection
 }

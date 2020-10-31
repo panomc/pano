@@ -163,7 +163,7 @@ class DatabaseManager(
     }
 
     fun initDatabase(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
-        val databaseInitProcessHandlers = mDatabase.init(sqlConnection)
+        val databaseInitProcessHandlers = mDatabase.init()
 
         var currentIndex = 0
 
@@ -184,7 +184,7 @@ class DatabaseManager(
             }
 
             if (currentIndex <= databaseInitProcessHandlers.lastIndex)
-                databaseInitProcessHandlers[currentIndex].invoke(localHandler)
+                databaseInitProcessHandlers[currentIndex].invoke(sqlConnection, localHandler)
         }
 
         invoke()

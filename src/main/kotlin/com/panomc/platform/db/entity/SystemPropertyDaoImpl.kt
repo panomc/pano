@@ -11,11 +11,10 @@ import io.vertx.ext.sql.SQLConnection
 
 class SystemPropertyDaoImpl(override val tableName: String = "system_property") : DaoImpl(), SystemPropertyDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `option` text NOT NULL,
@@ -23,7 +22,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System Property table.';
         """
-        ) {
+            ) {
             if (it.succeeded())
                 addShowGettingStartedOption(sqlConnection) {
                     handler.invoke(it)

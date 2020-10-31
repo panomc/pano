@@ -2,7 +2,6 @@ package com.panomc.platform.db
 
 import com.panomc.platform.db.dao.*
 import com.panomc.platform.db.entity.*
-import io.vertx.ext.sql.SQLConnection
 
 data class Database(
     val schemeVersionDao: SchemeVersionDao = SchemeVersionDaoImpl(),
@@ -18,20 +17,18 @@ data class Database(
     val ticketDao: TicketDao = TicketDaoImpl(),
     val ticketCategoryDao: TicketCategoryDao = TicketCategoryDaoImpl()
 ) {
-    fun init(
-        sqlConnection: SQLConnection
-    ) = listOf(
-        schemeVersionDao.init(sqlConnection),
-        userDao.init(sqlConnection),
-        permissionDao.init(sqlConnection),
-        tokenDao.init(sqlConnection),
-        panelConfigDao.init(sqlConnection),
-        serverDao.init(sqlConnection),
-        systemPropertyDao.init(sqlConnection),
-        panelNotificationDao.init(sqlConnection),
-        postDao.init(sqlConnection),
-        postCategoryDao.init(sqlConnection),
-        ticketDao.init(sqlConnection),
-        ticketCategoryDao.init(sqlConnection)
+    fun init() = listOf(
+        schemeVersionDao.init(),
+        userDao.init(),
+        permissionDao.init(),
+        tokenDao.init(),
+        panelConfigDao.init(),
+        serverDao.init(),
+        systemPropertyDao.init(),
+        panelNotificationDao.init(),
+        postDao.init(),
+        postCategoryDao.init(),
+        ticketDao.init(),
+        ticketCategoryDao.init()
     )
 }

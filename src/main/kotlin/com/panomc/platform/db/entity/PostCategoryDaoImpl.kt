@@ -12,11 +12,10 @@ import java.util.*
 
 class PostCategoryDaoImpl(override val tableName: String = "post_category") : DaoImpl(), PostCategoryDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
@@ -26,7 +25,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Post category table.';
         """
-        ) {
+            ) {
             handler.invoke(it)
         }
     }

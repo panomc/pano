@@ -12,11 +12,10 @@ import java.util.*
 
 class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
@@ -31,7 +30,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Posts table.';
         """
-        ) {
+            ) {
             handler.invoke(it)
         }
     }

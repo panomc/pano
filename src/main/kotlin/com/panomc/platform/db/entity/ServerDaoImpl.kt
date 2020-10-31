@@ -13,11 +13,10 @@ import java.util.*
 
 class ServerDaoImpl(override val tableName: String = "server") : DaoImpl(), ServerDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `name` varchar(255) NOT NULL,
@@ -34,7 +33,7 @@ class ServerDaoImpl(override val tableName: String = "server") : DaoImpl(), Serv
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connected server table.';
         """
-        ) {
+            ) {
             handler.invoke(it)
         }
     }

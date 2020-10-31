@@ -13,11 +13,10 @@ import io.vertx.ext.sql.SQLConnection
 
 class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : DaoImpl(), SchemeVersionDao {
 
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `when` timestamp not null default CURRENT_TIMESTAMP,
               `key` varchar(255) not null,
@@ -25,7 +24,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
               PRIMARY KEY (`key`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Database scheme version table.';
         """
-        ) {
+            ) {
             if (it.succeeded())
                 getLastSchemeVersion(sqlConnection) { schemeVersion, asyncResult ->
                     if (schemeVersion == null)

@@ -10,11 +10,10 @@ import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
 
 class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenDao {
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `token` text NOT NULL,
@@ -24,7 +23,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
         """
-        ) {
+            ) {
             handler.invoke(it)
         }
     }

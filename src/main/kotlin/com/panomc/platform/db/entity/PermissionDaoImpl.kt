@@ -10,19 +10,18 @@ import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
 
 class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl(), PermissionDao {
-    override fun init(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
-        sqlConnection.query(
-            """
+    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+        { sqlConnection, handler ->
+            sqlConnection.query(
+                """
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `name` varchar(16) NOT NULL UNIQUE,
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permission Table';
         """
-        ) {
-            if (it.succeeded())
+            ) {
+                if (it.succeeded())
                 createAdminPermission(sqlConnection) {
                     handler.invoke(it)
                 }
