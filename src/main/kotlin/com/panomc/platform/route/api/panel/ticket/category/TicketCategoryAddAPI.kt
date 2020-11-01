@@ -49,7 +49,7 @@ class TicketCategoryAddAPI : PanelApi() {
                 ) { result, _ ->
                     if (result == null)
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.TICKET_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_91))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_91))
                         }
                     else
                         databaseManager.closeConnection(sqlConnection) {

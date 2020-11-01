@@ -36,7 +36,7 @@ class CloseConnectServerCardAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_26))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_26))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
@@ -45,7 +45,7 @@ class CloseConnectServerCardAPI : PanelApi() {
                     ) { isUserInstalledSystem, _ ->
                         if (isUserInstalledSystem == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_27))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_27))
                             }
                         else
                             databaseManager.getDatabase().systemPropertyDao.update(
@@ -57,7 +57,7 @@ class CloseConnectServerCardAPI : PanelApi() {
                             ) { updateResult, _ ->
                                 databaseManager.closeConnection(sqlConnection) {
                                     if (updateResult == null)
-                                        handler.invoke(Error(ErrorCode.CLOSE_CONNECT_SERVER_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_25))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_25))
                                     else
                                         handler.invoke(Successful())
                                 }

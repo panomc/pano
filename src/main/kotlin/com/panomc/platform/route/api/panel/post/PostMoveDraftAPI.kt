@@ -36,7 +36,7 @@ class PostMoveDraftAPI : PanelApi() {
             ) { exists, _ ->
                 if (exists == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.MOVE_DRAFT_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_109))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_109))
                     }
 
                     return@isExistsByID
@@ -56,7 +56,7 @@ class PostMoveDraftAPI : PanelApi() {
                 ) { result, _ ->
                     if (result == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.MOVE_DRAFT_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_108))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_108))
                         }
 
                         return@moveDraftByID

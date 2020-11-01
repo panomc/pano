@@ -30,7 +30,7 @@ class CategoriesAPI : PanelApi() {
             databaseManager.getDatabase().postCategoryDao.getCount(sqlConnection) { countOfCategories, _ ->
                 if (countOfCategories == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_CATEGORY_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_88))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_88))
                     }
                 else
                     databaseManager.getDatabase().postCategoryDao.getCategories(
@@ -38,7 +38,7 @@ class CategoriesAPI : PanelApi() {
                     ) { categories, _ ->
                         if (categories == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.POST_CATEGORY_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_87))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_87))
                             }
                         else {
                             val result = mutableMapOf<String, Any?>(

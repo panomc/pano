@@ -36,7 +36,7 @@ class CloseGettingStartedCardAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_23))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_23))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
@@ -45,7 +45,7 @@ class CloseGettingStartedCardAPI : PanelApi() {
                     ) { isUserInstalledSystem, _ ->
                         if (isUserInstalledSystem == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_24))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_24))
                             }
                         else
                             databaseManager.getDatabase().systemPropertyDao.update(
@@ -57,7 +57,7 @@ class CloseGettingStartedCardAPI : PanelApi() {
                             ) { updateResult, _ ->
                                 databaseManager.closeConnection(sqlConnection) {
                                     if (updateResult == null)
-                                        handler.invoke(Error(ErrorCode.CLOSE_GETTING_STARTED_CARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_22))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_22))
                                     else
                                         handler.invoke(Successful())
                                 }

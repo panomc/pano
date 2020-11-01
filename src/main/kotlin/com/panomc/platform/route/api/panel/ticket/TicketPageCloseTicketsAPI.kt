@@ -44,7 +44,7 @@ class TicketPageCloseTicketsAPI : PanelApi() {
             ) { result, _ ->
                 if (result == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.TICKET_CLOSE_TICKETS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_113))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_113))
                     }
                 else
                     databaseManager.closeConnection(sqlConnection) {

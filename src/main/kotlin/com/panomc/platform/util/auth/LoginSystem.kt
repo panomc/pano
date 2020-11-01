@@ -64,7 +64,7 @@ class LoginSystem : Auth() {
         ) { isLoginCorrect, _ ->
             when {
                 isLoginCorrect == null -> closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_127))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_127))
                 }
                 isLoginCorrect -> handler.invoke()
                 else -> closeConnection {
@@ -86,7 +86,7 @@ class LoginSystem : Auth() {
             ) { userID, _ ->
                 if (userID == null)
                     closeConnection {
-                        resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_4))
+                        resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_4))
                     }
                 else
                     handler.invoke(userID)
@@ -102,7 +102,7 @@ class LoginSystem : Auth() {
         databaseManager.getDatabase().userDao.getSecretKeyByID(userID, sqlConnection) { secretKey, _ ->
             if (secretKey == null)
                 closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_6))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_6))
                 }
             else
                 handler.invoke(secretKey)
@@ -133,7 +133,7 @@ class LoginSystem : Auth() {
                 ) { result, _ ->
                     if (result == null)
                         closeConnection {
-                            resultHandler.invoke(Error(ErrorCode.LOGIN_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_5))
+                            resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_5))
                         }
                     else
                         handler.invoke(token)

@@ -34,7 +34,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
             databaseManager.getDatabase().ticketCategoryDao.count(sqlConnection) { count, _ ->
                 if (count == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_80))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_80))
                     }
                 else {
                     var totalPage = ceil(count.toDouble() / 10).toInt()
@@ -53,7 +53,7 @@ class TicketCategoryPageInitAPI : PanelApi() {
                         ) { categories, _ ->
                             if (categories == null)
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.TICKET_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_79))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_79))
                                 }
                             else
                                 databaseManager.closeConnection(sqlConnection) {

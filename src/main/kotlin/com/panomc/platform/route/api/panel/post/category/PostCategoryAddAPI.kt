@@ -74,7 +74,7 @@ class PostCategoryAddAPI : PanelApi() {
             ) { exists, _ ->
                 when {
                     exists == null -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_94))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_94))
                     }
                     exists -> {
                         errors["url"] = true
@@ -93,7 +93,7 @@ class PostCategoryAddAPI : PanelApi() {
                     ) { id, _ ->
                         if (id == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.POST_CATEGORY_ADD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_93))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_93))
                             }
                         else
                             databaseManager.closeConnection(sqlConnection) {

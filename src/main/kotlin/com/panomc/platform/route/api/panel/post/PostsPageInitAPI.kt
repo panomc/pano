@@ -38,7 +38,7 @@ class PostsPageInitAPI : PanelApi() {
             ) { count, _ ->
                 if (count == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_84))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_84))
                     }
 
                     return@countByPageType
@@ -64,7 +64,7 @@ class PostsPageInitAPI : PanelApi() {
                 ) { posts, _ ->
                     if (posts == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_82))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_82))
                         }
 
                         return@getByPageAndPageType

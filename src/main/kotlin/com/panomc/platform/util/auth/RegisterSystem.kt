@@ -72,7 +72,7 @@ class RegisterSystem : Auth() {
         ) { isEmailExists, _ ->
             when {
                 isEmailExists == null -> closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_1))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_1))
                 }
                 isEmailExists -> closeConnection {
                     resultHandler.invoke(Error(ErrorCode.REGISTER_EMAIL_NOT_AVAILABLE))
@@ -92,7 +92,7 @@ class RegisterSystem : Auth() {
         ) { permissionID, _ ->
             if (permissionID == null)
                 closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_3))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_3))
                 }
             else
                 handler.invoke(permissionID)
@@ -126,7 +126,7 @@ class RegisterSystem : Auth() {
         ) { result, _ ->
             if (result == null || result !is Successful)
                 closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_2))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_2))
                 }
             else
                 handler.invoke()
@@ -144,7 +144,7 @@ class RegisterSystem : Auth() {
         ) { userID, _ ->
             if (userID == null)
                 closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_12))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_12))
                 }
             else
                 handler.invoke(userID)
@@ -161,7 +161,7 @@ class RegisterSystem : Auth() {
         databaseManager.getDatabase().systemPropertyDao.isPropertyExists(property, sqlConnection) { exists, _ ->
             when {
                 exists == null -> closeConnection {
-                    resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_13))
+                    resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_13))
                 }
                 exists -> databaseManager.getDatabase().systemPropertyDao.update(
                     property,
@@ -169,7 +169,7 @@ class RegisterSystem : Auth() {
                 ) { resultOfUpdate, _ ->
                     if (resultOfUpdate == null)
                         closeConnection {
-                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_15))
+                            resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_15))
                         }
                     else
                         handler.invoke()
@@ -180,7 +180,7 @@ class RegisterSystem : Auth() {
                 ) { resultOfAdd, _ ->
                     if (resultOfAdd == null)
                         closeConnection {
-                            resultHandler.invoke(Error(ErrorCode.REGISTER_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_14))
+                            resultHandler.invoke(Error(ErrorCode.UNKNOWN_ERROR_14))
                         }
                     else
                         handler.invoke()

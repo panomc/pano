@@ -36,7 +36,7 @@ class PostMoveTrashAPI : PanelApi() {
             ) { exists, _ ->
                 when {
                     exists == null -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.MOVE_TRASH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_107))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_107))
                     }
                     exists -> databaseManager.getDatabase().postDao.moveTrashByID(
                         id,
@@ -44,7 +44,7 @@ class PostMoveTrashAPI : PanelApi() {
                     ) { result, _ ->
                         if (result == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.MOVE_TRASH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_106))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_106))
                             }
                         else
                             handler.invoke(Successful())

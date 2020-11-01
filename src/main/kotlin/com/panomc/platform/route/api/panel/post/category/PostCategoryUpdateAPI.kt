@@ -77,7 +77,7 @@ class PostCategoryUpdateAPI : PanelApi() {
             ) { exists, _ ->
                 if (exists == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_96))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_96))
                     }
 
                     return@isExistsByURLNotByID
@@ -103,7 +103,7 @@ class PostCategoryUpdateAPI : PanelApi() {
                 ) { result, _ ->
                     if (result == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.POST_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_95))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_95))
                         }
 
                         return@update

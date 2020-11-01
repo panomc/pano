@@ -37,7 +37,7 @@ class PostDeleteAPI : PanelApi() {
             ) { exists, _ ->
                 if (exists == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.DELETE_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_102))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_102))
                     }
                 else {
                     if (!exists) {
@@ -54,7 +54,7 @@ class PostDeleteAPI : PanelApi() {
                     ) { result, _ ->
                         if (result == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.DELETE_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_101))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_101))
                             }
                         else
                             databaseManager.closeConnection(sqlConnection) {

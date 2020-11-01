@@ -36,7 +36,7 @@ class EditPostPageInitAPI : PanelApi() {
             ) { exists, _ ->
                 when {
                     exists == null -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.EDIT_POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_100))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_100))
                     }
                     exists -> databaseManager.getDatabase().postDao.getByID(
                         id,
@@ -44,7 +44,7 @@ class EditPostPageInitAPI : PanelApi() {
                     ) { post, _ ->
                         if (post == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.EDIT_POST_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_99))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_99))
                             }
                         else
                             databaseManager.closeConnection(sqlConnection) {

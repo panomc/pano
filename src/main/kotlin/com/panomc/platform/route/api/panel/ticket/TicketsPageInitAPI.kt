@@ -38,7 +38,7 @@ class TicketsPageInitAPI : PanelApi() {
             ) { count, _ ->
                 if (count == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_78))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_78))
                     }
                 else {
                     var totalPage = ceil(count.toDouble() / 10).toInt()
@@ -61,7 +61,7 @@ class TicketsPageInitAPI : PanelApi() {
                     ) { tickets, _ ->
                         if (tickets == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_76))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_76))
                             }
                         else {
 

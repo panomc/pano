@@ -45,7 +45,7 @@ class PostPublishAPI : PanelApi() {
                     databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(
                             Error(
-                                ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_116
+                                ErrorCode.UNKNOWN_ERROR_116
                             )
                         )
                     }
@@ -59,7 +59,7 @@ class PostPublishAPI : PanelApi() {
                         ) { postID, _ ->
                             if (postID == null)
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_114))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_114))
                                 }
                             else
                                 databaseManager.closeConnection(sqlConnection) {
@@ -80,7 +80,7 @@ class PostPublishAPI : PanelApi() {
                         ) { result, _ ->
                             if (result == null)
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.PUBLISH_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_115))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_115))
                                 }
                             else
                                 handler.invoke(Successful())

@@ -36,7 +36,7 @@ class TicketCategoryDeleteAPI : PanelApi() {
             ) { exists, _ ->
                 if (exists == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_90))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_90))
                     }
                 else
                     if (!exists)
@@ -51,7 +51,7 @@ class TicketCategoryDeleteAPI : PanelApi() {
                         ) { result, _ ->
                             if (result == null)
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.TICKET_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_89))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_89))
                                 }
                             else
                                 databaseManager.closeConnection(sqlConnection) {

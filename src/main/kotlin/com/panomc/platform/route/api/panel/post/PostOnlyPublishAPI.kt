@@ -38,7 +38,7 @@ class PostOnlyPublishAPI : PanelApi() {
             ) { exists, _ ->
                 if (exists == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_104))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_104))
                     }
 
                     return@isExistsByID
@@ -58,7 +58,7 @@ class PostOnlyPublishAPI : PanelApi() {
                 ) { userID, _ ->
                     if (userID == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_105))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_105))
                         }
 
                         return@getUserIDFromToken
@@ -71,7 +71,7 @@ class PostOnlyPublishAPI : PanelApi() {
                     ) { result, _ ->
                         if (result == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.PUBLISH_ONLY_POST_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_103))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_103))
                             }
 
                             return@publishByID

@@ -41,7 +41,7 @@ class TicketPageDeleteTicketsAPI : PanelApi() {
             ) { result, _ ->
                 if (result == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.TICKET_DELETE_TICKETS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_117))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_117))
                     }
                 else
                     databaseManager.closeConnection(sqlConnection) {

@@ -62,7 +62,7 @@ class ConnectNewAPI : Api() {
                 ) { token, _ ->
                     if (token == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.CONNECT_NEW_SERVER_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_29))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_29))
                         }
 
                         return@add

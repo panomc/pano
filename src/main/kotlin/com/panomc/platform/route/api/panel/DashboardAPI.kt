@@ -35,7 +35,7 @@ class DashboardAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_16))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_16))
                     }
                 else
                     databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
@@ -44,13 +44,13 @@ class DashboardAPI : PanelApi() {
                     ) { isUserInstalled, _ ->
                         if (isUserInstalled == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_17))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_17))
                             }
                         else
                             databaseManager.getDatabase().userDao.count(sqlConnection) { countOfUsers, _ ->
                                 if (countOfUsers == null)
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_18))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_18))
                                     }
                                 else
                                     databaseManager.getDatabase().postDao.count(
@@ -58,7 +58,7 @@ class DashboardAPI : PanelApi() {
                                     ) { countOfPosts, _ ->
                                         if (countOfPosts == null)
                                             databaseManager.closeConnection(sqlConnection) {
-                                                handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_19))
+                                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_19))
                                             }
                                         else
                                             databaseManager.getDatabase().ticketDao.count(
@@ -66,7 +66,7 @@ class DashboardAPI : PanelApi() {
                                             ) { countOfTickets, _ ->
                                                 if (countOfTickets == null)
                                                     databaseManager.closeConnection(sqlConnection) {
-                                                        handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_112))
+                                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_112))
                                                     }
                                                 else
                                                     databaseManager.getDatabase().ticketDao.countOfOpenTickets(
@@ -74,7 +74,7 @@ class DashboardAPI : PanelApi() {
                                                     ) { countOfOpenTickets, _ ->
                                                         if (countOfOpenTickets == null)
                                                             databaseManager.closeConnection(sqlConnection) {
-                                                                handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_118))
+                                                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_118))
                                                             }
                                                         else
                                                             databaseManager.getDatabase().ticketDao.getLast5Tickets(
@@ -82,7 +82,7 @@ class DashboardAPI : PanelApi() {
                                                             ) { tickets, _ ->
                                                                 if (tickets == null)
                                                                     databaseManager.closeConnection(sqlConnection) {
-                                                                        handler.invoke(Error(ErrorCode.TICKETS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_76))
+                                                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_76))
                                                                     }
                                                                 else {
                                                                     val result = mutableMapOf<String, Any?>(
@@ -114,7 +114,7 @@ class DashboardAPI : PanelApi() {
                                                                                 databaseManager.closeConnection(
                                                                                     sqlConnection
                                                                                 ) {
-                                                                                    handler.invoke(Error(ErrorCode.DASHBOARD_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_20))
+                                                                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_20))
                                                                                 }
                                                                             else {
                                                                                 result["getting_started_blocks"] =

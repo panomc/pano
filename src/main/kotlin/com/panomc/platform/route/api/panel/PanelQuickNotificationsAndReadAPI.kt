@@ -35,7 +35,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_72))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_72))
                     }
                 else
                     databaseManager.getDatabase().panelNotificationDao.getLast5ByUserID(
@@ -44,7 +44,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
                     ) { notifications, _ ->
                         if (notifications == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_71))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_71))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
@@ -53,7 +53,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
                             ) { count, _ ->
                                 if (count == null)
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_70))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_70))
                                     }
                                 else
                                     databaseManager.getDatabase().panelNotificationDao.markReadLat5ByUserID(
@@ -62,7 +62,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
                                     ) { result, _ ->
                                         if (result == null)
                                             databaseManager.closeConnection(sqlConnection) {
-                                                handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_69))
+                                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_69))
                                             }
                                         else
                                             databaseManager.closeConnection(sqlConnection) {

@@ -36,14 +36,14 @@ class PostCategoryDeleteAPI : PanelApi() {
             ) { exists, _ ->
                 when {
                     exists == null -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_98))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_98))
                     }
                     exists -> databaseManager.getDatabase().postDao.removePostCategoriesByCategoryID(
                         id,
                         sqlConnection
                     ) { removeResult, _ ->
                         if (removeResult == null) databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_121))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_121))
                         }
                         else databaseManager.getDatabase().postCategoryDao.deleteByID(
                             id,
@@ -51,7 +51,7 @@ class PostCategoryDeleteAPI : PanelApi() {
                         ) { deleteResult, _ ->
                             if (deleteResult == null)
                                 databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.POST_CATEGORY_DELETE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_97))
+                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_97))
                                 }
                             else
                                 handler.invoke(Successful())

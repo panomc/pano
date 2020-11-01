@@ -50,7 +50,7 @@ class TicketCategoryUpdateAPI : PanelApi() {
                 ) { result, _ ->
                     if (result == null)
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.TICKET_CATEGORY_UPDATE_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_92))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_92))
                         }
                     else
                         databaseManager.closeConnection(sqlConnection) {

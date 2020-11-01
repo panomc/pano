@@ -35,7 +35,7 @@ class PanelQuickNotificationsAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_74))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_74))
                     }
                 else
                     databaseManager.getDatabase().panelNotificationDao.getLast5ByUserID(
@@ -44,7 +44,7 @@ class PanelQuickNotificationsAPI : PanelApi() {
                     ) { notifications, _ ->
                         if (notifications == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_73))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_73))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
@@ -53,7 +53,7 @@ class PanelQuickNotificationsAPI : PanelApi() {
                             ) { count, _ ->
                                 if (count == null)
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_67))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_67))
                                     }
                                 else
                                     databaseManager.closeConnection(sqlConnection) {

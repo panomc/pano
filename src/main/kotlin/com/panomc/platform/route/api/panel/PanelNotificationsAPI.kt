@@ -34,7 +34,7 @@ class PanelNotificationsAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_66))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_66))
                     }
                 else
                     databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
@@ -43,7 +43,7 @@ class PanelNotificationsAPI : PanelApi() {
                     ) { count, _ ->
                         if (count == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_65))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_65))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getAllByUserID(
@@ -52,7 +52,7 @@ class PanelNotificationsAPI : PanelApi() {
                             ) { notifications, _ ->
                                 if (notifications == null)
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_110))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_110))
                                     }
                                 else
                                     databaseManager.getDatabase().panelNotificationDao.markReadAll(
@@ -61,7 +61,7 @@ class PanelNotificationsAPI : PanelApi() {
                                     ) { result, _ ->
                                         if (result == null)
                                             databaseManager.closeConnection(sqlConnection) {
-                                                handler.invoke(Error(ErrorCode.PANEL_NOTIFICATIONS_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_111))
+                                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_111))
                                             }
                                         else {
                                             databaseManager.closeConnection(sqlConnection) {

@@ -38,7 +38,7 @@ class PlayersPageInitAPI : PanelApi() {
             ) { count, _ ->
                 if (count == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PLAYERS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_124))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_124))
                     }
 
                     return@countByPageType
@@ -64,7 +64,7 @@ class PlayersPageInitAPI : PanelApi() {
                 ) { userList, _ ->
                     if (userList == null) {
                         databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.PLAYERS_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_125))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_125))
                         }
 
                         return@getAllByPageAndPageType

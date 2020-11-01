@@ -43,7 +43,7 @@ class BasicDataAPI : PanelApi() {
             ) { userID, _ ->
                 if (userID == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_8))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_8))
                     }
                 else
                     databaseManager.getDatabase().userDao.getByID(
@@ -52,7 +52,7 @@ class BasicDataAPI : PanelApi() {
                     ) { user, _ ->
                         if (user == null)
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_7))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_7))
                             }
                         else
                             databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
@@ -61,7 +61,7 @@ class BasicDataAPI : PanelApi() {
                             ) { count, _ ->
                                 if (count == null)
                                     databaseManager.closeConnection(sqlConnection) {
-                                        handler.invoke(Error(ErrorCode.PANEL_BASIC_DATA_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_68))
+                                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_68))
                                     }
                                 else
                                     databaseManager.closeConnection(sqlConnection) {

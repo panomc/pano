@@ -34,7 +34,7 @@ class PostCategoryPageInitAPI : PanelApi() {
             databaseManager.getDatabase().postCategoryDao.getCount(sqlConnection) { count, _ ->
                 if (count == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_86))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_86))
                     }
                 else {
                     var totalPage = ceil(count.toDouble() / 10).toInt()
@@ -56,7 +56,7 @@ class PostCategoryPageInitAPI : PanelApi() {
                     ) { categories, _ ->
                         if (categories == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.POST_CATEGORY_PAGE_INIT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_85))
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
                             }
 
                             return@getCategories

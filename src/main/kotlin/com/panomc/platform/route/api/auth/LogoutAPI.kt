@@ -35,7 +35,7 @@ class LogoutAPI : LoggedInApi() {
             ) { result, _ ->
                 if (result == null)
                     databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.LOGOUT_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_28))
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
                     }
                 else
                     databaseManager.closeConnection(sqlConnection) {
