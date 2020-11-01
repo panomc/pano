@@ -72,7 +72,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id FROM `${getTablePrefix() + tableName}` where name = ?"
+            "SELECT id FROM `${getTablePrefix() + tableName}` where `name` = ?"
 
         sqlConnection.queryWithParams(query, JsonArray().add(permission.name)) { queryResult ->
             if (queryResult.succeeded())

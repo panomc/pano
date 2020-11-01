@@ -58,7 +58,9 @@ object RegisterUtil {
                     return@getPermissionID
                 }
 
-                addUser(user, databaseManager, sqlConnection) { result, asyncResultOfAddUser ->
+                val newUser = User(user.id, user.username, user.email, user.password, user.ipAddress, permissionID)
+
+                addUser(newUser, databaseManager, sqlConnection) { result, asyncResultOfAddUser ->
                     if (result == null) {
                         handler.invoke(
                             Error(ErrorCode.UNKNOWN_ERROR_2),
