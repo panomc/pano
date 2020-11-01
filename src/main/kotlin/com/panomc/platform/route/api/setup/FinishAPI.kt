@@ -98,6 +98,8 @@ class FinishAPI : SetupApi() {
                             }
 
                             if (isLoggedIn) {
+                                setupManager.finishSetup()
+
                                 handler.invoke(Successful())
 
                                 return@login

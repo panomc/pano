@@ -12,6 +12,7 @@ import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
 import io.vertx.ext.sql.SQLConnection
+import org.apache.commons.codec.digest.DigestUtils
 import java.util.*
 
 class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao {
@@ -35,9 +36,9 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
         """
             ) {
-            handler.invoke(it)
+                handler.invoke(it)
+            }
         }
-    }
 
     override fun add(
         user: User,
@@ -55,7 +56,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             JsonArray()
                 .add(user.username)
                 .add(user.email)
-                .add(user.password)
+                .add(DigestUtils.md5Hex(user.password))
                 .add(user.ipAddress)
                 .add(user.permissionID)
                 .add(Base64.getEncoder().encodeToString(key.private.encoded))
@@ -137,15 +138,18 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     }
 
     override fun isLoginCorrect(
-        email: String,
+        usernameOrEmail: String,
         password: String,
         sqlConnection: SQLConnection,
         handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ? and password = ?"
+            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where (username = ? or email = ?) and password = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(email).add(password)) { queryResult ->
+        sqlConnection.queryWithParams(
+            query,
+            JsonArray().add(usernameOrEmail).add(usernameOrEmail).add(DigestUtils.md5Hex(password))
+        ) { queryResult ->
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
             else

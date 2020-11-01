@@ -36,7 +36,7 @@ interface UserDao : Dao<User> {
     )
 
     fun isLoginCorrect(
-        email: String,
+        usernameOrEmail: String,
         password: String,
         sqlConnection: SQLConnection,
         handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
