@@ -19,7 +19,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
               `id` int NOT NULL AUTO_INCREMENT,
               `title` MEDIUMTEXT NOT NULL,
-              `category_id` int(title11) NOT NULL,
+              `category_id` int(11) NOT NULL,
               `user_id` int(11) NOT NULL,
               `date` MEDIUMTEXT NOT NULL,
               `status` int(1) NOT NULL,
