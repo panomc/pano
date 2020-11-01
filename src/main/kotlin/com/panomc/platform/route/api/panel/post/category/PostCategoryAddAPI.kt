@@ -2,24 +2,14 @@ package com.panomc.platform.route.api.panel.post.category
 
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.*
 import io.vertx.ext.web.RoutingContext
-import javax.inject.Inject
 
 class PostCategoryAddAPI : PanelApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/panel/post/category/add")
-
-    init {
-        getComponent().inject(this)
-    }
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson

@@ -2,6 +2,7 @@ package com.panomc.platform.util
 
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
+import com.panomc.platform.db.DatabaseManager
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.impl.StaticHandlerImpl
 import javax.inject.Inject
@@ -14,18 +15,19 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl(mRoot) 
     @Inject
     lateinit var configManager: ConfigManager
 
+    @Inject
+    lateinit var databaseManager: DatabaseManager
+
     init {
         getComponent().inject(this)
     }
 
     override fun handle(context: RoutingContext) {
-        if (context.normalisedPath().startsWith("/panel/")) {
-            val auth = Auth()
-
-            auth.isAdmin(context) { isAdmin ->
+        if (context.normalisedPath().startsWith("/panel/"))
+            LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
                 handle(context, isAdmin)
             }
-        } else
+        else
             handle(context, false)
     }
 

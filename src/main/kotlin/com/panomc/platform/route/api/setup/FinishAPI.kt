@@ -3,11 +3,11 @@ package com.panomc.platform.route.api.setup
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.db.DatabaseManager
+import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
-import com.panomc.platform.util.auth.LoginSystem
-import com.panomc.platform.util.auth.RegisterSystem
+import com.panomc.platform.util.LoginUtil
+import com.panomc.platform.util.RegisterUtil
 import io.vertx.ext.web.RoutingContext
-import java.net.ConnectException
 import javax.inject.Inject
 
 class FinishAPI : SetupApi() {
@@ -23,36 +23,91 @@ class FinishAPI : SetupApi() {
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        if (setupManager.getStep() == 3) {
-            val data = context.bodyAsJson
-            val remoteIP = context.request().remoteAddress().host()
+        if (setupManager.getStep() != 3) {
+            handler.invoke(Successful(setupManager.getCurrentStepData()))
 
-            databaseManager.initDatabase {
-                if (it.failed() && it.cause() is ConnectException)
+            return
+        }
+
+        val data = context.bodyAsJson
+
+        val username = data.getString("username")
+        val email = data.getString("email")
+        val password = data.getString("password")
+
+        val remoteIP = context.request().remoteAddress().host()
+
+        RegisterUtil.validateForm(
+            username,
+            email,
+            email,
+            password,
+            password,
+            false
+        ) { resultOfValidateForm ->
+            if (resultOfValidateForm is Error) {
+                handler.invoke(resultOfValidateForm)
+
+                return@validateForm
+            }
+
+            databaseManager.createConnection { sqlConnection, _ ->
+                if (sqlConnection == null) {
                     handler.invoke(Error(ErrorCode.FINISH_API_CANT_CONNECT_DATABASE_PLEASE_CHECK_YOUR_INFO))
-                else if (it.failed())
-                    handler.invoke(Error(ErrorCode.FINISH_API_SOMETHING_WENT_WRONG_IN_DATABASE))
-                else {
-                    val registerSystem = RegisterSystem()
 
-                    registerSystem.register(data, remoteIP, true) { registerResult ->
-                        if (registerResult is Successful) {
-                            val loginSystem = LoginSystem()
+                    return@createConnection
+                }
 
-                            loginSystem.login(data, remoteIP) { loginResult ->
-                                if (loginResult is Successful)
-                                    loginSystem.createSession(data.getString("username"), context) { result ->
-                                        handler.invoke(result)
-                                    }
-                                else if (loginResult is Error)
-                                    handler.invoke(loginResult)
+                databaseManager.initDatabase(sqlConnection) {
+                    if (it.failed()) {
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_128))
+
+                        return@initDatabase
+                    }
+
+                    RegisterUtil.register(
+                        databaseManager,
+                        sqlConnection,
+                        User(-1, username, email, password, remoteIP),
+                        true
+                    ) { resultOfRegister, _ ->
+                        if (resultOfRegister == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_128))
+
+                            return@register
+                        }
+
+                        if (resultOfRegister is Error) {
+                            handler.invoke(resultOfValidateForm)
+
+                            return@register
+                        }
+
+                        LoginUtil.login(
+                            username,
+                            password,
+                            true,
+                            context,
+                            databaseManager,
+                            sqlConnection
+                        ) { isLoggedIn, _ ->
+                            if (isLoggedIn == null) {
+                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_129))
+
+                                return@login
                             }
-                        } else if (registerResult is Error)
-                            handler.invoke(registerResult)
+
+                            if (isLoggedIn) {
+                                handler.invoke(Successful())
+
+                                return@login
+                            }
+
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_130))
+                        }
                     }
                 }
             }
-        } else
-            handler.invoke(Successful(setupManager.getCurrentStepData()))
+        }
     }
 }

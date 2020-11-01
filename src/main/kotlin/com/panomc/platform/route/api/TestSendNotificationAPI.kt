@@ -1,25 +1,15 @@
 package com.panomc.platform.route.api
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main
-import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
 import com.panomc.platform.util.NotificationStatus
 import io.vertx.ext.web.RoutingContext
-import javax.inject.Inject
 
 class TestSendNotificationAPI : PanelApi() {
     override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/testNotification")
-
-    init {
-        Main.getComponent().inject(this)
-    }
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val token = context.getCookie("pano_token").value

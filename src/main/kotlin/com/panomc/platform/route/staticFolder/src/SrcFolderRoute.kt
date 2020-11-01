@@ -2,8 +2,9 @@ package com.panomc.platform.route.staticFolder.src
 
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
+import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.Route
-import com.panomc.platform.util.Auth
+import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.core.impl.StringEscapeUtils
@@ -24,16 +25,17 @@ class SrcFolderRoute : Route() {
     @Inject
     lateinit var setupManager: SetupManager
 
+    @Inject
+    lateinit var databaseManager: DatabaseManager
+
     override fun getHandler() = Handler<RoutingContext> { context ->
         val normalisedPath = context.normalisedPath()
 
-        if (normalisedPath.startsWith("/panel/")) {
-            val auth = Auth()
-
-            auth.isAdmin(context) { isAdmin ->
+        if (normalisedPath.startsWith("/panel/"))
+            LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
                 handle(context, isAdmin)
             }
-        } else
+        else
             handle(context)
     }
 

@@ -1,53 +1,27 @@
 package com.panomc.platform.route.api.auth
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.DatabaseManager
-import com.panomc.platform.db.model.Token
-import com.panomc.platform.model.*
+import com.panomc.platform.model.Error
+import com.panomc.platform.model.LoggedInApi
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.RouteType
+import com.panomc.platform.util.LoginUtil
 import io.vertx.ext.web.RoutingContext
-import javax.inject.Inject
 
 class LogoutAPI : LoggedInApi() {
     override val routeType = RouteType.POST
 
     override val routes = arrayListOf("/api/auth/logout")
 
-    init {
-        getComponent().inject(this)
-    }
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
-
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie("pano_token").value
+        LoginUtil.logout(databaseManager, context) { isLoggedOut, _ ->
+            if (isLoggedOut == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-                return@createConnection
+                return@logout
             }
 
-            databaseManager.getDatabase().tokenDao.delete(
-                Token(-1, token, -1, ""),
-                sqlConnection
-            ) { result, _ ->
-                if (result == null)
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
-                    }
-                else
-                    databaseManager.closeConnection(sqlConnection) {
-                        deleteCookies(context)
-
-                        handler.invoke(Successful())
-                    }
-            }
+            handler.invoke(isLoggedOut)
         }
-    }
-
-    private fun deleteCookies(context: RoutingContext) {
-        context.removeCookie("pano_token")
     }
 }

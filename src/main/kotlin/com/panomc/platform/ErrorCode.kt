@@ -1,6 +1,6 @@
 package com.panomc.platform
 
-// last ID 127
+// last ID 128
 enum class ErrorCode {
     INVALID_DATA,
     UNKNOWN,
@@ -96,6 +96,9 @@ enum class ErrorCode {
     UNKNOWN_ERROR_125,
     UNKNOWN_ERROR_126,
     UNKNOWN_ERROR_127,
+    UNKNOWN_ERROR_128,
+    UNKNOWN_ERROR_129,
+    UNKNOWN_ERROR_130,
 
     REGISTER_USERNAME_EMPTY,
     REGISTER_EMAIL_EMPTY,

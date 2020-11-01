@@ -1,24 +1,14 @@
 package com.panomc.platform.route.api.panel
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.model.*
 import io.vertx.ext.web.RoutingContext
-import javax.inject.Inject
 
 class DashboardAPI : PanelApi() {
     override val routeType = RouteType.GET
 
     override val routes = arrayListOf("/api/panel/initPage/dashboard")
-
-    init {
-        getComponent().inject(this)
-    }
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         databaseManager.createConnection { sqlConnection, _ ->
