@@ -36,6 +36,12 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
         val categories = mutableListOf<TicketCategory>()
 
         sqlConnection.query(query) { categoryQueryResult ->
+            if (categoryQueryResult.failed()) {
+                handler.invoke(null, categoryQueryResult)
+
+                return@query
+            }
+
             categoryQueryResult.result().results.forEach { categoryInDB ->
                 categories.add(
                     TicketCategory(
@@ -47,6 +53,8 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                     )
                 )
             }
+
+            handler.invoke(categories, categoryQueryResult)
         }
     }
 
