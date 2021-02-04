@@ -60,4 +60,10 @@ interface TicketDao : Dao<Ticket> {
         sqlConnection: SQLConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun isExistsByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

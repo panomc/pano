@@ -387,4 +387,19 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun isExistsByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
+            else
+                handler.invoke(null, queryResult)
+        }
+    }
 }
