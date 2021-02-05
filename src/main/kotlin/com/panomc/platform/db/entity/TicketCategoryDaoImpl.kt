@@ -224,4 +224,31 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (ticketCategory: TicketCategory?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `description` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val ticket = TicketCategory(
+                    id = queryResult.result().results[0].getInteger(0),
+                    title = String(
+                        Base64.getDecoder().decode(queryResult.result().results[0].getString(1).toByteArray())
+                    ),
+                    description = String(
+                        Base64.getDecoder().decode(queryResult.result().results[0].getString(2).toByteArray())
+                    ),
+                )
+
+                handler.invoke(ticket, queryResult)
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
+
 }

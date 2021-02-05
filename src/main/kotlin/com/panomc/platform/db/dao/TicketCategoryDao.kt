@@ -44,4 +44,10 @@ interface TicketCategoryDao : Dao<TicketCategory> {
         sqlConnection: SQLConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (ticketCategory: TicketCategory?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
