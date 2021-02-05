@@ -15,7 +15,8 @@ data class Database(
     val postDao: PostDao = PostDaoImpl(),
     val postCategoryDao: PostCategoryDao = PostCategoryDaoImpl(),
     val ticketDao: TicketDao = TicketDaoImpl(),
-    val ticketCategoryDao: TicketCategoryDao = TicketCategoryDaoImpl()
+    val ticketCategoryDao: TicketCategoryDao = TicketCategoryDaoImpl(),
+    val ticketMessageDao: TicketMessageDao = TicketMessageDaoImpl()
 ) {
     fun init() = listOf(
         schemeVersionDao.init(),
@@ -29,6 +30,7 @@ data class Database(
         postDao.init(),
         postCategoryDao.init(),
         ticketDao.init(),
-        ticketCategoryDao.init()
+        ticketCategoryDao.init(),
+        ticketMessageDao.init()
     )
 }

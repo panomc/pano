@@ -36,7 +36,8 @@ class DatabaseManager(
             DatabaseMigration_9_10(),
             DatabaseMigration_10_11(),
             DatabaseMigration_11_12(),
-            DatabaseMigration_12_13()
+            DatabaseMigration_12_13(),
+            DatabaseMigration_13_14()
         )
     }
 
