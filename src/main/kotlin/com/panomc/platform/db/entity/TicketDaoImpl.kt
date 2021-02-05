@@ -2,6 +2,7 @@ package com.panomc.platform.db.entity
 
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.TicketDao
+import com.panomc.platform.db.model.Ticket
 import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
@@ -384,6 +385,33 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
             if (queryResult.succeeded())
                 handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
             else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun getByID(
+        id: Int,
+        sqlConnection: SQLConnection,
+        handler: (ticket: Ticket?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `category_id`, `user_id`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
+            if (queryResult.succeeded()) {
+                val ticket = Ticket(
+                    id = queryResult.result().results[0].getInteger(0),
+                    title = String(
+                        Base64.getDecoder().decode(queryResult.result().results[0].getString(1).toByteArray())
+                    ),
+                    categoryID = queryResult.result().results[0].getInteger(2),
+                    userID = queryResult.result().results[0].getInteger(3),
+                    date = queryResult.result().results[0].getString(4),
+                    status = queryResult.result().results[0].getInteger(5),
+                )
+
+                handler.invoke(ticket, queryResult)
+            } else
                 handler.invoke(null, queryResult)
         }
     }
