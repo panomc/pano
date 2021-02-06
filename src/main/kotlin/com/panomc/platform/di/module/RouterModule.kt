@@ -13,10 +13,7 @@ import com.panomc.platform.route.api.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.panel.post.category.PostCategoryAddAPI
 import com.panomc.platform.route.api.panel.post.category.PostCategoryDeleteAPI
 import com.panomc.platform.route.api.panel.post.category.PostCategoryUpdateAPI
-import com.panomc.platform.route.api.panel.ticket.TicketCategoryPageInitAPI
-import com.panomc.platform.route.api.panel.ticket.TicketPageCloseTicketsAPI
-import com.panomc.platform.route.api.panel.ticket.TicketPageDeleteTicketsAPI
-import com.panomc.platform.route.api.panel.ticket.TicketsPageInitAPI
+import com.panomc.platform.route.api.panel.ticket.*
 import com.panomc.platform.route.api.panel.ticket.category.TicketCategoryAddAPI
 import com.panomc.platform.route.api.panel.ticket.category.TicketCategoryDeleteAPI
 import com.panomc.platform.route.api.panel.ticket.category.TicketCategoryUpdateAPI
@@ -130,7 +127,9 @@ class RouterModule(private val mVertx: Vertx) {
             TicketPageCloseTicketsAPI(),
             TicketPageDeleteTicketsAPI(),
 
-            PlayersPageInitAPI()
+            PlayersPageInitAPI(),
+
+            TicketDetailAPI()
         )
     }
 
