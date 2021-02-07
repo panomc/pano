@@ -39,13 +39,17 @@ class TicketDetailAPI : PanelApi() {
     private fun isExistsByHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SQLConnection) =
         handler@{ exists: Boolean?, _: AsyncResult<*> ->
             if (exists == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_131))
+                databaseManager.closeConnection(sqlConnection) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_131))
+                }
 
                 return@handler
             }
 
             if (!exists)
-                handler.invoke(Error(ErrorCode.NOT_EXISTS))
+                databaseManager.closeConnection(sqlConnection) {
+                    handler.invoke(Error(ErrorCode.NOT_EXISTS))
+                }
             else
                 databaseManager.getDatabase().ticketDao.getByID(
                     id,
@@ -57,7 +61,9 @@ class TicketDetailAPI : PanelApi() {
     private fun getByIDHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SQLConnection) =
         handler@{ ticket: Ticket?, _: AsyncResult<*> ->
             if (ticket == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_132))
+                databaseManager.closeConnection(sqlConnection) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_132))
+                }
 
                 return@handler
             }
@@ -76,7 +82,9 @@ class TicketDetailAPI : PanelApi() {
         ticket: Ticket
     ) = handler@{ username: String?, _: AsyncResult<*> ->
         if (username == null) {
-            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_133))
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_133))
+            }
 
             return@handler
         }
@@ -97,25 +105,31 @@ class TicketDetailAPI : PanelApi() {
         username: String
     ) = handler@{ messages: List<TicketMessage>?, _: AsyncResult<*> ->
         if (messages == null) {
-            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_135))
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_135))
+            }
 
             return@handler
         }
 
         if (ticket.categoryID == -1)
-            invokeHandler(handler, ticket, null, username, messages)
+            databaseManager.closeConnection(sqlConnection) {
+                invokeHandler(handler, ticket, null, username, messages)
+            }
         else
             databaseManager.getDatabase().ticketCategoryDao.getByID(
                 ticket.categoryID,
                 sqlConnection
             ) { ticketCategory, _ ->
-                if (ticketCategory == null) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_134))
+                databaseManager.closeConnection(sqlConnection) {
+                    if (ticketCategory == null) {
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_134))
 
-                    return@getByID
+                        return@closeConnection
+                    }
+
+                    invokeHandler(handler, ticket, ticketCategory, username, messages)
                 }
-
-                invokeHandler(handler, ticket, ticketCategory, username, messages)
             }
     }
 
