@@ -8,7 +8,7 @@ plugins {
 group = "com.panomc.platform"
 version = "1.0"
 
-val vertxVersionVariable = "3.9.4"
+val vertxVersionVariable = "3.9.5"
 
 repositories {
     jcenter()
