@@ -74,4 +74,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SQLConnection,
         handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUsernameByListOfID(
+        userIDList: List<Int>,
+        sqlConnection: SQLConnection,
+        handler: (usernameList: Map<Int, String>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

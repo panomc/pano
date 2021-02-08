@@ -321,4 +321,35 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 handler.invoke(null, queryResult)
         }
     }
+
+    override fun getUsernameByListOfID(
+        userIDList: List<Int>,
+        sqlConnection: SQLConnection,
+        handler: (usernameList: Map<Int, String>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        var listText = ""
+
+        userIDList.forEach { id ->
+            if (listText == "")
+                listText = "'$id'"
+            else
+                listText += ", '$id'"
+        }
+
+        val query =
+            "SELECT id, username FROM `${getTablePrefix() + tableName}` where id IN ($listText)"
+
+        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
+            if (queryResult.succeeded()) {
+                val listOfUsers = mutableMapOf<Int, String>()
+
+                queryResult.result().results.forEach { user ->
+                    listOfUsers[user.getInteger(0)] = user.getString(1)
+                }
+
+                handler.invoke(listOfUsers, queryResult)
+            } else
+                handler.invoke(null, queryResult)
+        }
+    }
 }
