@@ -111,9 +111,38 @@ class TicketDetailAPI : PanelApi() {
             return@handler
         }
 
+        val userIDList = mutableListOf<Int>()
+
+        messages.forEach { message ->
+            if (userIDList.indexOf(message.userID) == -1)
+                userIDList.add(message.userID)
+        }
+
+        databaseManager.getDatabase().userDao.getUsernameByListOfID(
+            userIDList,
+            sqlConnection,
+            (this::getUsernameByListOfIDHandler)(handler, sqlConnection, ticket, username, messages)
+        )
+    }
+
+    private fun getUsernameByListOfIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SQLConnection,
+        ticket: Ticket,
+        username: String,
+        messages: List<TicketMessage>
+    ) = handler@{ usernameList: Map<Int, String>?, _: AsyncResult<*> ->
+        if (usernameList == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_136))
+            }
+
+            return@handler
+        }
+
         if (ticket.categoryID == -1)
             databaseManager.closeConnection(sqlConnection) {
-                invokeHandler(handler, ticket, null, username, messages)
+                invokeHandler(handler, ticket, usernameList, null, username, messages)
             }
         else
             databaseManager.getDatabase().ticketCategoryDao.getByID(
@@ -127,7 +156,7 @@ class TicketDetailAPI : PanelApi() {
                         return@closeConnection
                     }
 
-                    invokeHandler(handler, ticket, ticketCategory, username, messages)
+                    invokeHandler(handler, ticket, usernameList, ticketCategory, username, messages)
                 }
             }
     }
@@ -135,10 +164,24 @@ class TicketDetailAPI : PanelApi() {
     private fun invokeHandler(
         handler: (result: Result) -> Unit,
         ticket: Ticket,
+        usernameList: Map<Int, String>,
         ticketCategory: TicketCategory?,
         username: String,
-        messages: List<TicketMessage>
+        ticketMessages: List<TicketMessage>
     ) {
+        val messages = mutableMapOf<Int, Map<String, Any?>>()
+
+        ticketMessages.forEach { ticketMessage ->
+            messages[ticketMessage.id] = mapOf(
+                "id" to ticketMessage.id,
+                "userID" to ticketMessage.userID,
+                "ticketID" to ticketMessage.ticketID,
+                "username" to usernameList[ticketMessage.userID],
+                "message" to ticketMessage.message,
+                "date" to ticketMessage.date,
+            )
+        }
+
         handler.invoke(
             Successful(
                 mapOf(
