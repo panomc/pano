@@ -93,13 +93,12 @@ class TicketDetailAPI : PanelApi() {
             id,
             1,
             sqlConnection,
-            (this::getByTicketIDAndPageHandler)(handler, id, sqlConnection, ticket, username)
+            (this::getByTicketIDAndPageHandler)(handler, sqlConnection, ticket, username)
         )
     }
 
     private fun getByTicketIDAndPageHandler(
         handler: (result: Result) -> Unit,
-        id: Int,
         sqlConnection: SQLConnection,
         ticket: Ticket,
         username: String
