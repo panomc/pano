@@ -41,20 +41,21 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
             if (queryResult.succeeded()) {
                 val messages = mutableListOf<TicketMessage>()
 
-                if (queryResult.result().results.size > 0) {
-                    messages.add(
-                        TicketMessage(
-                            id = queryResult.result().results[0].getInteger(0),
-                            userID = queryResult.result().results[0].getInteger(1),
-                            ticketID = queryResult.result().results[0].getInteger(2),
-                            message = String(
-                                Base64.getDecoder().decode(queryResult.result().results[0].getString(3).toByteArray())
-                            ),
-                            date = queryResult.result().results[0].getString(4),
-                            panel = queryResult.result().results[0].getInteger(5)
+                if (queryResult.result().results.size > 0)
+                    queryResult.result().results.forEach { ticketMessage ->
+                        messages.add(
+                            TicketMessage(
+                                id = ticketMessage.getInteger(0),
+                                userID = ticketMessage.getInteger(1),
+                                ticketID = ticketMessage.getInteger(2),
+                                message = String(
+                                    Base64.getDecoder().decode(ticketMessage.getString(3).toByteArray())
+                                ),
+                                date = ticketMessage.getString(4),
+                                panel = ticketMessage.getInteger(5)
+                            )
                         )
-                    )
-                }
+                    }
 
                 handler.invoke(messages, queryResult)
             } else
