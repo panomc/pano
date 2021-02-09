@@ -55,8 +55,25 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                         )
                     )
                 }
+
                 handler.invoke(messages, queryResult)
             } else
+                handler.invoke(null, queryResult)
+        }
+    }
+
+    override fun getCountByTicketID(
+        ticketID: Int,
+        sqlConnection: SQLConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where ticket_id = ?"
+
+        sqlConnection.queryWithParams(query, JsonArray().add(ticketID)) { queryResult ->
+            if (queryResult.succeeded())
+                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
+            else
                 handler.invoke(null, queryResult)
         }
     }
