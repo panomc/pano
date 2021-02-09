@@ -37,13 +37,14 @@ class DatabaseManager(
             DatabaseMigration_10_11(),
             DatabaseMigration_11_12(),
             DatabaseMigration_12_13(),
-            DatabaseMigration_13_14()
+            DatabaseMigration_13_14(),
+            DatabaseMigration_14_15()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 13
-        const val DATABASE_SCHEME_VERSION_INFO = "Add email_verified field to user table."
+        const val DATABASE_SCHEME_VERSION = 15
+        const val DATABASE_SCHEME_VERSION_INFO = "Add panel field to ticket_message table."
     }
 
     init {

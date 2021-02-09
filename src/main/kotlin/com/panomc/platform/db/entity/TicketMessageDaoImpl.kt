@@ -19,6 +19,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
               `ticket_id` int NOT NULL,
               `message` text NOT NULL,
               `date` MEDIUMTEXT NOT NULL,
+              `panel` int NOT NULL COMMENT='Is it a message wrote on panel by an authorized.',
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket message table.';
         """
@@ -34,7 +35,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, user_id, ticket_id, message, `date` FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 5 OFFSET ${(page - 1) * 5}"
+            "SELECT id, user_id, ticket_id, message, `date`, `panel` FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 5 OFFSET ${(page - 1) * 5}"
 
         sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
             if (queryResult.succeeded()) {
@@ -49,7 +50,8 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                             message = String(
                                 Base64.getDecoder().decode(queryResult.result().results[0].getString(3).toByteArray())
                             ),
-                            date = queryResult.result().results[0].getString(4)
+                            date = queryResult.result().results[0].getString(4),
+                            panel = queryResult.result().results[0].getInteger(5)
                         )
                     )
                 }

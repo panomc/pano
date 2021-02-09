@@ -179,6 +179,7 @@ class TicketDetailAPI : PanelApi() {
                 "username" to usernameList[ticketMessage.userID],
                 "message" to ticketMessage.message,
                 "date" to ticketMessage.date,
+                "panel" to ticketMessage.panel
             )
         }
 
