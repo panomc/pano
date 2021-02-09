@@ -140,9 +140,33 @@ class TicketDetailAPI : PanelApi() {
             return@handler
         }
 
+        databaseManager.getDatabase().ticketMessageDao.getCountByTicketID(
+            ticket.id,
+            sqlConnection,
+            (this::getCountByTicketIDHandler)(handler, sqlConnection, ticket, username, messages, usernameList)
+        )
+    }
+
+
+    private fun getCountByTicketIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SQLConnection,
+        ticket: Ticket,
+        username: String,
+        messages: List<TicketMessage>,
+        usernameList: Map<Int, String>
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_137))
+            }
+
+            return@handler
+        }
+
         if (ticket.categoryID == -1)
             databaseManager.closeConnection(sqlConnection) {
-                invokeHandler(handler, ticket, usernameList, null, username, messages)
+                invokeHandler(handler, ticket, usernameList, null, username, messages, count)
             }
         else
             databaseManager.getDatabase().ticketCategoryDao.getByID(
@@ -156,7 +180,7 @@ class TicketDetailAPI : PanelApi() {
                         return@closeConnection
                     }
 
-                    invokeHandler(handler, ticket, usernameList, ticketCategory, username, messages)
+                    invokeHandler(handler, ticket, usernameList, ticketCategory, username, messages, count)
                 }
             }
     }
@@ -167,19 +191,22 @@ class TicketDetailAPI : PanelApi() {
         usernameList: Map<Int, String>,
         ticketCategory: TicketCategory?,
         username: String,
-        ticketMessages: List<TicketMessage>
+        ticketMessages: List<TicketMessage>,
+        messageCount: Int
     ) {
-        val messages = mutableMapOf<Int, Map<String, Any?>>()
+        val messages = mutableListOf<Map<String, Any?>>()
 
         ticketMessages.forEach { ticketMessage ->
-            messages[ticketMessage.id] = mapOf(
-                "id" to ticketMessage.id,
-                "userID" to ticketMessage.userID,
-                "ticketID" to ticketMessage.ticketID,
-                "username" to usernameList[ticketMessage.userID],
-                "message" to ticketMessage.message,
-                "date" to ticketMessage.date,
-                "panel" to ticketMessage.panel
+            messages.add(
+                mapOf(
+                    "id" to ticketMessage.id,
+                    "userID" to ticketMessage.userID,
+                    "ticketID" to ticketMessage.ticketID,
+                    "username" to usernameList[ticketMessage.userID],
+                    "message" to ticketMessage.message,
+                    "date" to ticketMessage.date,
+                    "panel" to ticketMessage.panel
+                )
             )
         }
 
@@ -198,7 +225,8 @@ class TicketDetailAPI : PanelApi() {
                                     ),
                         "messages" to messages,
                         "status" to ticket.status,
-                        "date" to ticket.date
+                        "date" to ticket.date,
+                        "count" to messageCount
                     )
                 )
             )
