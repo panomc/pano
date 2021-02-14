@@ -14,6 +14,14 @@ interface TicketMessageDao : Dao<TicketMessage> {
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun getByTicketIDPageAndStartFromID(
+        lastMessageID: Int,
+        ticketID: Int,
+        page: Int,
+        sqlConnection: SqlConnection,
+        handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getCountByTicketID(
         ticketID: Int,
         sqlConnection: SqlConnection,
