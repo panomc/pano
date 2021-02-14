@@ -39,11 +39,11 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, user_id, ticket_id, message, `date`, `panel` FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 5 OFFSET ${(page - 1) * 5}"
+            "SELECT id, user_id, ticket_id, message, `date`, `panel` FROM `${getTablePrefix() + tableName}` WHERE ticket_id = ? ORDER BY id DESC LIMIT ${(page - 1) * 5}, 5"
 
         sqlConnection
             .preparedQuery(query)
-            .execute { queryResult ->
+            .execute(Tuple.of(ticketID)) { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
                     val messages = mutableListOf<TicketMessage>()
