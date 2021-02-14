@@ -198,6 +198,7 @@ class TicketDetailAPI : PanelApi() {
 
         ticketMessages.forEach { ticketMessage ->
             messages.add(
+                0,
                 mapOf(
                     "id" to ticketMessage.id,
                     "userID" to ticketMessage.userID,
