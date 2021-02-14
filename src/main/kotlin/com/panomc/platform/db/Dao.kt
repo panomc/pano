@@ -1,8 +1,8 @@
 package com.panomc.platform.db
 
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 interface Dao<T> {
-    fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection
+    fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit
 }

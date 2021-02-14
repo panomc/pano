@@ -2,8 +2,8 @@ package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 
 @Suppress("ClassName")
 class DatabaseMigration_1_2 : DatabaseMigration() {
@@ -11,48 +11,40 @@ class DatabaseMigration_1_2 : DatabaseMigration() {
     override val SCHEME_VERSION = 2
     override val SCHEME_VERSION_INFO = ""
 
-    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit> =
         listOf(
             createSystemPropertyTable()
         )
 
-    private fun createSystemPropertyTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    private fun createSystemPropertyTable(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}system_property` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `option` text NOT NULL,
-              `value` text NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='System Property table.';
-        """
-            ) {
-                if (it.succeeded())
-                    sqlConnection.updateWithParams(
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}system_property` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `option` text NOT NULL,
+                              `value` text NOT NULL,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='System Property table.';
                         """
-                    INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
-            """.trimIndent(),
-                        JsonArray()
-                            .add("show_getting_started")
-                            .add("true")
-                    ) {
-                        if (it.succeeded())
-                            sqlConnection.updateWithParams(
-                                """
-                    INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)
-            """.trimIndent(),
-                                JsonArray()
-                                    .add("show_connect_server_info")
-                                    .add("true")
-                            ) {
-                                handler.invoke(it)
+                )
+                .execute {
+                    if (it.succeeded())
+                        sqlConnection
+                            .preparedQuery("INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)")
+                            .execute(Tuple.of("show_getting_started", "true")) { queryResult ->
+                                if (queryResult.succeeded())
+                                    sqlConnection
+                                        .preparedQuery("INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)")
+                                        .execute(Tuple.of("show_connect_server_info", "true")) { queryResult ->
+                                            handler.invoke(queryResult)
+                                        }
+                                else
+                                    handler.invoke(queryResult)
                             }
-                        else
-                            handler.invoke(it)
-                    }
-                else
-                    handler.invoke(it)
-            }
+                    else
+                        handler.invoke(it)
+                }
         }
 }

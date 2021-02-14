@@ -6,8 +6,8 @@ import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.db.model.TicketMessage
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class TicketDetailAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -22,7 +22,7 @@ class TicketDetailAPI : PanelApi() {
     }
 
     private fun createConnectionHandler(handler: (result: Result) -> Unit, id: Int) =
-        handler@{ sqlConnection: SQLConnection?, _: AsyncResult<SQLConnection> ->
+        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
             if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
@@ -36,7 +36,7 @@ class TicketDetailAPI : PanelApi() {
             )
         }
 
-    private fun isExistsByHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SQLConnection) =
+    private fun isExistsByHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SqlConnection) =
         handler@{ exists: Boolean?, _: AsyncResult<*> ->
             if (exists == null) {
                 databaseManager.closeConnection(sqlConnection) {
@@ -58,7 +58,7 @@ class TicketDetailAPI : PanelApi() {
                 )
         }
 
-    private fun getByIDHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SQLConnection) =
+    private fun getByIDHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SqlConnection) =
         handler@{ ticket: Ticket?, _: AsyncResult<*> ->
             if (ticket == null) {
                 databaseManager.closeConnection(sqlConnection) {
@@ -78,7 +78,7 @@ class TicketDetailAPI : PanelApi() {
     private fun getUsernameFromUserIDHandler(
         handler: (result: Result) -> Unit,
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         ticket: Ticket
     ) = handler@{ username: String?, _: AsyncResult<*> ->
         if (username == null) {
@@ -99,7 +99,7 @@ class TicketDetailAPI : PanelApi() {
 
     private fun getByTicketIDAndPageHandler(
         handler: (result: Result) -> Unit,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         ticket: Ticket,
         username: String
     ) = handler@{ messages: List<TicketMessage>?, _: AsyncResult<*> ->
@@ -127,7 +127,7 @@ class TicketDetailAPI : PanelApi() {
 
     private fun getUsernameByListOfIDHandler(
         handler: (result: Result) -> Unit,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         ticket: Ticket,
         username: String,
         messages: List<TicketMessage>
@@ -150,7 +150,7 @@ class TicketDetailAPI : PanelApi() {
 
     private fun getCountByTicketIDHandler(
         handler: (result: Result) -> Unit,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         ticket: Ticket,
         username: String,
         messages: List<TicketMessage>,

@@ -6,136 +6,164 @@ import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 
 class SystemPropertyDaoImpl(override val tableName: String = "system_property") : DaoImpl(), SystemPropertyDao {
 
-    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `option` text NOT NULL,
-              `value` text NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System Property table.';
-        """
-            ) {
-            if (it.succeeded())
-                addShowGettingStartedOption(sqlConnection) {
-                    handler.invoke(it)
+            sqlConnection
+                .query(
+                    """
+                        CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
+                          `id` int NOT NULL AUTO_INCREMENT,
+                          `option` text NOT NULL,
+                          `value` text NOT NULL,
+                          PRIMARY KEY (`id`)
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System Property table.';
+                    """
+                )
+                .execute {
+                    if (it.succeeded())
+                        addShowGettingStartedOption(sqlConnection) {
+                            handler.invoke(it)
+                        }
+                    else
+                        handler.invoke(it)
                 }
-            else
-                handler.invoke(it)
         }
-    }
 
     override fun add(
         systemProperty: SystemProperty,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        sqlConnection.updateWithParams(
-            """
-                INSERT INTO `${getTablePrefix() + tableName}` (`option`, `value`) VALUES (?, ?)
-            """.trimIndent(),
-            JsonArray()
-                .add(systemProperty.option)
-                .add(systemProperty.value)
-        ) {
-            if (it.succeeded())
-                handler.invoke(Successful(), it)
-            else
-                handler.invoke(null, it)
-        }
+        val query = "INSERT INTO `${getTablePrefix() + tableName}` (`option`, `value`) VALUES (?, ?)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    systemProperty.option,
+                    systemProperty.value
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun update(
         systemProperty: SystemProperty,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val params = JsonArray()
+        val params = Tuple.tuple()
 
-        params.add(systemProperty.value)
-        params.add(systemProperty.option)
+        params.addString(systemProperty.value)
+        params.addString(systemProperty.option)
 
         if (systemProperty.id != -1)
-            params.add(systemProperty.id)
+            params.addInteger(systemProperty.id)
 
-        sqlConnection.updateWithParams(
-            """
-                UPDATE `${getTablePrefix() + tableName}` SET value = ? ${if (systemProperty.id != -1) ", option = ?" else ""} WHERE `${if (systemProperty.id == -1) "option" else "id"}` = ?
-            """.trimIndent(),
-            params
-        ) {
-            if (it.succeeded())
-                handler.invoke(Successful(), it)
-            else
-                handler.invoke(null, it)
-        }
+        val query =
+            "UPDATE `${getTablePrefix() + tableName}` SET value = ? ${if (systemProperty.id != -1) ", option = ?" else ""} WHERE `${if (systemProperty.id == -1) "option" else "id"}` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                params
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
 
     override fun isPropertyExists(
         systemProperty: SystemProperty,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT COUNT(`value`) FROM `${getTablePrefix() + tableName}` where `option` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(systemProperty.option)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) != 0, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(systemProperty.option)
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun isUserInstalledSystemByUserID(
         userID: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (isUserInstalledSystem: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(`value`) FROM `${getTablePrefix() + tableName}` where `option` = ? and `value` = ?"
 
-        sqlConnection.queryWithParams(
-            query,
-            JsonArray().add("who_installed_user_id").add(userID.toString())
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) != 0, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    "who_installed_user_id",
+                    userID.toString()
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getValue(
         systemProperty: SystemProperty,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (systemProperty: SystemProperty?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT `value` FROM `${getTablePrefix() + tableName}` where `option` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(systemProperty.option)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(
-                    SystemProperty(
-                        systemProperty.id,
-                        systemProperty.option,
-                        queryResult.result().results[0].getString(0)
-                    ), queryResult
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    systemProperty.option
                 )
-            else
-                handler.invoke(null, queryResult)
-        }
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(
+                        SystemProperty(
+                            systemProperty.id,
+                            systemProperty.option,
+                            rows.toList()[0].getString(0)
+                        ), queryResult
+                    )
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     private fun addShowGettingStartedOption(
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (asyncResult: AsyncResult<*>) -> Unit
     ) {
         add(SystemProperty(-1, "show_getting_started", "true"), sqlConnection) { _, asyncResult ->

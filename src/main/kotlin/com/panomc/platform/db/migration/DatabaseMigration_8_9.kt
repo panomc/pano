@@ -2,8 +2,8 @@ package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 
 @Suppress("ClassName")
 class DatabaseMigration_8_9 : DatabaseMigration() {
@@ -11,21 +11,18 @@ class DatabaseMigration_8_9 : DatabaseMigration() {
     override val SCHEME_VERSION = 9
     override val SCHEME_VERSION_INFO = "Delete platformCode system property."
 
-    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit> =
         listOf(
             deletePlatformCode()
         )
 
-    private fun deletePlatformCode(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    private fun deletePlatformCode(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.updateWithParams(
-                """
-                   DELETE FROM ${getTablePrefix()}system_property WHERE `option` = ?
-            """.trimIndent(),
-                JsonArray()
-                    .add("platformCode")
-            ) {
-                handler.invoke(it)
-            }
+            sqlConnection
+                .preparedQuery("DELETE FROM ${getTablePrefix()}system_property WHERE `option` = ?")
+                .execute(Tuple.of("platformCode"))
+                {
+                    handler.invoke(it)
+                }
         }
 }

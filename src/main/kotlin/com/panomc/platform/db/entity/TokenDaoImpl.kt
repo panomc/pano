@@ -6,95 +6,124 @@ import com.panomc.platform.db.model.Token
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 
 class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenDao {
-    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `token` text NOT NULL,
-              `created_time` MEDIUMTEXT NOT NULL,
-              `user_id` int(11) NOT NULL,
-              `subject` varchar(255) NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
-        """
-            ) {
-            handler.invoke(it)
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `token` text NOT NULL,
+                              `created_time` MEDIUMTEXT NOT NULL,
+                              `user_id` int(11) NOT NULL,
+                              `subject` varchar(255) NOT NULL,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
+                        """
+                )
+                .execute {
+                    handler.invoke(it)
+                }
         }
-    }
 
     override fun add(
         token: Token,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        sqlConnection.updateWithParams(
-            """
-                INSERT INTO `${getTablePrefix() + tableName}` (token, created_time, user_id, subject) VALUES (?, ?, ?, ?)
-            """.trimIndent(),
-            JsonArray()
-                .add(token.token)
-                .add(System.currentTimeMillis())
-                .add(token.userID)
-                .add(token.subject)
-        ) {
-            if (it.succeeded())
-                handler.invoke(Successful(), it)
-            else
-                handler.invoke(null, it)
-        }
+        val query =
+            "INSERT INTO `${getTablePrefix() + tableName}` (token, created_time, user_id, subject) VALUES (?, ?, ?, ?)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    token.token,
+                    System.currentTimeMillis(),
+                    token.userID,
+                    token.subject
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getUserIDFromToken(
         token: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT user_id FROM `${getTablePrefix() + tableName}` where `token` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    token
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun isTokenExists(
         token: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (isTokenExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `token` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(token)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    token
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun delete(
         token: Token,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "DELETE from `${getTablePrefix() + tableName}` WHERE token = ?"
 
-        sqlConnection.updateWithParams(query, JsonArray().add(token.token)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    token.token
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 }

@@ -4,57 +4,57 @@ import com.panomc.platform.db.Dao
 import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface PostCategoryDao : Dao<PostCategory> {
     fun isExistsByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun deleteByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun getCount(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun getCount(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getCategories(
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getCategories(
         page: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isExistsByURL(
         url: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isExistsByURLNotByID(
         url: String,
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun add(
         postCategory: PostCategory,
-        sqlConnection: SQLConnection,
-        handler: (id: Int?, asyncResult: AsyncResult<*>) -> Unit
+        sqlConnection: SqlConnection,
+        handler: (id: Long?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun update(
         postCategory: PostCategory,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

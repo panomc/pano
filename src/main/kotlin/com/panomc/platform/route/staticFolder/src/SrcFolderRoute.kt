@@ -7,7 +7,6 @@ import com.panomc.platform.model.Route
 import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
-import io.vertx.core.impl.StringEscapeUtils
 import io.vertx.ext.web.RoutingContext
 import java.io.File
 import javax.inject.Inject
@@ -66,10 +65,10 @@ class SrcFolderRoute : Route() {
 
         if (componentFile.exists() && componentUIFile.exists())
             response.end(
-                componentFile.readText().replace(
-                    "PANO.UI",
-                    "\"${StringEscapeUtils.escapeJavaScript(componentUIFile.readText())}\""
-                )
+//                componentFile.readText().replace(
+//                    "PANO.UI",
+//                    "\"${StringEscapeUtils.escapeJavaScript(componentUIFile.readText())}\""
+//                )
             )
         else
             if (setupManager.isSetupDone())

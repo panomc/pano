@@ -10,12 +10,12 @@ import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import de.triology.recaptchav2java.ReCaptcha
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 object RegisterUtil {
     fun register(
         databaseManager: DatabaseManager,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         user: User,
         isAdmin: Boolean = false,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
@@ -229,7 +229,7 @@ object RegisterUtil {
     private fun addUser(
         user: User,
         databaseManager: DatabaseManager,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         databaseManager.getDatabase().userDao.add(user, sqlConnection) { isSuccessful, asyncResultOfAdd ->

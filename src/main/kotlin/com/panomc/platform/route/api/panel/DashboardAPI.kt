@@ -4,8 +4,8 @@ import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class DashboardAPI : PanelApi() {
     override val routeType = RouteType.GET
@@ -20,7 +20,7 @@ class DashboardAPI : PanelApi() {
 
 
     private fun createConnectionHandler(handler: (result: Result) -> Unit, token: String) =
-        handler@{ sqlConnection: SQLConnection?, _: AsyncResult<SQLConnection> ->
+        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
             if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
@@ -30,15 +30,14 @@ class DashboardAPI : PanelApi() {
             databaseManager.getDatabase().tokenDao.getUserIDFromToken(
                 token,
                 sqlConnection,
-                (this::getUserIDFromTokenHandler)(handler, token, sqlConnection)
+                (this::getUserIDFromTokenHandler)(handler, sqlConnection)
             )
         }
 
 
     private fun getUserIDFromTokenHandler(
         handler: (result: Result) -> Unit,
-        token: String,
-        sqlConnection: SQLConnection
+        sqlConnection: SqlConnection
     ) =
         handler@{ userID: Int?, _: AsyncResult<*> ->
             if (userID == null)
@@ -54,7 +53,7 @@ class DashboardAPI : PanelApi() {
         }
 
 
-    private fun isUserInstalledSystemByUserIDHandler(handler: (result: Result) -> Unit, sqlConnection: SQLConnection) =
+    private fun isUserInstalledSystemByUserIDHandler(handler: (result: Result) -> Unit, sqlConnection: SqlConnection) =
         handler@{ isUserInstalled: Boolean?, _: AsyncResult<*> ->
             if (isUserInstalled == null)
                 databaseManager.closeConnection(sqlConnection) {

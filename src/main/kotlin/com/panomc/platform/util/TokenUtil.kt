@@ -5,7 +5,7 @@ import com.panomc.platform.db.model.Token
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 import java.util.*
 
 object TokenUtil {
@@ -17,7 +17,7 @@ object TokenUtil {
         subject: SUBJECT,
         userID: Int,
         databaseManager: DatabaseManager,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (token: String?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         databaseManager.getDatabase().userDao.getSecretKeyByID(

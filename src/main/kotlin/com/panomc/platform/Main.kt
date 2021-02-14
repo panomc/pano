@@ -4,10 +4,7 @@ import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.di.component.ApplicationComponent
 import com.panomc.platform.di.component.DaggerApplicationComponent
 import com.panomc.platform.di.module.*
-import io.vertx.core.AbstractVerticle
-import io.vertx.core.Future
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
+import io.vertx.core.*
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
@@ -71,7 +68,7 @@ class Main : AbstractVerticle() {
     @Inject
     lateinit var router: Router
 
-    override fun start(startFuture: Future<Void>) {
+    override fun start(startPromise: Promise<Void>?) {
         vertx.executeBlocking<Any>({ future ->
             init().onComplete { init ->
                 future.complete(init.result())

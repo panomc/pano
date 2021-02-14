@@ -8,7 +8,7 @@ plugins {
 group = "com.panomc.platform"
 version = "1.0"
 
-val vertxVersionVariable = "3.9.5"
+val vertxVersionVariable = "4.0.2"
 
 repositories {
     jcenter()
@@ -30,8 +30,7 @@ dependencies {
 
     implementation("io.vertx:vertx-web:$vertxVersionVariable")
     implementation("io.vertx:vertx-web-client:$vertxVersionVariable")
-    implementation("io.vertx:vertx-mysql-postgresql-client:$vertxVersionVariable")
-    implementation("io.vertx:vertx-sql-common:$vertxVersionVariable")
+    implementation("io.vertx:vertx-mysql-client:$vertxVersionVariable")
     implementation("io.vertx:vertx-mail-client:$vertxVersionVariable")
     implementation("io.vertx:vertx-lang-kotlin:$vertxVersionVariable")
     implementation("io.vertx:vertx-web-templ-handlebars:$vertxVersionVariable")
@@ -42,8 +41,8 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.30")
 
     // dagger 2x
-    implementation("com.google.dagger:dagger:2.31.2")
-    kapt("com.google.dagger:dagger-compiler:2.31.2")
+    implementation("com.google.dagger:dagger:2.32")
+    kapt("com.google.dagger:dagger-compiler:2.32")
 
     // recaptcha v2 1.0.3
     implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.4")

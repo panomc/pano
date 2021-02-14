@@ -11,6 +11,5 @@ class TemplateEngineModule {
 
     @Provides
     @Singleton
-    fun provideTemplateEngine(vertx: Vertx): HandlebarsTemplateEngine =
-        HandlebarsTemplateEngine.create(vertx).setMaxCacheSize(0)
+    fun provideTemplateEngine(vertx: Vertx): HandlebarsTemplateEngine = HandlebarsTemplateEngine.create(vertx)
 }

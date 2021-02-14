@@ -10,39 +10,43 @@ import com.panomc.platform.model.Successful
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 import org.apache.commons.codec.digest.DigestUtils
 import java.util.*
 
 class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao {
 
-    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `username` varchar(16) NOT NULL UNIQUE,
-              `email` varchar(255) NOT NULL UNIQUE,
-              `password` varchar(255) NOT NULL,
-              `permission_id` int(11) NOT NULL,
-              `registered_ip` varchar(255) NOT NULL,
-              `secret_key` text NOT NULL,
-              `public_key` text NOT NULL,
-              `register_date` MEDIUMTEXT NOT NULL,
-              `email_verified` int(1) NOT NULL DEFAULT 0,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
-        """
-            ) {
-                handler.invoke(it)
-            }
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `username` varchar(16) NOT NULL UNIQUE,
+                              `email` varchar(255) NOT NULL UNIQUE,
+                              `password` varchar(255) NOT NULL,
+                              `permission_id` int(11) NOT NULL,
+                              `registered_ip` varchar(255) NOT NULL,
+                              `secret_key` text NOT NULL,
+                              `public_key` text NOT NULL,
+                              `register_date` MEDIUMTEXT NOT NULL,
+                              `email_verified` int(1) NOT NULL DEFAULT 0,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User Table';
+                        """
+                )
+                .execute {
+                    handler.invoke(it)
+                }
         }
 
     override fun add(
         user: User,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
@@ -51,280 +55,342 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
-        sqlConnection.updateWithParams(
-            query,
-            JsonArray()
-                .add(user.username)
-                .add(user.email)
-                .add(DigestUtils.md5Hex(user.password))
-                .add(user.ipAddress)
-                .add(user.permissionID)
-                .add(Base64.getEncoder().encodeToString(key.private.encoded))
-                .add(Base64.getEncoder().encodeToString(key.public.encoded))
-                .add(System.currentTimeMillis())
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else {
-                val errorCode = ErrorCode.UNKNOWN_ERROR_2
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    user.username,
+                    user.email,
+                    DigestUtils.md5Hex(user.password),
+                    user.ipAddress,
+                    user.permissionID,
+                    Base64.getEncoder().encodeToString(key.private.encoded),
+                    Base64.getEncoder().encodeToString(key.public.encoded),
+                    System.currentTimeMillis()
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else {
+                    val errorCode = ErrorCode.UNKNOWN_ERROR_2
 
-                handler.invoke(Error(errorCode), queryResult)
+                    handler.invoke(Error(errorCode), queryResult)
+                }
             }
-        }
     }
 
     override fun isEmailExists(
         email: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (isEmailExists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where email = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(email)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    email
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getUserIDFromUsername(
         username: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id FROM `${getTablePrefix() + tableName}` where username = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(username)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    username
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getPermissionIDFromUserID(
         userID: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT permission_id FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    userID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getSecretKeyByID(
         userID: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (secretKey: String?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT secret_key FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getString(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    userID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getString(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun isLoginCorrect(
         usernameOrEmail: String,
         password: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where (username = ? or email = ?) and password = ?"
 
-        sqlConnection.queryWithParams(
-            query,
-            JsonArray().add(usernameOrEmail).add(usernameOrEmail).add(DigestUtils.md5Hex(password))
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    usernameOrEmail,
+                    usernameOrEmail,
+                    DigestUtils.md5Hex(password)
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
-    override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun count(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
-        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getUsernameFromUserID(
         userID: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (username: String?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT username FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(userID)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getString(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(userID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getString(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getByID(
         userID: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `username`, `email`, `password`, `registered_ip`, `permission_id` FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(
-            query,
-            JsonArray().add(userID)
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(
-                    User(
-                        userID,
-                        queryResult.result().results[0].getString(0),
-                        queryResult.result().results[0].getString(1),
-                        queryResult.result().results[0].getString(2),
-                        queryResult.result().results[0].getString(3),
-                        queryResult.result().results[0].getInteger(4)
-                    ),
-                    queryResult
-                )
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(userID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    handler.invoke(
+                        User(
+                            userID,
+                            row.getString(0),
+                            row.getString(1),
+                            row.getString(2),
+                            row.getString(3),
+                            row.getInteger(4)
+                        ),
+                        queryResult
+                    )
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun countByPageType(
         pageType: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ?" else ""}"
 
-        val parameters = JsonArray()
+        val parameters = Tuple.tuple()
 
         if (pageType == 2)
-            parameters.add(-1)
+            parameters.addInteger(-1)
 
-        sqlConnection.queryWithParams(query, parameters) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(parameters) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getAllByPageAndPageType(
         page: Int,
         pageType: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, username, register_date FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
-        val parameters = JsonArray()
+        val parameters = Tuple.tuple()
 
         if (pageType == 2)
-            parameters.add(-1)
+            parameters.addInteger(-1)
 
-        sqlConnection.queryWithParams(query, parameters) { queryResult ->
-            if (queryResult.succeeded()) {
-                val players = mutableListOf<Map<String, Any>>()
+        sqlConnection
+            .preparedQuery(query)
+            .execute(parameters) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val players = mutableListOf<Map<String, Any>>()
 
-                if (queryResult.result().results.size > 0) {
-                    val handlers: List<(handler: () -> Unit) -> Any> =
-                        queryResult.result().results.map { playerInDB ->
-                            val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                databaseManager.getDatabase().ticketDao.countByUserID(
-                                    playerInDB.getInteger(0),
-                                    sqlConnection
-                                ) { count, asyncResult ->
-                                    if (count == null) {
-                                        handler.invoke(null, asyncResult)
+                    if (rows.size() > 0) {
+                        val handlers: List<(handler: () -> Unit) -> Any> =
+                            rows.map { row ->
+                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                                    databaseManager.getDatabase().ticketDao.countByUserID(
+                                        row.getInteger(0),
+                                        sqlConnection
+                                    ) { count, asyncResult ->
+                                        if (count == null) {
+                                            handler.invoke(null, asyncResult)
 
-                                        return@countByUserID
-                                    }
+                                            return@countByUserID
+                                        }
 
-                                    players.add(
-                                        mapOf(
-                                            "id" to playerInDB.getInteger(0),
-                                            "username" to playerInDB.getString(1),
-                                            "ticket_count" to count,
-                                            "register_date" to playerInDB.getString(2)
+                                        players.add(
+                                            mapOf(
+                                                "id" to row.getInteger(0),
+                                                "username" to row.getString(1),
+                                                "ticket_count" to count,
+                                                "register_date" to row.getString(2)
+                                            )
                                         )
-                                    )
 
-                                    localHandler.invoke()
+                                        localHandler.invoke()
+                                    }
                                 }
+
+                                localHandler
                             }
 
-                            localHandler
+                        var currentIndex = -1
+
+                        fun invoke() {
+                            val localHandler: () -> Unit = {
+                                if (currentIndex == handlers.lastIndex)
+                                    handler.invoke(players, queryResult)
+                                else
+                                    invoke()
+                            }
+
+                            currentIndex++
+
+                            if (currentIndex <= handlers.lastIndex)
+                                handlers[currentIndex].invoke(localHandler)
                         }
 
-                    var currentIndex = -1
-
-                    fun invoke() {
-                        val localHandler: () -> Unit = {
-                            if (currentIndex == handlers.lastIndex)
-                                handler.invoke(players, queryResult)
-                            else
-                                invoke()
-                        }
-
-                        currentIndex++
-
-                        if (currentIndex <= handlers.lastIndex)
-                            handlers[currentIndex].invoke(localHandler)
-                    }
-
-                    invoke()
+                        invoke()
+                    } else
+                        handler.invoke(players, queryResult)
                 } else
-                    handler.invoke(players, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getUserIDFromUsernameOrEmail(
         usernameOrEmail: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id FROM `${getTablePrefix() + tableName}` where username = ? or email = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(usernameOrEmail).add(usernameOrEmail)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(usernameOrEmail, usernameOrEmail)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getUsernameByListOfID(
         userIDList: List<Int>,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (usernameList: Map<Int, String>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         var listText = ""
@@ -339,16 +405,19 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         val query =
             "SELECT id, username FROM `${getTablePrefix() + tableName}` where id IN ($listText)"
 
-        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
-            if (queryResult.succeeded()) {
-                val listOfUsers = mutableMapOf<Int, String>()
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val listOfUsers = mutableMapOf<Int, String>()
 
-                queryResult.result().results.forEach { user ->
-                    listOfUsers[user.getInteger(0)] = user.getString(1)
-                }
+                    rows.forEach { row ->
+                        listOfUsers[row.getInteger(0)] = row.getString(1)
+                    }
 
-                handler.invoke(listOfUsers, queryResult)
-            } else
+                    handler.invoke(listOfUsers, queryResult)
+                } else
                 handler.invoke(null, queryResult)
         }
     }

@@ -6,10 +6,11 @@ import com.panomc.platform.util.SetupManager
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.core.logging.Logger
-import io.vertx.ext.asyncsql.AsyncSQLClient
-import io.vertx.ext.asyncsql.MySQLClient
-import io.vertx.ext.sql.SQLConnection
-import io.vertx.kotlin.core.json.jsonObjectOf
+import io.vertx.mysqlclient.MySQLConnectOptions
+import io.vertx.mysqlclient.MySQLPool
+import io.vertx.sqlclient.Pool
+import io.vertx.sqlclient.PoolOptions
+import io.vertx.sqlclient.SqlConnection
 
 class DatabaseManager(
     private val mVertx: Vertx,
@@ -17,7 +18,7 @@ class DatabaseManager(
     private val mConfigManager: ConfigManager,
     setupManager: SetupManager
 ) {
-    private lateinit var mAsyncSQLClient: AsyncSQLClient
+    private lateinit var mPool: Pool
 
     private val mDatabase by lazy {
         Database()
@@ -71,7 +72,7 @@ class DatabaseManager(
         }
     }
 
-    private fun migrate(sqlConnection: SQLConnection, databaseVersion: Int) {
+    private fun migrate(sqlConnection: SqlConnection, databaseVersion: Int) {
         val handlers = mMigrations.map { it.migrate(sqlConnection) }
 
         var currentIndex = 0
@@ -121,8 +122,8 @@ class DatabaseManager(
         invoke()
     }
 
-    fun createConnection(handler: (sqlConnection: SQLConnection?, asyncResult: AsyncResult<SQLConnection>) -> Unit) {
-        if (!::mAsyncSQLClient.isInitialized) {
+    fun createConnection(handler: (sqlConnection: SqlConnection?, asyncResult: AsyncResult<SqlConnection>) -> Unit) {
+        if (!::mPool.isInitialized) {
             val databaseConfig = (mConfigManager.getConfig()["database"] as Map<*, *>)
 
             var port = 3306
@@ -136,18 +137,22 @@ class DatabaseManager(
                 port = splitHost[1].toInt()
             }
 
-            val mySQLClientConfig = jsonObjectOf(
-                Pair("host", host),
-                Pair("port", port),
-                Pair("database", databaseConfig["name"]),
-                Pair("username", databaseConfig["username"]),
-                Pair("password", if (databaseConfig["password"] == "") null else databaseConfig["password"])
-            )
+            val connectOptions = MySQLConnectOptions()
+                .setPort(port)
+                .setHost(host)
+                .setDatabase(databaseConfig["name"] as String)
+                .setUser(databaseConfig["username"] as String)
 
-            mAsyncSQLClient = MySQLClient.createShared(mVertx, mySQLClientConfig, "MysqlLoginPool")
+            if (databaseConfig["password"] != "")
+                connectOptions.password = databaseConfig["password"] as String
+
+            val poolOptions = PoolOptions()
+                .setMaxSize(10)
+
+            mPool = MySQLPool.pool(mVertx, connectOptions, poolOptions)
         }
 
-        mAsyncSQLClient.getConnection { getConnection ->
+        mPool.getConnection { getConnection ->
             if (getConnection.succeeded())
                 handler.invoke(getConnection.result(), getConnection)
             else {
@@ -158,13 +163,13 @@ class DatabaseManager(
         }
     }
 
-    fun closeConnection(sqlConnection: SQLConnection, handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
+    fun closeConnection(sqlConnection: SqlConnection, handler: ((asyncResult: AsyncResult<Void?>?) -> Unit)? = null) {
         sqlConnection.close {
             handler?.invoke(it)
         }
     }
 
-    fun initDatabase(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
+    fun initDatabase(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit = {}) {
         val databaseInitProcessHandlers = mDatabase.init()
 
         var currentIndex = 0

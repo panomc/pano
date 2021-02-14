@@ -2,7 +2,7 @@ package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 @Suppress("ClassName")
 class DatabaseMigration_13_14 : DatabaseMigration() {
@@ -10,26 +10,28 @@ class DatabaseMigration_13_14 : DatabaseMigration() {
     override val SCHEME_VERSION = 14
     override val SCHEME_VERSION_INFO = "Create ticket_message table."
 
-    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit> =
         listOf(
             createTicketMessageTable()
         )
 
-    private fun createTicketMessageTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    private fun createTicketMessageTable(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}ticket_message` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `user_id` int NOT NULL,              
-              `ticket_id` int NOT NULL,
-              `message` text NOT NULL,
-              `date` MEDIUMTEXT NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket message table.';
-        """
-            ) {
-                handler.invoke(it)
-            }
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix()}ticket_message` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `user_id` int NOT NULL,              
+                              `ticket_id` int NOT NULL,
+                              `message` text NOT NULL,
+                              `date` MEDIUMTEXT NOT NULL,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket message table.';
+                        """
+                )
+                .execute {
+                    handler.invoke(it)
+                }
         }
 }

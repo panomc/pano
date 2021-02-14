@@ -6,269 +6,310 @@ import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.mysqlclient.MySQLClient
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 import java.util.*
 
 class PostCategoryDaoImpl(override val tableName: String = "post_category") : DaoImpl(), PostCategoryDao {
 
-    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `title` MEDIUMTEXT NOT NULL,
-              `description` text NOT NULL,
-              `url` varchar(255) NOT NULL,
-              `color` varchar(6) NOT NULL,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Post category table.';
-        """
-            ) {
-            handler.invoke(it)
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `title` MEDIUMTEXT NOT NULL,
+                              `description` text NOT NULL,
+                              `url` varchar(255) NOT NULL,
+                              `color` varchar(6) NOT NULL,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Post category table.';
+                        """
+                )
+                .execute {
+                    handler.invoke(it)
+                }
         }
-    }
 
     override fun isExistsByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun deleteByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "DELETE FROM `${getTablePrefix() + tableName}` WHERE id = ?"
 
-        sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
-    override fun getCount(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun getCount(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
-        sqlConnection.query(query) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getCategories(
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC"
 
-        sqlConnection.query(query) { queryResult ->
-            if (queryResult.succeeded()) {
-                val categories = mutableListOf<Map<String, Any>>()
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val categories = mutableListOf<Map<String, Any>>()
 
-                if (queryResult.result().results.size > 0)
-                    queryResult.result().results.forEach { categoryInDB ->
-                        categories.add(
-                            mapOf(
-                                "id" to categoryInDB.getInteger(0),
-                                "title" to String(
-                                    Base64.getDecoder().decode(categoryInDB.getString(1))
-                                ),
-                                "description" to String(Base64.getDecoder().decode(categoryInDB.getString(2))),
-                                "url" to categoryInDB.getString(3),
-                                "color" to categoryInDB.getString(4)
+                    if (rows.size() > 0)
+                        rows.forEach { row ->
+                            categories.add(
+                                mapOf(
+                                    "id" to row.getInteger(0),
+                                    "title" to String(
+                                        Base64.getDecoder().decode(row.getString(1))
+                                    ),
+                                    "description" to String(Base64.getDecoder().decode(row.getString(2))),
+                                    "url" to row.getString(3),
+                                    "color" to row.getString(4)
+                                )
                             )
-                        )
-                    }
+                        }
 
-                handler.invoke(categories, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(categories, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getCategories(
         page: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
-        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
-            if (queryResult.succeeded()) {
-                val categories = mutableListOf<Map<String, Any>>()
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val categories = mutableListOf<Map<String, Any>>()
 
-                if (queryResult.result().results.size > 0) {
-                    val handlers: List<(handler: () -> Unit) -> Any> =
-                        queryResult.result().results.map { categoryInDB ->
-                            val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                databaseManager.getDatabase().postDao.countByCategory(
-                                    categoryInDB.getInteger(0),
-                                    sqlConnection
-                                ) { count, asyncResultOfCount ->
-                                    if (count == null) {
-                                        handler.invoke(null, asyncResultOfCount)
-
-                                        return@countByCategory
-                                    }
-
-                                    databaseManager.getDatabase().postDao.getByCategory(
+                    if (rows.size() > 0) {
+                        val handlers: List<(handler: () -> Unit) -> Any> =
+                            rows.map { categoryInDB ->
+                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                                    databaseManager.getDatabase().postDao.countByCategory(
                                         categoryInDB.getInteger(0),
                                         sqlConnection
-                                    ) { posts, asyncResultOfPosts ->
-                                        if (posts == null) {
-                                            handler.invoke(null, asyncResultOfPosts)
+                                    ) { count, asyncResultOfCount ->
+                                        if (count == null) {
+                                            handler.invoke(null, asyncResultOfCount)
 
-                                            return@getByCategory
+                                            return@countByCategory
                                         }
 
-                                        categories.add(
-                                            mapOf(
-                                                "id" to categoryInDB.getInteger(0),
-                                                "title" to String(
-                                                    Base64.getDecoder().decode(categoryInDB.getString(1))
-                                                ),
-                                                "description" to String(
-                                                    Base64.getDecoder().decode(categoryInDB.getString(2))
-                                                ),
-                                                "url" to categoryInDB.getString(3),
-                                                "color" to categoryInDB.getString(4),
-                                                "post_count" to count,
-                                                "posts" to posts
-                                            )
-                                        )
+                                        databaseManager.getDatabase().postDao.getByCategory(
+                                            categoryInDB.getInteger(0),
+                                            sqlConnection
+                                        ) { posts, asyncResultOfPosts ->
+                                            if (posts == null) {
+                                                handler.invoke(null, asyncResultOfPosts)
 
-                                        localHandler.invoke()
+                                                return@getByCategory
+                                            }
+
+                                            categories.add(
+                                                mapOf(
+                                                    "id" to categoryInDB.getInteger(0),
+                                                    "title" to String(
+                                                        Base64.getDecoder().decode(categoryInDB.getString(1))
+                                                    ),
+                                                    "description" to String(
+                                                        Base64.getDecoder().decode(categoryInDB.getString(2))
+                                                    ),
+                                                    "url" to categoryInDB.getString(3),
+                                                    "color" to categoryInDB.getString(4),
+                                                    "post_count" to count,
+                                                    "posts" to posts
+                                                )
+                                            )
+
+                                            localHandler.invoke()
+                                        }
                                     }
                                 }
+
+                                localHandler
                             }
 
-                            localHandler
+                        var currentIndex = -1
+
+                        fun invoke() {
+                            val localHandler: () -> Unit = {
+                                if (currentIndex == handlers.lastIndex)
+                                    handler.invoke(categories, queryResult)
+                                else
+                                    invoke()
+                            }
+
+                            currentIndex++
+
+                            if (currentIndex <= handlers.lastIndex)
+                                handlers[currentIndex].invoke(localHandler)
                         }
 
-                    var currentIndex = -1
-
-                    fun invoke() {
-                        val localHandler: () -> Unit = {
-                            if (currentIndex == handlers.lastIndex)
-                                handler.invoke(categories, queryResult)
-                            else
-                                invoke()
-                        }
-
-                        currentIndex++
-
-                        if (currentIndex <= handlers.lastIndex)
-                            handlers[currentIndex].invoke(localHandler)
-                    }
-
-                    invoke()
+                        invoke()
+                    } else
+                        handler.invoke(categories, queryResult)
                 } else
-                    handler.invoke(categories, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun isExistsByURL(
         url: String,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `url` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(url)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(url)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun isExistsByURLNotByID(
         url: String,
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `url` = ? and id != ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(url).add(id)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(url, id)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun add(
         postCategory: PostCategory,
-        sqlConnection: SQLConnection,
-        handler: (id: Int?, asyncResult: AsyncResult<*>) -> Unit
+        sqlConnection: SqlConnection,
+        handler: (id: Long?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "INSERT INTO `${getTablePrefix() + tableName}` (`title`, `description`, `url`, `color`) VALUES (?, ?, ?, ?)"
 
-        sqlConnection.updateWithParams(
-            query,
-            JsonArray()
-                .add(Base64.getEncoder().encodeToString(postCategory.title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(postCategory.description.toByteArray()))
-                .add(postCategory.url)
-                .add(postCategory.color.replace("#", ""))
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().keys.getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    Base64.getEncoder().encodeToString(postCategory.title.toByteArray()),
+                    Base64.getEncoder().encodeToString(postCategory.description.toByteArray()),
+                    postCategory.url,
+                    postCategory.color.replace("#", "")
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.property(MySQLClient.LAST_INSERTED_ID), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun update(
         postCategory: PostCategory,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "UPDATE `${getTablePrefix() + tableName}` SET title = ?, description = ?, url = ?, color = ? WHERE `id` = ?"
 
-        sqlConnection.updateWithParams(
-            query,
-            JsonArray()
-                .add(
-                    Base64.getEncoder().encodeToString(postCategory.title.toByteArray())
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    Base64.getEncoder().encodeToString(postCategory.title.toByteArray()),
+                    Base64.getEncoder().encodeToString(postCategory.description.toByteArray()),
+                    postCategory.url,
+                    postCategory.color.replace("#", ""),
+                    postCategory.id
                 )
-                .add(Base64.getEncoder().encodeToString(postCategory.description.toByteArray()))
-                .add(postCategory.url)
-                .add(postCategory.color.replace("#", ""))
-                .add(postCategory.id)
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 }

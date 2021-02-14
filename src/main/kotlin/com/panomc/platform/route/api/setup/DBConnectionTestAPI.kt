@@ -2,9 +2,10 @@ package com.panomc.platform.route.api.setup
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
-import io.vertx.ext.asyncsql.MySQLClient
 import io.vertx.ext.web.RoutingContext
-import io.vertx.kotlin.core.json.jsonObjectOf
+import io.vertx.mysqlclient.MySQLConnectOptions
+import io.vertx.mysqlclient.MySQLPool
+import io.vertx.sqlclient.PoolOptions
 
 class DBConnectionTestAPI : SetupApi() {
     override val routeType = RouteType.POST
@@ -25,25 +26,29 @@ class DBConnectionTestAPI : SetupApi() {
             port = splitHost[1].toInt()
         }
 
-        val mySQLClientConfig = jsonObjectOf(
-            Pair("host", host),
-            Pair("port", port),
-            Pair("database", data.getString("dbName")),
-            Pair("username", data.getString("username")),
-            Pair("password", if (data.getString("password").isNullOrEmpty()) null else data.getString("password"))
-        )
+        val connectOptions = MySQLConnectOptions()
+            .setPort(port)
+            .setHost(host)
+            .setDatabase(data.getString("dbName"))
+            .setUser(data.getString("username"))
 
-        val mySQLClient = MySQLClient.createNonShared(context.vertx(), mySQLClientConfig)
+        if (!data.getString("password").isNullOrEmpty())
+            connectOptions.password = data.getString("password")
 
-        mySQLClient.getConnection { connection ->
+        val poolOptions = PoolOptions()
+            .setMaxSize(1)
+
+        val mySQLPool = MySQLPool.pool(context.vertx(), connectOptions, poolOptions)
+
+        mySQLPool.getConnection { connection ->
             if (connection.succeeded())
                 connection.result().close {
-                    mySQLClient.close {
+                    mySQLPool.close {
                         handler.invoke(Successful())
                     }
                 }
             else
-                mySQLClient.close {
+                mySQLPool.close {
                     handler.invoke(Error(ErrorCode.INVALID_DATA))
                 }
         }

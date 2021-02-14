@@ -3,7 +3,7 @@ package com.panomc.platform.db
 import com.panomc.platform.Main
 import com.panomc.platform.db.model.SchemeVersion
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 import javax.inject.Inject
 
 abstract class DatabaseMigration {
@@ -14,7 +14,7 @@ abstract class DatabaseMigration {
         Main.getComponent().inject(this)
     }
 
-    abstract val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection>
+    abstract val handlers: List<(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit>
 
 
     abstract val FROM_SCHEME_VERSION: Int
@@ -24,7 +24,7 @@ abstract class DatabaseMigration {
     fun isMigratable(version: Int) = version == FROM_SCHEME_VERSION
 
     fun migrate(
-        sqlConnection: SQLConnection
+        sqlConnection: SqlConnection
     ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit = { handler ->
         var currentIndex = 0
 
@@ -49,8 +49,8 @@ abstract class DatabaseMigration {
     }
 
     fun updateSchemeVersion(
-        sqlConnection: SQLConnection
-    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection = { handler ->
+        sqlConnection: SqlConnection
+    ): (handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit = { handler ->
         databaseManager.getDatabase().schemeVersionDao.add(
             sqlConnection,
             SchemeVersion(SCHEME_VERSION.toString(), SCHEME_VERSION_INFO)

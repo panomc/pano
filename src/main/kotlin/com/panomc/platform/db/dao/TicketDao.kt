@@ -5,71 +5,71 @@ import com.panomc.platform.db.model.Ticket
 import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
 import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface TicketDao : Dao<Ticket> {
-    fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun count(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
-    fun countOfOpenTickets(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun countOfOpenTickets(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getLast5Tickets(
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getAllByPageAndPageType(
         page: Int,
         pageType: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getCountByPageType(
         pageType: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getByCategory(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun closeTickets(
         selectedTickets: JsonArray,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun countByCategory(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun delete(
         ticketList: JsonArray,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun countByUserID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (ticket: Ticket?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isExistsByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

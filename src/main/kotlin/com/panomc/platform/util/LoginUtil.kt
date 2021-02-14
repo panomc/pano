@@ -6,8 +6,8 @@ import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.core.http.Cookie
-import io.vertx.ext.sql.SQLConnection
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 object LoginUtil {
     const val COOKIE_NAME = "pano_token"
@@ -19,7 +19,7 @@ object LoginUtil {
         rememberMe: Boolean,
         routingContext: RoutingContext,
         databaseManager: DatabaseManager,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (isLoggedIn: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         databaseManager.getDatabase().userDao.isLoginCorrect(

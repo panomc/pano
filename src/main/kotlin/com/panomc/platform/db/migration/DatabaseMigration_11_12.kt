@@ -2,7 +2,7 @@ package com.panomc.platform.db.migration
 
 import com.panomc.platform.db.DatabaseMigration
 import io.vertx.core.AsyncResult
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.SqlConnection
 
 @Suppress("ClassName")
 class DatabaseMigration_11_12 : DatabaseMigration() {
@@ -10,20 +10,17 @@ class DatabaseMigration_11_12 : DatabaseMigration() {
     override val SCHEME_VERSION = 12
     override val SCHEME_VERSION_INFO = "Add register_date field to user table."
 
-    override val handlers: List<(sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection> =
+    override val handlers: List<(sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit> =
         listOf(
             addRegisterDateFieldToUserTable()
         )
 
-    private fun addRegisterDateFieldToUserTable(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    private fun addRegisterDateFieldToUserTable(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-                    ALTER TABLE `${getTablePrefix()}user` 
-                    ADD `register_date` MEDIUMTEXT;
-                """
-            ) {
-                handler.invoke(it)
-            }
+            sqlConnection
+                .query("ALTER TABLE `${getTablePrefix()}user` ADD `register_date` MEDIUMTEXT;")
+                .execute {
+                    handler.invoke(it)
+                }
         }
 }

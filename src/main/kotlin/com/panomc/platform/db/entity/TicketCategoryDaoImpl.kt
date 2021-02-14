@@ -6,171 +6,197 @@ import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
-import io.vertx.core.json.JsonArray
-import io.vertx.ext.sql.SQLConnection
+import io.vertx.sqlclient.Row
+import io.vertx.sqlclient.RowSet
+import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 import java.util.*
 
 class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") : DaoImpl(), TicketCategoryDao {
 
-    override fun init(): (sqlConnection: SQLConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> SQLConnection =
+    override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
         { sqlConnection, handler ->
-            sqlConnection.query(
-                """
-            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
-              `id` int NOT NULL AUTO_INCREMENT,
-              `title` MEDIUMTEXT NOT NULL,
-              `description` text,
-              PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket category table.';
-        """
-            ) {
-            handler.invoke(it)
+            sqlConnection
+                .query(
+                    """
+                            CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
+                              `id` int NOT NULL AUTO_INCREMENT,
+                              `title` MEDIUMTEXT NOT NULL,
+                              `description` text,
+                              PRIMARY KEY (`id`)
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket category table.';
+                        """
+                )
+                .execute {
+                    handler.invoke(it)
+                }
         }
-    }
 
     override fun getAll(
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT id, title FROM `${getTablePrefix() + tableName}`"
         val categories = mutableListOf<TicketCategory>()
 
-        sqlConnection.query(query) { categoryQueryResult ->
-            if (categoryQueryResult.failed()) {
-                handler.invoke(null, categoryQueryResult)
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.failed()) {
+                    handler.invoke(null, queryResult)
 
-                return@query
-            }
+                    return@execute
+                }
 
-            categoryQueryResult.result().results.forEach { categoryInDB ->
-                categories.add(
-                    TicketCategory(
-                        categoryInDB.getInteger(0),
-                        String(
-                            Base64.getDecoder()
-                                .decode(categoryInDB.getString(1).toByteArray())
+                val rows: RowSet<Row> = queryResult.result()
+
+                rows.forEach { row ->
+                    categories.add(
+                        TicketCategory(
+                            row.getInteger(0),
+                            String(
+                                Base64.getDecoder()
+                                    .decode(row.getString(1).toByteArray())
+                            )
                         )
                     )
-                )
-            }
+                }
 
-            handler.invoke(categories, categoryQueryResult)
-        }
+                handler.invoke(categories, queryResult)
+            }
     }
 
     override fun isExistsByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0) == 1, queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(id)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun deleteByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query = "DELETE FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
 
-        sqlConnection.updateWithParams(query, JsonArray().add(id)) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(id)) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun add(
         ticketCategory: TicketCategory,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
 
         val query =
             "INSERT INTO `${getTablePrefix() + tableName}` (`title`, `description`) VALUES (?, ?)"
 
-        sqlConnection.updateWithParams(
-            query,
-            JsonArray().add(Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray()))
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()),
+                    Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray())
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun update(
         ticketCategory: TicketCategory,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "UPDATE `${getTablePrefix() + tableName}` SET title = ?, description = ? WHERE `id` = ?"
 
-        sqlConnection.updateWithParams(
-            query,
-            JsonArray()
-                .add(Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()))
-                .add(Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray()))
-                .add(ticketCategory.id)
-        ) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(Successful(), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()),
+                    Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray()),
+                    ticketCategory.id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
     }
 
-    override fun count(sqlConnection: SQLConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
+    override fun count(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit) {
         val query =
             "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}`"
 
-        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
-            if (queryResult.succeeded())
-                handler.invoke(queryResult.result().results[0].getInteger(0), queryResult)
-            else
-                handler.invoke(null, queryResult)
-        }
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getByPage(
         page: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, title, description FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
 
-        sqlConnection.queryWithParams(query, JsonArray()) { queryResult ->
-            if (queryResult.succeeded()) {
-                val categories = mutableListOf<Map<String, Any>>()
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val categories = mutableListOf<Map<String, Any>>()
 
-                if (queryResult.result().results.size > 0) {
-                    val handlers: List<(handler: () -> Unit) -> Any> =
-                        queryResult.result().results.map { categoryInDB ->
-                            val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                databaseManager.getDatabase().ticketDao.countByCategory(
-                                    categoryInDB.getInteger(0),
-                                    sqlConnection
-                                ) { count, asyncResult ->
-                                    if (count == null) {
-                                        handler.invoke(null, asyncResult)
+                    if (rows.size() > 0) {
+                        val handlers: List<(handler: () -> Unit) -> Any> =
+                            rows.map { row ->
+                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                                    databaseManager.getDatabase().ticketDao.countByCategory(
+                                        row.getInteger(0),
+                                        sqlConnection
+                                    ) { count, asyncResult ->
+                                        if (count == null) {
+                                            handler.invoke(null, asyncResult)
 
-                                        return@countByCategory
-                                    }
+                                            return@countByCategory
+                                        }
 
                                     databaseManager.getDatabase().ticketDao.getByCategory(
-                                        categoryInDB.getInteger(0),
+                                        row.getInteger(0),
                                         sqlConnection
                                     ) { tickets, asyncResultOfGetByCategory ->
                                         if (tickets == null) {
@@ -181,12 +207,12 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
 
                                         categories.add(
                                             mapOf(
-                                                "id" to categoryInDB.getInteger(0),
+                                                "id" to row.getInteger(0),
                                                 "title" to String(
-                                                    Base64.getDecoder().decode(categoryInDB.getString(1))
+                                                    Base64.getDecoder().decode(row.getString(1))
                                                 ),
                                                 "description" to String(
-                                                    Base64.getDecoder().decode(categoryInDB.getString(2))
+                                                    Base64.getDecoder().decode(row.getString(2))
                                                 ),
                                                 "ticket_count" to count,
                                                 "tickets" to tickets
@@ -227,23 +253,28 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
 
     override fun getByID(
         id: Int,
-        sqlConnection: SQLConnection,
+        sqlConnection: SqlConnection,
         handler: (ticketCategory: TicketCategory?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `id`, `title`, `description` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
 
-        sqlConnection.queryWithParams(query, JsonArray().add(id)) { queryResult ->
-            if (queryResult.succeeded()) {
-                val ticket = TicketCategory(
-                    id = queryResult.result().results[0].getInteger(0),
-                    title = String(
-                        Base64.getDecoder().decode(queryResult.result().results[0].getString(1).toByteArray())
-                    ),
-                    description = String(
-                        Base64.getDecoder().decode(queryResult.result().results[0].getString(2).toByteArray())
-                    ),
-                )
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(id)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    val ticket = TicketCategory(
+                        id = row.getInteger(0),
+                        title = String(
+                            Base64.getDecoder().decode(row.getString(1).toByteArray())
+                        ),
+                        description = String(
+                            Base64.getDecoder().decode(row.getString(2).toByteArray())
+                        ),
+                    )
 
                 handler.invoke(ticket, queryResult)
             } else
