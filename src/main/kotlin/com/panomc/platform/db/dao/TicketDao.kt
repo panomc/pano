@@ -72,4 +72,11 @@ interface TicketDao : Dao<Ticket> {
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun makeStatus(
+        id: Int,
+        status: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

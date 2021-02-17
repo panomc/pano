@@ -474,4 +474,27 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun makeStatus(
+        id: Int,
+        status: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE id = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    status,
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
