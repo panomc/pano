@@ -6,6 +6,7 @@ import com.panomc.platform.db.model.TicketMessage
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import io.vertx.mysqlclient.MySQLClient
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -156,6 +157,37 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
 
                     handler.invoke(Successful(mapOf("id" to rows.property(MySQLClient.LAST_INSERTED_ID))), queryResult)
                 } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun deleteByTicketIDList(
+        ticketIDList: JsonArray,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val parameters = Tuple.tuple()
+
+        var selectedTicketsSQLText = ""
+
+        ticketIDList.forEach {
+            if (selectedTicketsSQLText.isEmpty())
+                selectedTicketsSQLText = "?"
+            else
+                selectedTicketsSQLText += ", ?"
+
+            parameters.addValue(it)
+        }
+
+        val query =
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE ticket_id IN ($selectedTicketsSQLText)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(parameters) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
                     handler.invoke(null, queryResult)
             }
     }

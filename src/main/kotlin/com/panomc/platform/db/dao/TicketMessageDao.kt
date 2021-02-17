@@ -4,6 +4,7 @@ import com.panomc.platform.db.Dao
 import com.panomc.platform.db.model.TicketMessage
 import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import io.vertx.sqlclient.SqlConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -31,6 +32,12 @@ interface TicketMessageDao : Dao<TicketMessage> {
 
     fun addMessage(
         ticketMessage: TicketMessage,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun deleteByTicketIDList(
+        ticketIDList: JsonArray,
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
