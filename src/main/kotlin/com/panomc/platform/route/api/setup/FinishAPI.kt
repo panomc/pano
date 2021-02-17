@@ -72,7 +72,7 @@ class FinishAPI : SetupApi() {
                         true
                     ) { resultOfRegister, _ ->
                         if (resultOfRegister == null) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_128))
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_144))
 
                             return@register
                         }
