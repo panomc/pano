@@ -2,6 +2,7 @@ package com.panomc.platform.db.dao
 
 import com.panomc.platform.db.Dao
 import com.panomc.platform.db.model.TicketMessage
+import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
 import io.vertx.sqlclient.SqlConnection
 
@@ -26,5 +27,11 @@ interface TicketMessageDao : Dao<TicketMessage> {
         ticketID: Int,
         sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun addMessage(
+        ticketMessage: TicketMessage,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

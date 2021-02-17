@@ -3,7 +3,10 @@ package com.panomc.platform.db.entity
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.TicketMessageDao
 import com.panomc.platform.db.model.TicketMessage
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
+import io.vertx.mysqlclient.MySQLClient
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
@@ -124,6 +127,34 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                     val rows: RowSet<Row> = queryResult.result()
 
                     handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun addMessage(
+        ticketMessage: TicketMessage,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "INSERT INTO `${getTablePrefix() + tableName}` (user_id, ticket_id, message, `date`, panel) VALUES (?, ?, ?, ?, ?)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    ticketMessage.userID,
+                    ticketMessage.ticketID,
+                    Base64.getEncoder().encodeToString(ticketMessage.message.toByteArray()),
+                    ticketMessage.date,
+                    ticketMessage.panel,
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(Successful(mapOf("id" to rows.property(MySQLClient.LAST_INSERTED_ID))), queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
