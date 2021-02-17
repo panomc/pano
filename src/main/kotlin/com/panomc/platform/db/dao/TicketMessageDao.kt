@@ -41,4 +41,10 @@ interface TicketMessageDao : Dao<TicketMessage> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getLastMessageByTicketID(
+        ticketID: Int,
+        sqlConnection: SqlConnection,
+        handler: (ticketMessage: TicketMessage?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

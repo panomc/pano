@@ -191,4 +191,34 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getLastMessageByTicketID(
+        ticketID: Int,
+        sqlConnection: SqlConnection,
+        handler: (ticketMessage: TicketMessage?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT id, user_id, ticket_id, message, `date`, `panel` FROM `${getTablePrefix() + tableName}` WHERE ticket_id = ? DESC LIMIT 1"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(ticketID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val ticketRow = rows.toList()[0]
+
+                    val ticketMessage = TicketMessage(
+                        ticketRow.getInteger(0),
+                        ticketRow.getInteger(1),
+                        ticketRow.getInteger(2),
+                        ticketRow.getString(3),
+                        ticketRow.getString(4),
+                        ticketRow.getInteger(5)
+                    )
+
+                    handler.invoke(ticketMessage, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
