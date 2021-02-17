@@ -29,14 +29,28 @@ class TicketPageDeleteTicketsAPI : PanelApi() {
                 selectedTickets,
                 sqlConnection
             ) { result, _ ->
-                if (result == null)
+                if (result == null) {
                     databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_117))
                     }
-                else
+
+                    return@delete
+                }
+
+                databaseManager.getDatabase().ticketMessageDao.deleteByTicketIDList(
+                    selectedTickets,
+                    sqlConnection
+                ) { resultOfDeleteByTicketIDList, _ ->
                     databaseManager.closeConnection(sqlConnection) {
+                        if (resultOfDeleteByTicketIDList == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_147))
+
+                            return@closeConnection
+                        }
+
                         handler.invoke(Successful())
                     }
+                }
             }
         }
     }

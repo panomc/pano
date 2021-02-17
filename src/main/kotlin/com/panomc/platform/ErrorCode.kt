@@ -145,4 +145,5 @@ enum class ErrorCode {
     UNKNOWN_ERROR_144,
     UNKNOWN_ERROR_145,
     UNKNOWN_ERROR_146,
+    UNKNOWN_ERROR_147,
 }
