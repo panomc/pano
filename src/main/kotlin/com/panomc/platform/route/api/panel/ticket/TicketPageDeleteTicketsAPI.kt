@@ -2,7 +2,10 @@ package com.panomc.platform.route.api.panel.ticket
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
+import io.vertx.core.json.JsonArray
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class TicketPageDeleteTicketsAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -19,39 +22,58 @@ class TicketPageDeleteTicketsAPI : PanelApi() {
             return
         }
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-                return@createConnection
+        databaseManager.createConnection((this::createConnectionHandler)(handler, selectedTickets))
+    }
+
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        selectedTickets: JsonArray
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().ticketDao.delete(
+            selectedTickets,
+            sqlConnection,
+            (this::deleteHandler)(handler, sqlConnection, selectedTickets)
+        )
+    }
+
+    private fun deleteHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        selectedTickets: JsonArray
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        if (result == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_117))
             }
 
-            databaseManager.getDatabase().ticketDao.delete(
-                selectedTickets,
-                sqlConnection
-            ) { result, _ ->
-                if (result == null) {
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_117))
-                    }
+            return@handler
+        }
 
-                    return@delete
-                }
+        databaseManager.getDatabase().ticketMessageDao.deleteByTicketIDList(
+            selectedTickets,
+            sqlConnection,
+            (this::deleteByTicketIDListHandler)(handler, sqlConnection)
+        )
+    }
 
-                databaseManager.getDatabase().ticketMessageDao.deleteByTicketIDList(
-                    selectedTickets,
-                    sqlConnection
-                ) { resultOfDeleteByTicketIDList, _ ->
-                    databaseManager.closeConnection(sqlConnection) {
-                        if (resultOfDeleteByTicketIDList == null) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_147))
+    private fun deleteByTicketIDListHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (result == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_147))
 
-                            return@closeConnection
-                        }
-
-                        handler.invoke(Successful())
-                    }
-                }
+                return@closeConnection
             }
+
+            handler.invoke(Successful())
         }
     }
 }

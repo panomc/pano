@@ -21,59 +21,70 @@ class TicketDetailAPI : PanelApi() {
         databaseManager.createConnection((this::createConnectionHandler)(handler, id))
     }
 
-    private fun createConnectionHandler(handler: (result: Result) -> Unit, id: Int) =
-        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        id: Int
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
-                return@handler
-            }
-
-            databaseManager.getDatabase().ticketDao.isExistsByID(
-                id,
-                sqlConnection,
-                (this::isExistsByHandler)(handler, id, sqlConnection)
-            )
+            return@handler
         }
 
-    private fun isExistsByHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SqlConnection) =
-        handler@{ exists: Boolean?, _: AsyncResult<*> ->
-            if (exists == null) {
-                databaseManager.closeConnection(sqlConnection) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_131))
-                }
+        databaseManager.getDatabase().ticketDao.isExistsByID(
+            id,
+            sqlConnection,
+            (this::isExistsByHandler)(handler, id, sqlConnection)
+        )
+    }
 
-                return@handler
+    private fun isExistsByHandler(
+        handler: (result: Result) -> Unit,
+        id: Int,
+        sqlConnection: SqlConnection
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_131))
             }
 
-            if (!exists)
-                databaseManager.closeConnection(sqlConnection) {
-                    handler.invoke(Error(ErrorCode.NOT_EXISTS))
-                }
-            else
-                databaseManager.getDatabase().ticketDao.getByID(
-                    id,
-                    sqlConnection,
-                    (this::getByIDHandler)(handler, id, sqlConnection)
-                )
+            return@handler
         }
 
-    private fun getByIDHandler(handler: (result: Result) -> Unit, id: Int, sqlConnection: SqlConnection) =
-        handler@{ ticket: Ticket?, _: AsyncResult<*> ->
-            if (ticket == null) {
-                databaseManager.closeConnection(sqlConnection) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_132))
-                }
-
-                return@handler
+        if (!exists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.NOT_EXISTS))
             }
 
-            databaseManager.getDatabase().userDao.getUsernameFromUserID(
-                ticket.userID,
-                sqlConnection,
-                (this::getUsernameFromUserIDHandler)(handler, id, sqlConnection, ticket)
-            )
+            return@handler
         }
+
+        databaseManager.getDatabase().ticketDao.getByID(
+            id,
+            sqlConnection,
+            (this::getByIDHandler)(handler, id, sqlConnection)
+        )
+    }
+
+    private fun getByIDHandler(
+        handler: (result: Result) -> Unit,
+        id: Int,
+        sqlConnection: SqlConnection
+    ) = handler@{ ticket: Ticket?, _: AsyncResult<*> ->
+        if (ticket == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_132))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.getUsernameFromUserID(
+            ticket.userID,
+            sqlConnection,
+            (this::getUsernameFromUserIDHandler)(handler, id, sqlConnection, ticket)
+        )
+    }
 
     private fun getUsernameFromUserIDHandler(
         handler: (result: Result) -> Unit,
@@ -164,25 +175,47 @@ class TicketDetailAPI : PanelApi() {
             return@handler
         }
 
-        if (ticket.categoryID == -1)
+        if (ticket.categoryID == -1) {
             databaseManager.closeConnection(sqlConnection) {
                 invokeHandler(handler, ticket, usernameList, null, username, messages, count)
             }
-        else
-            databaseManager.getDatabase().ticketCategoryDao.getByID(
-                ticket.categoryID,
-                sqlConnection
-            ) { ticketCategory, _ ->
-                databaseManager.closeConnection(sqlConnection) {
-                    if (ticketCategory == null) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_134))
 
-                        return@closeConnection
-                    }
+            return@handler
+        }
 
-                    invokeHandler(handler, ticket, usernameList, ticketCategory, username, messages, count)
-                }
+        databaseManager.getDatabase().ticketCategoryDao.getByID(
+            ticket.categoryID,
+            sqlConnection,
+            (this::ticketCategoryGetByIDHandler)(
+                handler,
+                sqlConnection,
+                ticket,
+                username,
+                messages,
+                usernameList,
+                count
+            )
+        )
+    }
+
+    private fun ticketCategoryGetByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        ticket: Ticket,
+        username: String,
+        messages: List<TicketMessage>,
+        usernameList: Map<Int, String>,
+        count: Int
+    ) = handler@{ ticketCategory: TicketCategory?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (ticketCategory == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_134))
+
+                return@closeConnection
             }
+
+            invokeHandler(handler, ticket, usernameList, ticketCategory, username, messages, count)
+        }
     }
 
     private fun invokeHandler(

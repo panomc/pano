@@ -17,7 +17,7 @@ class PanelConfigDaoImpl(override val tableName: String = "panel_config") : DaoI
                               `option` varchar(255) NOT NULL,
                               `value` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Panel Config per player table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Config per player table.';
                         """
                 )
                 .execute {

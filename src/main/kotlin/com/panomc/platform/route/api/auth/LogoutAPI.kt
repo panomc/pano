@@ -6,6 +6,7 @@ import com.panomc.platform.model.LoggedInApi
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.util.LoginUtil
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 
 class LogoutAPI : LoggedInApi() {
@@ -14,14 +15,16 @@ class LogoutAPI : LoggedInApi() {
     override val routes = arrayListOf("/api/auth/logout")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        LoginUtil.logout(databaseManager, context) { isLoggedOut, _ ->
-            if (isLoggedOut == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
+        LoginUtil.logout(databaseManager, context, (this::logoutHandler)(handler))
+    }
 
-                return@logout
-            }
+    private fun logoutHandler(handler: (result: Result) -> Unit) = handler@{ isLoggedOut: Result?, _: AsyncResult<*>? ->
+        if (isLoggedOut == null) {
+            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_28))
 
-            handler.invoke(isLoggedOut)
+            return@handler
         }
+
+        handler.invoke(isLoggedOut)
     }
 }

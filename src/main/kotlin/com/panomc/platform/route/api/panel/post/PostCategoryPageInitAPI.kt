@@ -2,7 +2,9 @@ package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 import kotlin.math.ceil
 
 class PostCategoryPageInitAPI : PanelApi() {
@@ -14,56 +16,75 @@ class PostCategoryPageInitAPI : PanelApi() {
         val data = context.bodyAsJson
         val page = data.getInteger("page")
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                handler,
+                page
+            )
+        )
+    }
 
-                return@createConnection
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        page: Int
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postCategoryDao.getCount(
+            sqlConnection,
+            (this::getCountHandler)(handler, sqlConnection, page)
+        )
+    }
+
+    private fun getCountHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        page: Int
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_86))
             }
 
-            databaseManager.getDatabase().postCategoryDao.getCount(sqlConnection) { count, _ ->
-                if (count == null)
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_86))
-                    }
-                else {
-                    var totalPage = ceil(count.toDouble() / 10).toInt()
+            return@handler
+        }
 
-                    if (totalPage < 1)
-                        totalPage = 1
+        var totalPage = ceil(count.toDouble() / 10).toInt()
 
-                    if (page > totalPage || page < 1) {
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
-                        }
+        if (totalPage < 1)
+            totalPage = 1
 
-                        return@getCount
-                    }
+        if (page > totalPage || page < 1) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
+            }
 
-                    databaseManager.getDatabase().postCategoryDao.getCategories(
-                        page,
-                        sqlConnection
-                    ) { categories, _ ->
-                        if (categories == null) {
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
-                            }
+            return@handler
+        }
 
-                            return@getCategories
-                        }
+        databaseManager.getDatabase().postCategoryDao.getCategories(
+            page,
+            sqlConnection
+        ) { categories, _ ->
+            databaseManager.closeConnection(sqlConnection) {
+                if (categories == null) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
 
-                        val result = mutableMapOf<String, Any?>(
-                            "categories" to categories,
-                            "category_count" to count,
-                            "total_page" to totalPage,
-                            "host" to "http://"
-                        )
-
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Successful(result))
-                        }
-                    }
+                    return@closeConnection
                 }
+
+                val result = mutableMapOf<String, Any?>(
+                    "categories" to categories,
+                    "category_count" to count,
+                    "total_page" to totalPage,
+                    "host" to "http://"
+                )
+
+                handler.invoke(Successful(result))
             }
         }
     }

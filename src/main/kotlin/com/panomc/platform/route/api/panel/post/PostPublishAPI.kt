@@ -3,7 +3,9 @@ package com.panomc.platform.route.api.panel.post
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.Post
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class PostPublishAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -20,64 +22,115 @@ class PostPublishAPI : PanelApi() {
 
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                handler,
+                id,
+                title,
+                categoryID,
+                text,
+                imageCode,
+                token
+            )
+        )
+    }
 
-                return@createConnection
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        id: Int,
+        title: String,
+        categoryID: Int,
+        text: String,
+        imageCode: String,
+        token: String
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+            token,
+            sqlConnection,
+            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id, title, categoryID, text, imageCode)
+        )
+    }
+
+    private fun getUserIDFromTokenHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int,
+        title: String,
+        categoryID: Int,
+        text: String,
+        imageCode: String,
+    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
+        if (userID == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(
+                    Error(
+                        ErrorCode.UNKNOWN_ERROR_116
+                    )
+                )
             }
 
-            databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-                token,
-                sqlConnection
-            ) { userID, _ ->
-                if (userID == null)
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(
-                            Error(
-                                ErrorCode.UNKNOWN_ERROR_116
-                            )
-                        )
-                    }
-                else {
-                    val post = Post(id, title, categoryID, userID, text, imageCode)
+            return@handler
+        }
 
-                    if (id == -1)
-                        databaseManager.getDatabase().postDao.insertAndPublish(
-                            post,
-                            sqlConnection
-                        ) { postID, _ ->
-                            if (postID == null)
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_114))
-                                }
-                            else
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(
-                                        Successful(
-                                            mapOf(
-                                                "id" to postID
-                                            )
-                                        )
-                                    )
-                                }
-                        }
-                    else
-                        databaseManager.getDatabase().postDao.updateAndPublish(
-                            userID,
-                            post,
-                            sqlConnection
-                        ) { result, _ ->
-                            if (result == null)
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_115))
-                                }
-                            else
-                                handler.invoke(Successful())
+        val post = Post(id, title, categoryID, userID, text, imageCode)
 
-                        }
-                }
+        if (id == -1) {
+            databaseManager.getDatabase().postDao.insertAndPublish(
+                post,
+                sqlConnection,
+                (this::insertAndPublishHandler)(handler, sqlConnection)
+            )
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.updateAndPublish(
+            userID,
+            post,
+            sqlConnection,
+            (this::updateAndPublishHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun insertAndPublishHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) = handler@{ postID: Long?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (postID == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_114))
+
+                return@closeConnection
             }
+
+            handler.invoke(
+                Successful(
+                    mapOf(
+                        "id" to postID
+                    )
+                )
+            )
+        }
+    }
+
+    private fun updateAndPublishHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (result == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_115))
+
+                return@closeConnection
+            }
+
+            handler.invoke(Successful())
         }
     }
 }

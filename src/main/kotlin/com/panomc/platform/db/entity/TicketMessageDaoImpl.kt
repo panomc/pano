@@ -12,7 +12,6 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
 import io.vertx.sqlclient.Tuple
-import java.util.*
 
 class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : DaoImpl(), TicketMessageDao {
     override fun init(): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
@@ -26,9 +25,9 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                               `ticket_id` int NOT NULL,
                               `message` text NOT NULL,
                               `date` MEDIUMTEXT NOT NULL,
-                              `panel` int NOT NULL COMMENT='Is it a message wrote on panel by an authorized.',
+                              `panel` int NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket message table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket message table.';
                         """
                 )
                 .execute {
@@ -59,9 +58,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                                     id = row.getInteger(0),
                                     userID = row.getInteger(1),
                                     ticketID = row.getInteger(2),
-                                    message = String(
-                                        Base64.getDecoder().decode(row.getString(3).toByteArray())
-                                    ),
+                                    message = row.getString(3),
                                     date = row.getString(4),
                                     panel = row.getInteger(5)
                                 )
@@ -98,9 +95,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                                     id = row.getInteger(0),
                                     userID = row.getInteger(1),
                                     ticketID = row.getInteger(2),
-                                    message = String(
-                                        Base64.getDecoder().decode(row.getString(3).toByteArray())
-                                    ),
+                                    message = row.getString(3),
                                     date = row.getString(4),
                                     panel = row.getInteger(5)
                                 )
@@ -147,7 +142,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                 Tuple.of(
                     ticketMessage.userID,
                     ticketMessage.ticketID,
-                    Base64.getEncoder().encodeToString(ticketMessage.message.toByteArray()),
+                    ticketMessage.message,
                     ticketMessage.date,
                     ticketMessage.panel,
                 )

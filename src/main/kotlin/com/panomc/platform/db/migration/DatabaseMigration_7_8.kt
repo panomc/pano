@@ -35,7 +35,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
                               `status` int(1) NOT NULL,
                               `image` longblob NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Posts table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Posts table.';
                         """
                 )
                 .execute {
@@ -55,7 +55,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
                               `url` varchar(255) NOT NULL,
                               `color` varchar(6) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Post category table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Post category table.';
                         """
                 )
                 .execute {
@@ -100,7 +100,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
                               `date` int(50) NOT NULL,
                               `status` int(1) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Tickets table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tickets table.';
                         """
                 )
                 .execute {
@@ -118,7 +118,7 @@ class DatabaseMigration_7_8 : DatabaseMigration() {
                               `title` varchar(255) NOT NULL,
                               `description` text,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Ticket category table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket category table.';
                         """
                 )
                 .execute {

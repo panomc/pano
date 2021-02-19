@@ -25,7 +25,7 @@ class SchemeVersionDaoImpl(override val tableName: String = "scheme_version") : 
                               `key` varchar(255) not null,
                               `extra` varchar(255),
                               PRIMARY KEY (`key`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Database scheme version table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Database scheme version table.';
                         """
                 )
                 .execute {

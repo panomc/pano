@@ -27,7 +27,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                               `date` MEDIUMTEXT NOT NULL,
                               `status` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Panel Notification table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Notification table.';
                         """
                 )
                 .execute {

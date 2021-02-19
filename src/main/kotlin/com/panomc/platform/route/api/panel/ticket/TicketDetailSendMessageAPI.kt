@@ -28,20 +28,19 @@ class TicketDetailSendMessageAPI : PanelApi() {
         ticketID: Int,
         message: String,
         token: String
-    ) =
-        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
-                return@handler
-            }
-
-            databaseManager.getDatabase().ticketDao.isExistsByID(
-                ticketID,
-                sqlConnection,
-                (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, token)
-            )
+            return@handler
         }
+
+        databaseManager.getDatabase().ticketDao.isExistsByID(
+            ticketID,
+            sqlConnection,
+            (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, token)
+        )
+    }
 
     private fun isExistsByHandler(
         handler: (result: Result) -> Unit,

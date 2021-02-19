@@ -21,7 +21,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                               `id` int NOT NULL AUTO_INCREMENT,
                               `name` varchar(16) NOT NULL UNIQUE,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permission Table';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Permission Table';
                         """
                 )
                 .execute {

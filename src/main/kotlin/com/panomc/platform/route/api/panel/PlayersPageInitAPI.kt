@@ -2,7 +2,9 @@ package com.panomc.platform.route.api.panel
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 import kotlin.math.ceil
 
 class PlayersPageInitAPI : PanelApi() {
@@ -15,63 +17,82 @@ class PlayersPageInitAPI : PanelApi() {
         val pageType = data.getInteger("page_type")
         val page = data.getInteger("page")
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, pageType, page))
+    }
 
-                return@createConnection
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        pageType: Int,
+        page: Int
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.countByPageType(
+            pageType,
+            sqlConnection,
+            (this::countByPageTypeHandler)(handler, sqlConnection, pageType, page)
+        )
+    }
+
+    private fun countByPageTypeHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        pageType: Int,
+        page: Int
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_124))
             }
 
-            databaseManager.getDatabase().userDao.countByPageType(
-                pageType,
-                sqlConnection
-            ) { count, _ ->
-                if (count == null) {
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_124))
-                    }
+            return@handler
+        }
 
-                    return@countByPageType
-                }
+        var totalPage = ceil(count.toDouble() / 10).toInt()
 
-                var totalPage = ceil(count.toDouble() / 10).toInt()
+        if (totalPage < 1)
+            totalPage = 1
 
-                if (totalPage < 1)
-                    totalPage = 1
-
-                if (page > totalPage || page < 1) {
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
-                    }
-
-                    return@countByPageType
-                }
-
-                databaseManager.getDatabase().userDao.getAllByPageAndPageType(
-                    page,
-                    pageType,
-                    sqlConnection
-                ) { userList, _ ->
-                    if (userList == null) {
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_125))
-                        }
-
-                        return@getAllByPageAndPageType
-                    }
-
-
-                    val result = mutableMapOf<String, Any?>(
-                        "players" to userList,
-                        "players_count" to count,
-                        "total_page" to totalPage
-                    )
-
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Successful(result))
-                    }
-                }
+        if (page > totalPage || page < 1) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
             }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.getAllByPageAndPageType(
+            page,
+            pageType,
+            sqlConnection,
+            (this::getAllByPageAndPageTypeHandler)(handler, sqlConnection, count, totalPage)
+        )
+    }
+
+    private fun getAllByPageAndPageTypeHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        count: Int,
+        totalPage: Int
+    ) = handler@{ userList: List<Map<String, Any>>?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (userList == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_125))
+
+                return@closeConnection
+            }
+
+            val result = mutableMapOf<String, Any?>(
+                "players" to userList,
+                "players_count" to count,
+                "total_page" to totalPage
+            )
+
+            handler.invoke(Successful(result))
         }
     }
 }

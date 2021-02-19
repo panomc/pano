@@ -23,7 +23,7 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
                           `option` text NOT NULL,
                           `value` text NOT NULL,
                           PRIMARY KEY (`id`)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System Property table.';
+                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='System Property table.';
                     """
                 )
                 .execute {

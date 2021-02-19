@@ -25,28 +25,34 @@ class TestSendNotificationAPI : PanelApi() {
                 token,
                 sqlConnection
             ) { userID, _ ->
-                if (userID == null)
+                if (userID == null) {
                     databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(Error(ErrorCode.UNKNOWN))
                     }
-                else
-                    databaseManager.getDatabase().panelNotificationDao.add(
-                        PanelNotification(
-                            -1,
-                            userID,
-                            "TEST NOTIFICATION",
-                            System.currentTimeMillis(),
-                            NotificationStatus.NOT_READ
-                        ),
-                        sqlConnection
-                    ) { result, _ ->
-                        if (result == null)
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN))
-                            }
-                        else
-                            handler.invoke(Successful())
+
+                    return@getUserIDFromToken
+                }
+
+                databaseManager.getDatabase().panelNotificationDao.add(
+                    PanelNotification(
+                        -1,
+                        userID,
+                        "TEST NOTIFICATION",
+                        System.currentTimeMillis(),
+                        NotificationStatus.NOT_READ
+                    ),
+                    sqlConnection
+                ) { result, _ ->
+                    databaseManager.closeConnection(sqlConnection) {
+                        if (result == null) {
+                            handler.invoke(Error(ErrorCode.UNKNOWN))
+
+                            return@closeConnection
+                        }
+
+                        handler.invoke(Successful())
                     }
+                }
             }
         }
     }

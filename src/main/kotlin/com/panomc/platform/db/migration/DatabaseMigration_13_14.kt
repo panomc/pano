@@ -27,7 +27,7 @@ class DatabaseMigration_13_14 : DatabaseMigration() {
                               `message` text NOT NULL,
                               `date` MEDIUMTEXT NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket message table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket message table.';
                         """
                 )
                 .execute {

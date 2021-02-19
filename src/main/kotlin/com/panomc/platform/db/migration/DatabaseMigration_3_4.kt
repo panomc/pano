@@ -25,7 +25,7 @@ class DatabaseMigration_3_4 : DatabaseMigration() {
                               `user_id` int NOT NULL,
                               `type_ID` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Panel Notification table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Notification table.';
                         """
                 )
                 .execute {

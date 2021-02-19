@@ -7,7 +7,9 @@ import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
 import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.RegisterUtil
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 import javax.inject.Inject
 
 class FinishAPI : SetupApi() {
@@ -43,73 +45,140 @@ class FinishAPI : SetupApi() {
             email,
             password,
             password,
-            false
-        ) { resultOfValidateForm ->
-            if (resultOfValidateForm is Error) {
-                handler.invoke(resultOfValidateForm)
+            false,
+            "",
+            null,
+            (this::validateFormHandler)(handler, context, username, email, password, remoteIP)
+        )
+    }
 
-                return@validateForm
+    private fun validateFormHandler(
+        handler: (result: Result) -> Unit,
+        context: RoutingContext,
+        username: String,
+        email: String,
+        password: String,
+        remoteIP: String
+    ) = handler@{ result: Result ->
+        if (result is Error) {
+            handler.invoke(result)
+
+            return@handler
+        }
+
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                handler,
+                context,
+                username,
+                email,
+                password,
+                remoteIP
+            )
+        )
+    }
+
+
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        context: RoutingContext,
+        username: String,
+        email: String,
+        password: String,
+        remoteIP: String
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.initDatabase(
+            sqlConnection,
+            (this::initDatabaseHandler)(handler, context, sqlConnection, username, email, password, remoteIP)
+        )
+    }
+
+    private fun initDatabaseHandler(
+        handler: (result: Result) -> Unit,
+        context: RoutingContext,
+        sqlConnection: SqlConnection,
+        username: String,
+        email: String,
+        password: String,
+        remoteIP: String
+    ) = handler@{ asyncResult: AsyncResult<*> ->
+        if (asyncResult.failed()) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_128))
             }
 
-            databaseManager.createConnection { sqlConnection, _ ->
-                if (sqlConnection == null) {
-                    handler.invoke(Error(ErrorCode.FINISH_API_CANT_CONNECT_DATABASE_PLEASE_CHECK_YOUR_INFO))
+            return@handler
+        }
 
-                    return@createConnection
-                }
+        RegisterUtil.register(
+            databaseManager,
+            sqlConnection,
+            User(-1, username, email, password, remoteIP),
+            true,
+            (this::registerHandler)(handler, context, sqlConnection, username, password)
+        )
+    }
 
-                databaseManager.initDatabase(sqlConnection) {
-                    if (it.failed()) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_128))
-
-                        return@initDatabase
-                    }
-
-                    RegisterUtil.register(
-                        databaseManager,
-                        sqlConnection,
-                        User(-1, username, email, password, remoteIP),
-                        true
-                    ) { resultOfRegister, _ ->
-                        if (resultOfRegister == null) {
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_144))
-
-                            return@register
-                        }
-
-                        if (resultOfRegister is Error) {
-                            handler.invoke(resultOfValidateForm)
-
-                            return@register
-                        }
-
-                        LoginUtil.login(
-                            username,
-                            password,
-                            true,
-                            context,
-                            databaseManager,
-                            sqlConnection
-                        ) { isLoggedIn, _ ->
-                            if (isLoggedIn == null) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_129))
-
-                                return@login
-                            }
-
-                            if (isLoggedIn) {
-                                setupManager.finishSetup()
-
-                                handler.invoke(Successful())
-
-                                return@login
-                            }
-
-                            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_130))
-                        }
-                    }
-                }
+    private fun registerHandler(
+        handler: (result: Result) -> Unit,
+        context: RoutingContext,
+        sqlConnection: SqlConnection,
+        username: String,
+        password: String,
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        if (result == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_144))
             }
+
+            return@handler
+        }
+
+        if (result is Error) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(result)
+            }
+
+            return@handler
+        }
+
+        LoginUtil.login(
+            username,
+            password,
+            true,
+            context,
+            databaseManager,
+            sqlConnection,
+            (this::loginHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun loginHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) = handler@{ isLoggedIn: Boolean?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (isLoggedIn == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_129))
+
+                return@closeConnection
+            }
+
+            if (isLoggedIn) {
+                setupManager.finishSetup()
+
+                handler.invoke(Successful())
+
+                return@closeConnection
+            }
+
+            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_130))
         }
     }
 }

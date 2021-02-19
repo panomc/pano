@@ -2,7 +2,9 @@ package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class EditPostPageInitAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -14,45 +16,78 @@ class EditPostPageInitAPI : PanelApi() {
 
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { sqlConnection, _ ->
+        databaseManager.createConnection(
+            (this::createConnectionHandler)(
+                handler,
+                id
+            )
+        )
+    }
+
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        id: Int
+    ) =
+        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
             if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
-                return@createConnection
+                return@handler
             }
+
             databaseManager.getDatabase().postDao.isExistsByID(
                 id,
-                sqlConnection
-            ) { exists, _ ->
-                when {
-                    exists == null -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_100))
-                    }
-                    exists -> databaseManager.getDatabase().postDao.getByID(
-                        id,
-                        sqlConnection
-                    ) { post, _ ->
-                        if (post == null)
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_99))
-                            }
-                        else
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(
-                                    Successful(
-                                        mapOf(
-                                            "post" to post
-                                        )
-                                    )
-                                )
-                            }
-                    }
-                    else -> databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.POST_NOT_FOUND))
-                    }
-                }
+                sqlConnection,
+                (this::isExistsByIDHandler)(handler, sqlConnection, id)
+            )
+        }
 
+    private fun isExistsByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_100))
             }
+
+            return@handler
+        }
+
+        if (!exists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.POST_NOT_FOUND))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.getByID(
+            id,
+            sqlConnection,
+            (this::getByIDHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun getByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+    ) = handler@{ post: Map<String, Any>?, _: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (post == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_99))
+
+                return@closeConnection
+            }
+
+            handler.invoke(
+                Successful(
+                    mapOf(
+                        "post" to post
+                    )
+                )
+            )
         }
     }
 }

@@ -24,7 +24,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                               `user_id` int(11) NOT NULL,
                               `subject` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Token Table';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Token Table';
                         """
                 )
                 .execute {

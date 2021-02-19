@@ -32,7 +32,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                               `image` longblob NOT NULL,
                               `views` MEDIUMTEXT NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Posts table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Posts table.';
                         """
                 )
                 .execute {
@@ -106,10 +106,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
 
                     val post = mapOf(
                         "id" to row.getInteger(0),
-                        "title" to String(Base64.getDecoder().decode(row.getString(1))),
+                        "title" to row.getString(1),
                         "category" to row.getInteger(2),
                         "writer_user_id" to row.getInteger(3),
-                        "text" to String(Base64.getDecoder().decode(row.getBuffer(4).toString())),
+                        "text" to row.getBuffer(4).toString(),
                         "date" to row.getString(5),
                         "status" to row.getInteger(6),
                         "image" to row.getBuffer(7),
@@ -209,10 +209,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(post.title.toByteArray()),
+                    post.title,
                     post.categoryId,
                     post.writerUserID,
-                    Base64.getEncoder().encodeToString(post.post.toByteArray()),
+                    post.post,
                     System.currentTimeMillis(),
                     System.currentTimeMillis(),
                     1,
@@ -242,10 +242,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(post.title.toByteArray()),
+                    post.title,
                     post.categoryId,
                     post.writerUserID,
-                    Base64.getEncoder().encodeToString(post.post.toByteArray()),
+                    post.post,
                     System.currentTimeMillis(),
                     System.currentTimeMillis(),
                     1,
@@ -364,17 +364,15 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                         posts.add(
                             mapOf(
                                 "id" to row.getInteger(0),
-                                "title" to String(
-                                    Base64.getDecoder().decode(row.getString(1).toByteArray())
-                                )
+                                "title" to row.getString(1)
                             )
                         )
                     }
 
-                handler.invoke(posts, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(posts, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getByPageAndPageType(
@@ -417,68 +415,66 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                                                 return@getUsernameFromUserID
                                             }
 
-                                        var category: Any = "null"
+                                            var category: Any = "null"
 
-                                        categories.forEach { categoryInDB ->
-                                            if (categoryInDB["id"] == row.getInteger(2).toInt())
+                                            categories.forEach { categoryInDB ->
+                                                if (categoryInDB["id"] == row.getInteger(2).toInt())
+                                                    category = mapOf(
+                                                        "id" to categoryInDB["id"] as Int,
+                                                        "title" to categoryInDB["title"] as String,
+                                                        "url" to categoryInDB["url"] as String,
+                                                        "color" to categoryInDB["color"] as String
+                                                    )
+                                            }
+
+                                            if (category == "null")
                                                 category = mapOf(
-                                                    "id" to categoryInDB["id"] as Int,
-                                                    "title" to categoryInDB["title"] as String,
-                                                    "url" to categoryInDB["url"] as String,
-                                                    "color" to categoryInDB["color"] as String
+                                                    "title" to "-"
                                                 )
+
+                                            posts.add(
+                                                mapOf(
+                                                    "id" to row.getInteger(0),
+                                                    "title" to row.getString(1),
+                                                    "category" to category,
+                                                    "writer" to mapOf(
+                                                        "username" to username
+                                                    ),
+                                                    "date" to row.getString(4),
+                                                    "views" to row.getString(5),
+                                                    "status" to row.getInteger(6)
+                                                )
+                                            )
+
+                                            localHandler.invoke()
                                         }
-
-                                        if (category == "null")
-                                            category = mapOf(
-                                                "title" to "-"
-                                            )
-
-                                        posts.add(
-                                            mapOf(
-                                                "id" to row.getInteger(0),
-                                                "title" to String(
-                                                    Base64.getDecoder().decode(row.getString(1).toByteArray())
-                                                ),
-                                                "category" to category,
-                                                "writer" to mapOf(
-                                                    "username" to username
-                                                ),
-                                                "date" to row.getString(4),
-                                                "views" to row.getString(5),
-                                                "status" to row.getInteger(6)
-                                            )
-                                        )
-
-                                        localHandler.invoke()
                                     }
+
+                                    localHandler
                                 }
 
-                                localHandler
+                            var currentIndex = -1
+
+                            fun invoke() {
+                                val localHandler: () -> Unit = {
+                                    if (currentIndex == handlers.lastIndex)
+                                        handler.invoke(posts, asyncResult)
+                                    else
+                                        invoke()
+                                }
+
+                                currentIndex++
+
+                                if (currentIndex <= handlers.lastIndex)
+                                    handlers[currentIndex].invoke(localHandler)
                             }
 
-                        var currentIndex = -1
-
-                        fun invoke() {
-                            val localHandler: () -> Unit = {
-                                if (currentIndex == handlers.lastIndex)
-                                    handler.invoke(posts, asyncResult)
-                                else
-                                    invoke()
-                            }
-
-                            currentIndex++
-
-                            if (currentIndex <= handlers.lastIndex)
-                                handlers[currentIndex].invoke(localHandler)
+                            invoke()
                         }
-
-                        invoke()
-                    }
+                    } else
+                        handler.invoke(posts, queryResult)
                 } else
-                    handler.invoke(posts, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(null, queryResult)
+            }
     }
 }

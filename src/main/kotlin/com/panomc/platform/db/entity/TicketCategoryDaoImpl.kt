@@ -24,7 +24,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                               `title` MEDIUMTEXT NOT NULL,
                               `description` text,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Ticket category table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket category table.';
                         """
                 )
                 .execute {
@@ -54,10 +54,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                     categories.add(
                         TicketCategory(
                             row.getInteger(0),
-                            String(
-                                Base64.getDecoder()
-                                    .decode(row.getString(1).toByteArray())
-                            )
+                            row.getString(1)
                         )
                     )
                 }
@@ -115,8 +112,8 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()),
-                    Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray())
+                    ticketCategory.title,
+                    ticketCategory.description
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
@@ -138,8 +135,8 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(ticketCategory.title.toByteArray()),
-                    Base64.getEncoder().encodeToString(ticketCategory.description.toByteArray()),
+                    ticketCategory.title,
+                    ticketCategory.description,
                     ticketCategory.id
                 )
             ) { queryResult ->
@@ -195,60 +192,56 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                                             return@countByCategory
                                         }
 
-                                    databaseManager.getDatabase().ticketDao.getByCategory(
-                                        row.getInteger(0),
-                                        sqlConnection
-                                    ) { tickets, asyncResultOfGetByCategory ->
-                                        if (tickets == null) {
-                                            handler.invoke(null, asyncResultOfGetByCategory)
+                                        databaseManager.getDatabase().ticketDao.getByCategory(
+                                            row.getInteger(0),
+                                            sqlConnection
+                                        ) { tickets, asyncResultOfGetByCategory ->
+                                            if (tickets == null) {
+                                                handler.invoke(null, asyncResultOfGetByCategory)
 
-                                            return@getByCategory
-                                        }
+                                                return@getByCategory
+                                            }
 
-                                        categories.add(
-                                            mapOf(
-                                                "id" to row.getInteger(0),
-                                                "title" to String(
-                                                    Base64.getDecoder().decode(row.getString(1))
-                                                ),
-                                                "description" to String(
-                                                    Base64.getDecoder().decode(row.getString(2))
-                                                ),
-                                                "ticket_count" to count,
-                                                "tickets" to tickets
+                                            categories.add(
+                                                mapOf(
+                                                    "id" to row.getInteger(0),
+                                                    "title" to row.getString(1),
+                                                    "description" to row.getString(2),
+                                                    "ticket_count" to count,
+                                                    "tickets" to tickets
+                                                )
                                             )
-                                        )
 
-                                        localHandler.invoke()
+                                            localHandler.invoke()
+                                        }
                                     }
                                 }
+
+                                localHandler
                             }
 
-                            localHandler
+                        var currentIndex = -1
+
+                        fun invoke() {
+                            val localHandler: () -> Unit = {
+                                if (currentIndex == handlers.lastIndex)
+                                    handler.invoke(categories, queryResult)
+                                else
+                                    invoke()
+                            }
+
+                            currentIndex++
+
+                            if (currentIndex <= handlers.lastIndex)
+                                handlers[currentIndex].invoke(localHandler)
                         }
 
-                    var currentIndex = -1
-
-                    fun invoke() {
-                        val localHandler: () -> Unit = {
-                            if (currentIndex == handlers.lastIndex)
-                                handler.invoke(categories, queryResult)
-                            else
-                                invoke()
-                        }
-
-                        currentIndex++
-
-                        if (currentIndex <= handlers.lastIndex)
-                            handlers[currentIndex].invoke(localHandler)
-                    }
-
-                    invoke()
+                        invoke()
+                    } else
+                        handler.invoke(categories, queryResult)
                 } else
-                    handler.invoke(categories, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(null, queryResult)
+            }
     }
 
     override fun getByID(
@@ -268,18 +261,13 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
 
                     val ticket = TicketCategory(
                         id = row.getInteger(0),
-                        title = String(
-                            Base64.getDecoder().decode(row.getString(1).toByteArray())
-                        ),
-                        description = String(
-                            Base64.getDecoder().decode(row.getString(2).toByteArray())
-                        ),
+                        title = row.getString(1),
+                        description = row.getString(2),
                     )
 
-                handler.invoke(ticket, queryResult)
-            } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(ticket, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
     }
-
 }

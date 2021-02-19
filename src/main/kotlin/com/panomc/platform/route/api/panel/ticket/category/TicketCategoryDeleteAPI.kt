@@ -2,7 +2,9 @@ package com.panomc.platform.route.api.panel.ticket.category
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class TicketCategoryDeleteAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -13,43 +15,64 @@ class TicketCategoryDeleteAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        databaseManager.createConnection { sqlConnection, _ ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, id))
+    }
 
-                return@createConnection
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        id: Int
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().ticketCategoryDao.isExistsByID(
+            id,
+            sqlConnection,
+            (this::isExistsByIDHandler)(handler, sqlConnection, id)
+        )
+    }
+
+    private fun isExistsByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_90))
             }
 
-            databaseManager.getDatabase().ticketCategoryDao.isExistsByID(
-                id,
-                sqlConnection
-            ) { exists, _ ->
-                if (exists == null)
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_90))
-                    }
-                else
-                    if (!exists)
-                        databaseManager.closeConnection(sqlConnection) {
-                            handler.invoke(Error(ErrorCode.NOT_EXISTS))
-                        }
-                    else
+            return@handler
+        }
 
-                        databaseManager.getDatabase().ticketCategoryDao.deleteByID(
-                            id,
-                            sqlConnection
-                        ) { result, _ ->
-                            if (result == null)
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_89))
-                                }
-                            else
-                                databaseManager.closeConnection(sqlConnection) {
-                                    handler.invoke(Successful())
-                                }
-                        }
+        if (!exists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.NOT_EXISTS))
+            }
 
+            return@handler
+        }
+
+        databaseManager.getDatabase().ticketCategoryDao.deleteByID(
+            id,
+            sqlConnection,
+            (this::deleteByIDHandler)(handler, sqlConnection)
+        )
+    }
+
+    private fun deleteByIDHandler(handler: (result: Result) -> Unit, sqlConnection: SqlConnection) =
+        handler@{ result: Result?, _: AsyncResult<*> ->
+            databaseManager.closeConnection(sqlConnection) {
+                if (result == null) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_89))
+
+                    return@closeConnection
+                }
+
+                handler.invoke(Successful())
             }
         }
-    }
 }

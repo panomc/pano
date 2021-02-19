@@ -32,7 +32,7 @@ class ServerDaoImpl(override val tableName: String = "server") : DaoImpl(), Serv
                               `permission_granted` int(1) default 0,
                               `status` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Connected server table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Connected server table.';
                         """
                 )
                 .execute {

@@ -20,20 +20,23 @@ class TicketDetailMessagePageAPI : PanelApi() {
         databaseManager.createConnection((this::createConnectionHandler)(handler, lastMessageID, id))
     }
 
-    private fun createConnectionHandler(handler: (result: Result) -> Unit, lastMessageID: Int, id: Int) =
-        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
-            if (sqlConnection == null) {
-                handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
+    private fun createConnectionHandler(
+        handler: (result: Result) -> Unit,
+        lastMessageID: Int,
+        id: Int
+    ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
+        if (sqlConnection == null) {
+            handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
-                return@handler
-            }
-
-            databaseManager.getDatabase().ticketDao.isExistsByID(
-                id,
-                sqlConnection,
-                (this::isExistsByHandler)(handler, lastMessageID, id, sqlConnection)
-            )
+            return@handler
         }
+
+        databaseManager.getDatabase().ticketDao.isExistsByID(
+            id,
+            sqlConnection,
+            (this::isExistsByHandler)(handler, lastMessageID, id, sqlConnection)
+        )
+    }
 
     private fun isExistsByHandler(
         handler: (result: Result) -> Unit,
@@ -101,6 +104,7 @@ class TicketDetailMessagePageAPI : PanelApi() {
         databaseManager.closeConnection(sqlConnection) {
             if (usernameList == null) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_140))
+
                 return@closeConnection
             }
 

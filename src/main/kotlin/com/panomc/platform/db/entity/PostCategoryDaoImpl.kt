@@ -27,7 +27,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
                               `url` varchar(255) NOT NULL,
                               `color` varchar(6) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Post category table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Post category table.';
                         """
                 )
                 .execute {
@@ -116,10 +116,8 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
                             categories.add(
                                 mapOf(
                                     "id" to row.getInteger(0),
-                                    "title" to String(
-                                        Base64.getDecoder().decode(row.getString(1))
-                                    ),
-                                    "description" to String(Base64.getDecoder().decode(row.getString(2))),
+                                    "title" to row.getString(1),
+                                    "description" to row.getString(2),
                                     "url" to row.getString(3),
                                     "color" to row.getString(4)
                                 )
@@ -174,12 +172,8 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
                                             categories.add(
                                                 mapOf(
                                                     "id" to categoryInDB.getInteger(0),
-                                                    "title" to String(
-                                                        Base64.getDecoder().decode(categoryInDB.getString(1))
-                                                    ),
-                                                    "description" to String(
-                                                        Base64.getDecoder().decode(categoryInDB.getString(2))
-                                                    ),
+                                                    "title" to categoryInDB.getString(1),
+                                                    "description" to categoryInDB.getString(2),
                                                     "url" to categoryInDB.getString(3),
                                                     "color" to categoryInDB.getString(4),
                                                     "post_count" to count,
@@ -272,8 +266,8 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(postCategory.title.toByteArray()),
-                    Base64.getEncoder().encodeToString(postCategory.description.toByteArray()),
+                    postCategory.title,
+                    postCategory.description,
                     postCategory.url,
                     postCategory.color.replace("#", "")
                 )
@@ -299,8 +293,8 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    Base64.getEncoder().encodeToString(postCategory.title.toByteArray()),
-                    Base64.getEncoder().encodeToString(postCategory.description.toByteArray()),
+                    postCategory.title.toByteArray(),
+                    postCategory.description.toByteArray(),
                     postCategory.url,
                     postCategory.color.replace("#", ""),
                     postCategory.id

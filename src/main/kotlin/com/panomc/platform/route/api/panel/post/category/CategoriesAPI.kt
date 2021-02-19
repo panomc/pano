@@ -2,7 +2,9 @@ package com.panomc.platform.route.api.panel.post.category
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
+import io.vertx.sqlclient.SqlConnection
 
 class CategoriesAPI : PanelApi() {
     override val routeType = RouteType.GET
@@ -10,39 +12,54 @@ class CategoriesAPI : PanelApi() {
     override val routes = arrayListOf("/api/panel/post/category/categories")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        databaseManager.createConnection { sqlConnection, _ ->
+        databaseManager.createConnection((this::createConnectionHandler)(handler))
+    }
+
+    private fun createConnectionHandler(handler: (result: Result) -> Unit) =
+        handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
             if (sqlConnection == null) {
                 handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
 
-                return@createConnection
+                return@handler
             }
 
-            databaseManager.getDatabase().postCategoryDao.getCount(sqlConnection) { countOfCategories, _ ->
-                if (countOfCategories == null)
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_88))
-                    }
-                else
-                    databaseManager.getDatabase().postCategoryDao.getCategories(
-                        sqlConnection
-                    ) { categories, _ ->
-                        if (categories == null)
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_87))
-                            }
-                        else {
-                            val result = mutableMapOf<String, Any?>(
-                                "categories" to categories,
-                                "category_count" to countOfCategories
-                            )
+            databaseManager.getDatabase().postCategoryDao.getCount(
+                sqlConnection,
+                (this::getCountHandler)(handler, sqlConnection)
+            )
+        }
 
-                            databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(Successful(result))
-                            }
-                        }
+    private fun getCountHandler(handler: (result: Result) -> Unit, sqlConnection: SqlConnection) =
+        handler@{ count: Int?, _: AsyncResult<*> ->
+            if (count == null) {
+                databaseManager.closeConnection(sqlConnection) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_88))
+                }
 
-                    }
+                return@handler
+            }
+
+            databaseManager.getDatabase().postCategoryDao.getCategories(
+                sqlConnection,
+                (this::getCategoriesHandler)(handler, sqlConnection, count)
+            )
+        }
+
+    private fun getCategoriesHandler(handler: (result: Result) -> Unit, sqlConnection: SqlConnection, count: Int) =
+        handler@{ categories: List<Map<String, Any>>?, _: AsyncResult<*> ->
+            databaseManager.closeConnection(sqlConnection) {
+                if (categories == null) {
+                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_87))
+
+                    return@closeConnection
+                }
+
+                val result = mutableMapOf<String, Any?>(
+                    "categories" to categories,
+                    "category_count" to count
+                )
+
+                handler.invoke(Successful(result))
             }
         }
-    }
 }

@@ -29,7 +29,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                               `date` MEDIUMTEXT NOT NULL,
                               `status` int(1) NOT NULL,
                               PRIMARY KEY (`id`)
-                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Tickets table.';
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tickets table.';
                         """
                 )
                 .execute {
@@ -118,9 +118,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                             tickets.add(
                                                 mapOf(
                                                     "id" to row.getInteger(0),
-                                                    "title" to String(
-                                                        Base64.getDecoder().decode(row.getString(1).toByteArray())
-                                                    ),
+                                                    "title" to row.getString(1),
                                                     "category" to category!!,
                                                     "writer" to mapOf(
                                                         "username" to username
@@ -217,10 +215,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                             tickets.add(
                                                 mapOf(
                                                     "id" to row.getInteger(0),
-                                                    "title" to String(
-                                                        Base64.getDecoder()
-                                                            .decode(row.getString(1).toByteArray())
-                                                    ),
+                                                    "title" to row.getString(1),
                                                     "category" to category!!,
                                                     "writer" to mapOf(
                                                         "username" to username
@@ -307,9 +302,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                         posts.add(
                             mapOf(
                                 "id" to row.getInteger(0),
-                                "title" to String(
-                                    Base64.getDecoder().decode(row.getString(1).toByteArray())
-                                )
+                                "title" to row.getString(1)
                             )
                         )
                     }
@@ -441,9 +434,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
 
                     val ticket = Ticket(
                         id = row.getInteger(0),
-                        title = String(
-                            Base64.getDecoder().decode(row.getString(1).toByteArray())
-                        ),
+                        title = row.getString(1),
                         categoryID = row.getInteger(2),
                         userID = row.getInteger(3),
                         date = row.getString(4),
