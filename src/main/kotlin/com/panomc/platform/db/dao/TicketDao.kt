@@ -79,4 +79,11 @@ interface TicketDao : Dao<Ticket> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun updateLastUpdateDate(
+        id: Int,
+        date: Long,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

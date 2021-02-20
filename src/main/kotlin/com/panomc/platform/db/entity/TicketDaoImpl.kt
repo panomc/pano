@@ -315,7 +315,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (ticket: Ticket?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `user_id`, `date`, `last_update` `status` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
+            "SELECT `id`, `title`, `category_id`, `user_id`, `date`, `last_update`, `status` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -372,6 +372,29 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
             .execute(
                 Tuple.of(
                     status,
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun updateLastUpdateDate(
+        id: Int,
+        date: Long,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "UPDATE `${getTablePrefix() + tableName}` SET last_update = ? WHERE id = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    date,
                     id
                 )
             ) { queryResult ->
