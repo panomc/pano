@@ -113,7 +113,9 @@ class PlayersPageInitAPI : PanelApi() {
         fun invoke() {
             val localHandler: () -> Unit = {
                 if (currentIndex == handlers.lastIndex)
-                    handler.invoke(Successful(result))
+                    databaseManager.closeConnection(sqlConnection) {
+                        handler.invoke(Successful(result))
+                    }
                 else
                     invoke()
             }
