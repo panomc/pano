@@ -329,6 +329,7 @@ class DashboardAPI : PanelApi() {
                         "username" to usernameList[ticket.userID]
                     ),
                     "date" to ticket.date,
+                    "last_update" to ticket.lastUpdate,
                     "status" to ticket.status
                 )
             )
