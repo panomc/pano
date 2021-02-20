@@ -40,13 +40,14 @@ class DatabaseManager(
             DatabaseMigration_12_13(),
             DatabaseMigration_13_14(),
             DatabaseMigration_14_15(),
-            DatabaseMigration_15_16()
+            DatabaseMigration_15_16(),
+            DatabaseMigration_16_17()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 16
-        const val DATABASE_SCHEME_VERSION_INFO = "Add last_update field to ticket table."
+        const val DATABASE_SCHEME_VERSION = 17
+        const val DATABASE_SCHEME_VERSION_INFO = "Add banned field to user table."
     }
 
     init {
