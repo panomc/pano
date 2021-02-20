@@ -152,9 +152,32 @@ class TicketDetailSendMessageAPI : PanelApi() {
         username: String,
         lastInsertID: Long
     ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        if (result == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_146))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().ticketDao.updateLastUpdateDate(
+            ticketMessage.ticketID,
+            System.currentTimeMillis(),
+            sqlConnection,
+            (this::updateLastUpdateDateHandler)(handler, sqlConnection, ticketMessage, username, lastInsertID)
+        )
+    }
+
+    private fun updateLastUpdateDateHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        ticketMessage: TicketMessage,
+        username: String,
+        lastInsertID: Long
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
             if (result == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_146))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_159))
 
                 return@closeConnection
             }
