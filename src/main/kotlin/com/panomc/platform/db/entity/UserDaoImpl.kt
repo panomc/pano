@@ -301,12 +301,15 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, username, register_date FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, username, register_date FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ? " else if (pageType == 0) "WHERE banned = ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = Tuple.tuple()
 
         if (pageType == 2)
             parameters.addInteger(-1)
+
+        if (pageType == 0)
+            parameters.addInteger(1)
 
         sqlConnection
             .preparedQuery(query)

@@ -126,6 +126,14 @@ class PlayersPageInitAPI : PanelApi() {
                 handlers[currentIndex].invoke(localHandler)
         }
 
+        if (userList.isEmpty()) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Successful(result))
+            }
+
+            return@handler
+        }
+
         invoke()
     }
 
