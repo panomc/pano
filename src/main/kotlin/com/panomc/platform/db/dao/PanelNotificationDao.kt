@@ -23,7 +23,7 @@ interface PanelNotificationDao : Dao<PanelNotification> {
     fun getAllByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun markReadAll(
@@ -35,7 +35,7 @@ interface PanelNotificationDao : Dao<PanelNotification> {
     fun getLast5ByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun markReadLat5ByUserID(

@@ -314,55 +314,18 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     val rows: RowSet<Row> = queryResult.result()
                     val players = mutableListOf<Map<String, Any>>()
 
-                    if (rows.size() > 0) {
-                        val handlers: List<(handler: () -> Unit) -> Any> =
-                            rows.map { row ->
-                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                    databaseManager.getDatabase().ticketDao.countByUserID(
-                                        row.getInteger(0),
-                                        sqlConnection
-                                    ) { count, asyncResult ->
-                                        if (count == null) {
-                                            handler.invoke(null, asyncResult)
-
-                                            return@countByUserID
-                                        }
-
-                                        players.add(
-                                            mapOf(
-                                                "id" to row.getInteger(0),
-                                                "username" to row.getString(1),
-                                                "ticket_count" to count,
-                                                "register_date" to row.getString(2)
-                                            )
-                                        )
-
-                                        localHandler.invoke()
-                                    }
-                                }
-
-                                localHandler
-                            }
-
-                        var currentIndex = -1
-
-                        fun invoke() {
-                            val localHandler: () -> Unit = {
-                                if (currentIndex == handlers.lastIndex)
-                                    handler.invoke(players, queryResult)
-                                else
-                                    invoke()
-                            }
-
-                            currentIndex++
-
-                            if (currentIndex <= handlers.lastIndex)
-                                handlers[currentIndex].invoke(localHandler)
+                    if (rows.size() > 0)
+                        rows.forEach { row ->
+                            players.add(
+                                mapOf(
+                                    "id" to row.getInteger(0),
+                                    "username" to row.getString(1),
+                                    "register_date" to row.getString(2)
+                                )
+                            )
                         }
 
-                        invoke()
-                    } else
-                        handler.invoke(players, queryResult)
+                    handler.invoke(players, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
@@ -418,7 +381,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
 
                     handler.invoke(listOfUsers, queryResult)
                 } else
-                handler.invoke(null, queryResult)
-        }
+                    handler.invoke(null, queryResult)
+            }
     }
 }

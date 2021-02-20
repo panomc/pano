@@ -11,7 +11,6 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
 import io.vertx.sqlclient.Tuple
-import java.util.*
 
 class PostCategoryDaoImpl(override val tableName: String = "post_category") : DaoImpl(), PostCategoryDao {
 
@@ -133,7 +132,7 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
     override fun getCategories(
         page: Int,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: List<PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
@@ -143,71 +142,22 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
             .execute { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val categories = mutableListOf<Map<String, Any>>()
+                    val categories = mutableListOf<PostCategory>()
 
-                    if (rows.size() > 0) {
-                        val handlers: List<(handler: () -> Unit) -> Any> =
-                            rows.map { categoryInDB ->
-                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                    databaseManager.getDatabase().postDao.countByCategory(
-                                        categoryInDB.getInteger(0),
-                                        sqlConnection
-                                    ) { count, asyncResultOfCount ->
-                                        if (count == null) {
-                                            handler.invoke(null, asyncResultOfCount)
-
-                                            return@countByCategory
-                                        }
-
-                                        databaseManager.getDatabase().postDao.getByCategory(
-                                            categoryInDB.getInteger(0),
-                                            sqlConnection
-                                        ) { posts, asyncResultOfPosts ->
-                                            if (posts == null) {
-                                                handler.invoke(null, asyncResultOfPosts)
-
-                                                return@getByCategory
-                                            }
-
-                                            categories.add(
-                                                mapOf(
-                                                    "id" to categoryInDB.getInteger(0),
-                                                    "title" to categoryInDB.getString(1),
-                                                    "description" to categoryInDB.getString(2),
-                                                    "url" to categoryInDB.getString(3),
-                                                    "color" to categoryInDB.getString(4),
-                                                    "post_count" to count,
-                                                    "posts" to posts
-                                                )
-                                            )
-
-                                            localHandler.invoke()
-                                        }
-                                    }
-                                }
-
-                                localHandler
-                            }
-
-                        var currentIndex = -1
-
-                        fun invoke() {
-                            val localHandler: () -> Unit = {
-                                if (currentIndex == handlers.lastIndex)
-                                    handler.invoke(categories, queryResult)
-                                else
-                                    invoke()
-                            }
-
-                            currentIndex++
-
-                            if (currentIndex <= handlers.lastIndex)
-                                handlers[currentIndex].invoke(localHandler)
+                    if (rows.size() > 0)
+                        rows.forEach { row ->
+                            categories.add(
+                                PostCategory(
+                                    row.getInteger(0),
+                                    row.getString(1),
+                                    row.getString(2),
+                                    row.getString(3),
+                                    row.getString(4)
+                                )
+                            )
                         }
 
-                        invoke()
-                    } else
-                        handler.invoke(categories, queryResult)
+                    handler.invoke(categories, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
@@ -293,8 +243,8 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    postCategory.title.toByteArray(),
-                    postCategory.description.toByteArray(),
+                    postCategory.title,
+                    postCategory.description,
                     postCategory.url,
                     postCategory.color.replace("#", ""),
                     postCategory.id

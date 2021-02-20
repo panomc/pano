@@ -30,7 +30,7 @@ interface PostCategoryDao : Dao<PostCategory> {
     fun getCategories(
         page: Int,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: List<PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isExistsByURL(

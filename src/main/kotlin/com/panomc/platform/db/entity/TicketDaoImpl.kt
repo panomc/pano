@@ -3,7 +3,6 @@ package com.panomc.platform.db.entity
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.TicketDao
 import com.panomc.platform.db.model.Ticket
-import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
@@ -12,7 +11,6 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
 import io.vertx.sqlclient.Tuple
-import java.util.*
 
 class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), TicketDao {
 
@@ -72,89 +70,32 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
 
     override fun getLast5Tickets(
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, date, status FROM `${getTablePrefix() + tableName}` ORDER BY `date` DESC, `id` LIMIT 5"
+            "SELECT id, title, category_id, user_id, `date`, status FROM `${getTablePrefix() + tableName}` ORDER BY `date` DESC, `id` LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
             .execute { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val tickets = mutableListOf<Map<String, Any>>()
+                    val tickets = mutableListOf<Ticket>()
 
-                    if (rows.size() > 0) {
-                        databaseManager.getDatabase().ticketCategoryDao.getAll(sqlConnection) { categories, _ ->
-                            if (categories == null) {
-                                handler.invoke(null, queryResult)
-                                return@getAll
-                            }
+                    rows.forEach { row ->
+                        tickets.add(
+                            Ticket(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getString(4),
+                                row.getInteger(5)
+                            )
+                        )
+                    }
 
-                            val handlers: List<(handler: () -> Unit) -> Any> =
-                                rows.map { row ->
-                                    val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                        databaseManager.getDatabase().userDao.getUsernameFromUserID(
-                                            row.getInteger(
-                                                3
-                                            ), sqlConnection
-                                        ) { username, asyncResult ->
-                                            if (username == null) {
-                                                handler.invoke(null, asyncResult)
-
-                                                return@getUsernameFromUserID
-                                            }
-
-                                            var category: TicketCategory? = null
-
-                                            categories.forEach { categoryInDB ->
-                                                if (categoryInDB.id == row.getInteger(2).toInt())
-                                                    category = categoryInDB
-                                            }
-
-                                            if (category == null)
-                                                category = TicketCategory(-1, "-")
-
-                                            tickets.add(
-                                                mapOf(
-                                                    "id" to row.getInteger(0),
-                                                    "title" to row.getString(1),
-                                                    "category" to category!!,
-                                                    "writer" to mapOf(
-                                                        "username" to username
-                                                    ),
-                                                    "date" to row.getString(4),
-                                                    "status" to row.getInteger(5)
-                                                )
-                                            )
-
-                                            localHandler.invoke()
-                                        }
-                                    }
-
-                                    localHandler
-                                }
-
-                            var currentIndex = -1
-
-                            fun invoke() {
-                                val localHandler: () -> Unit = {
-                                    if (currentIndex == handlers.lastIndex)
-                                        handler.invoke(tickets, queryResult)
-                                    else
-                                        invoke()
-                                }
-
-                                currentIndex++
-
-                                if (currentIndex <= handlers.lastIndex)
-                                    handlers[currentIndex].invoke(localHandler)
-                            }
-
-                            invoke()
-                        }
-                    } else
-                        handler.invoke(tickets, queryResult)
+                    handler.invoke(tickets, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
@@ -164,10 +105,10 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         page: Int,
         pageType: Int,
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, date, status FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, title, category_id, user_id, `date`, status FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = Tuple.tuple()
 
@@ -179,79 +120,22 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
             .execute(parameters) { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val tickets = mutableListOf<Map<String, Any>>()
+                    val tickets = mutableListOf<Ticket>()
 
-                    if (rows.size() > 0) {
-                        databaseManager.getDatabase().ticketCategoryDao.getAll(sqlConnection) { categories, _ ->
-                            if (categories == null) {
-                                handler.invoke(null, queryResult)
-                                return@getAll
-                            }
+                    rows.forEach { row ->
+                        tickets.add(
+                            Ticket(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getString(4),
+                                row.getInteger(5)
+                            )
+                        )
+                    }
 
-                            val handlers: List<(handler: () -> Unit) -> Any> =
-                                rows.map { row ->
-                                    val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                        databaseManager.getDatabase().userDao.getUsernameFromUserID(
-                                            row.getInteger(
-                                                3
-                                            ), sqlConnection
-                                        ) { username, asyncResult ->
-                                            if (username == null) {
-                                                handler.invoke(null, asyncResult)
-
-                                                return@getUsernameFromUserID
-                                            }
-
-                                            var category: TicketCategory? = null
-
-                                            categories.forEach { categoryInDB ->
-                                                if (categoryInDB.id == row.getInteger(2).toInt())
-                                                    category = categoryInDB
-                                            }
-
-                                            if (category == null)
-                                                category = TicketCategory(-1, "-")
-
-                                            tickets.add(
-                                                mapOf(
-                                                    "id" to row.getInteger(0),
-                                                    "title" to row.getString(1),
-                                                    "category" to category!!,
-                                                    "writer" to mapOf(
-                                                        "username" to username
-                                                    ),
-                                                    "date" to row.getString(4),
-                                                    "status" to row.getInteger(5)
-                                                )
-                                            )
-
-                                            localHandler.invoke()
-                                        }
-                                    }
-
-                                    localHandler
-                                }
-
-                            var currentIndex = -1
-
-                            fun invoke() {
-                                val localHandler: () -> Unit = {
-                                    if (currentIndex == handlers.lastIndex)
-                                        handler.invoke(tickets, queryResult)
-                                    else
-                                        invoke()
-                                }
-
-                                currentIndex++
-
-                                if (currentIndex <= handlers.lastIndex)
-                                    handlers[currentIndex].invoke(localHandler)
-                            }
-
-                            invoke()
-                        }
-                    } else
-                        handler.invoke(tickets, queryResult)
+                    handler.invoke(tickets, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
@@ -286,23 +170,27 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
     override fun getByCategory(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
+            "SELECT id, title, category_id, user_id, `date`, status FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
             .execute(Tuple.of(id)) { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val posts = mutableListOf<Map<String, Any>>()
+                    val posts = mutableListOf<Ticket>()
 
                     rows.forEach { row ->
                         posts.add(
-                            mapOf(
-                                "id" to row.getInteger(0),
-                                "title" to row.getString(1)
+                            Ticket(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getString(4),
+                                row.getInteger(5)
                             )
                         )
                     }

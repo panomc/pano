@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.panel
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -78,7 +79,7 @@ class PanelNotificationsAPI : PanelApi() {
         sqlConnection: SqlConnection,
         userID: Int,
         count: Int
-    ) = handler@{ notifications: List<Map<String, Any>>?, _: AsyncResult<*> ->
+    ) = handler@{ notifications: List<PanelNotification>?, _: AsyncResult<*> ->
         if (notifications == null) {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_110))
@@ -90,7 +91,7 @@ class PanelNotificationsAPI : PanelApi() {
         databaseManager.getDatabase().panelNotificationDao.markReadAll(
             userID,
             sqlConnection,
-            (this::markReadAllHandler)(handler, sqlConnection, count, notifications)
+            (this::markReadAllHandler)(handler, sqlConnection, count, userID, notifications)
         )
     }
 
@@ -98,7 +99,8 @@ class PanelNotificationsAPI : PanelApi() {
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
         count: Int,
-        notifications: List<Map<String, Any>>?
+        userID: Int,
+        notifications: List<PanelNotification>
     ) = handler@{ result: Result?, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
             if (result == null) {
@@ -107,10 +109,24 @@ class PanelNotificationsAPI : PanelApi() {
                 return@closeConnection
             }
 
+            val notificationsDataList = mutableListOf<Map<String, Any?>>()
+
+            notifications.forEach { notification ->
+                notificationsDataList.add(
+                    mapOf(
+                        "id" to notification.id,
+                        "type_ID" to notification.typeID,
+                        "date" to notification.date,
+                        "status" to notification.status,
+                        "isPersonal" to (notification.userID == userID)
+                    )
+                )
+            }
+
             handler.invoke(
                 Successful(
                     mutableMapOf(
-                        "notifications" to notifications,
+                        "notifications" to notificationsDataList,
                         "notifications_count" to count
                     )
                 )

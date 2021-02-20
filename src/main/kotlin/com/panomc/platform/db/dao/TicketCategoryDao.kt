@@ -42,12 +42,18 @@ interface TicketCategoryDao : Dao<TicketCategory> {
     fun getByPage(
         page: Int,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: List<TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getByID(
         id: Int,
         sqlConnection: SqlConnection,
         handler: (ticketCategory: TicketCategory?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun getByIDList(
+        id: List<Int>,
+        sqlConnection: SqlConnection,
+        handler: (ticketCategoryList: Map<Int, TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

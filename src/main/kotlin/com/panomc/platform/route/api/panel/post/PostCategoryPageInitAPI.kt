@@ -1,6 +1,8 @@
 package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.Post
+import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -68,24 +70,145 @@ class PostCategoryPageInitAPI : PanelApi() {
 
         databaseManager.getDatabase().postCategoryDao.getCategories(
             page,
-            sqlConnection
-        ) { categories, _ ->
-            databaseManager.closeConnection(sqlConnection) {
-                if (categories == null) {
-                    handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
+            sqlConnection,
+            (this::getCategoriesHandler)(handler, sqlConnection, count, totalPage)
+        )
+    }
 
-                    return@closeConnection
+    private fun getCategoriesHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        count: Int,
+        totalPage: Int
+    ) = handler@{ categories: List<PostCategory>?, _: AsyncResult<*> ->
+        if (categories == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_85))
+            }
+
+            return@handler
+        }
+
+        val categoryDataList = mutableListOf<Map<String, Any?>>()
+
+        val handlers: List<(handler: () -> Unit) -> Any> =
+            categories.map { category ->
+                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                    databaseManager.getDatabase().postDao.countByCategory(
+                        category.id,
+                        sqlConnection,
+                        (this::countByCategoryHandler)(handler, sqlConnection, localHandler, category, categoryDataList)
+                    )
                 }
 
-                val result = mutableMapOf<String, Any?>(
-                    "categories" to categories,
-                    "category_count" to count,
-                    "total_page" to totalPage,
-                    "host" to "http://"
-                )
-
-                handler.invoke(Successful(result))
+                localHandler
             }
+
+        var currentIndex = -1
+
+        fun invoke() {
+            val localHandler: () -> Unit = {
+                if (currentIndex == handlers.lastIndex)
+                    returnResult(handler, sqlConnection, categoryDataList, count, totalPage)
+                else
+                    invoke()
+            }
+
+            currentIndex++
+
+            if (currentIndex <= handlers.lastIndex)
+                handlers[currentIndex].invoke(localHandler)
         }
+
+        if (categories.isNotEmpty()) {
+            invoke()
+
+            return@handler
+        }
+
+        returnResult(handler, sqlConnection, categoryDataList, count, totalPage)
+    }
+
+    private fun returnResult(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        categoryDataList: MutableList<Map<String, Any?>>,
+        count: Int,
+        totalPage: Int
+    ) {
+        databaseManager.closeConnection(sqlConnection) {
+            val result = mutableMapOf<String, Any?>(
+                "categories" to categoryDataList,
+                "category_count" to count,
+                "total_page" to totalPage,
+                "host" to "http://"
+            )
+
+            handler.invoke(Successful(result))
+        }
+    }
+
+    private fun countByCategoryHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        localHandler: () -> Unit,
+        category: PostCategory,
+        categoryDataList: MutableList<Map<String, Any?>>
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_148))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.getByCategory(
+            category.id,
+            sqlConnection,
+            (this::getByCategoryHandler)(handler, sqlConnection, localHandler, category, categoryDataList, count)
+        )
+    }
+
+    private fun getByCategoryHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        localHandler: () -> Unit,
+        category: PostCategory,
+        categoryDataList: MutableList<Map<String, Any?>>,
+        count: Int
+    ) = handler@{ posts: List<Post>?, _: AsyncResult<*> ->
+        if (posts == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_149))
+            }
+
+            return@handler
+        }
+
+        val postsDataList = mutableListOf<Map<String, Any?>>()
+
+        posts.forEach { post ->
+            postsDataList.add(
+                mapOf(
+                    "id" to post.id,
+                    "title" to post.title
+                )
+            )
+        }
+
+        categoryDataList.add(
+            mapOf(
+                "id" to category.id,
+                "title" to category.title,
+                "description" to category.description,
+                "url" to category.url,
+                "color" to category.color,
+                "post_count" to count,
+                "posts" to postsDataList
+            )
+        )
+
+        localHandler.invoke()
     }
 }

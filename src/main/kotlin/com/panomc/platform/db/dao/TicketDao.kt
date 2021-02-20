@@ -15,14 +15,14 @@ interface TicketDao : Dao<Ticket> {
 
     fun getLast5Tickets(
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getAllByPageAndPageType(
         page: Int,
         pageType: Int,
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getCountByPageType(
@@ -34,7 +34,7 @@ interface TicketDao : Dao<Ticket> {
     fun getByCategory(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (tickets: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun closeTickets(

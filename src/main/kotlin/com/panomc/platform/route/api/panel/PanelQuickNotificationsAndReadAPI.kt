@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.panel
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -57,7 +58,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
         userID: Int
-    ) = handler@{ notifications: List<Map<String, Any>>?, _: AsyncResult<*> ->
+    ) = handler@{ notifications: List<PanelNotification>?, _: AsyncResult<*> ->
         if (notifications == null) {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_71))
@@ -77,7 +78,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
         userID: Int,
-        notifications: List<Map<String, Any>>
+        notifications: List<PanelNotification>
     ) = handler@{ count: Int?, _: AsyncResult<*> ->
         if (count == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -90,14 +91,15 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
         databaseManager.getDatabase().panelNotificationDao.markReadLat5ByUserID(
             userID,
             sqlConnection,
-            (this::markReadLat5ByUserIDHandler)(handler, sqlConnection, notifications, count)
+            (this::markReadLat5ByUserIDHandler)(handler, sqlConnection, notifications, userID, count)
         )
     }
 
     private fun markReadLat5ByUserIDHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
-        notifications: List<Map<String, Any>>,
+        notifications: List<PanelNotification>,
+        userID: Int,
         count: Int
     ) = handler@{ result: Result?, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
@@ -107,10 +109,24 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
                 return@closeConnection
             }
 
+            val notificationsDataList = mutableListOf<Map<String, Any?>>()
+
+            notifications.forEach { notification ->
+                notificationsDataList.add(
+                    mapOf(
+                        "id" to notification.id,
+                        "type_ID" to notification.typeID,
+                        "date" to notification.date,
+                        "status" to notification.status,
+                        "isPersonal" to (notification.userID == userID)
+                    )
+                )
+            }
+
             handler.invoke(
                 Successful(
                     mutableMapOf(
-                        "notifications" to notifications,
+                        "notifications" to notificationsDataList,
                         "notifications_count" to count
                     )
                 )

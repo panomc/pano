@@ -77,7 +77,7 @@ interface PostDao : Dao<Post> {
     fun getByCategory(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getByPageAndPageType(

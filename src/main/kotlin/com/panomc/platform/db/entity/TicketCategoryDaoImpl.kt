@@ -166,7 +166,7 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
     override fun getByPage(
         page: Int,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: List<TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT id, title, description FROM `${getTablePrefix() + tableName}` ORDER BY id DESC LIMIT 10 OFFSET ${(page - 1) * 10}"
@@ -176,69 +176,20 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
             .execute { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val categories = mutableListOf<Map<String, Any>>()
+                    val categories = mutableListOf<TicketCategory>()
 
-                    if (rows.size() > 0) {
-                        val handlers: List<(handler: () -> Unit) -> Any> =
-                            rows.map { row ->
-                                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                    databaseManager.getDatabase().ticketDao.countByCategory(
-                                        row.getInteger(0),
-                                        sqlConnection
-                                    ) { count, asyncResult ->
-                                        if (count == null) {
-                                            handler.invoke(null, asyncResult)
-
-                                            return@countByCategory
-                                        }
-
-                                        databaseManager.getDatabase().ticketDao.getByCategory(
-                                            row.getInteger(0),
-                                            sqlConnection
-                                        ) { tickets, asyncResultOfGetByCategory ->
-                                            if (tickets == null) {
-                                                handler.invoke(null, asyncResultOfGetByCategory)
-
-                                                return@getByCategory
-                                            }
-
-                                            categories.add(
-                                                mapOf(
-                                                    "id" to row.getInteger(0),
-                                                    "title" to row.getString(1),
-                                                    "description" to row.getString(2),
-                                                    "ticket_count" to count,
-                                                    "tickets" to tickets
-                                                )
-                                            )
-
-                                            localHandler.invoke()
-                                        }
-                                    }
-                                }
-
-                                localHandler
-                            }
-
-                        var currentIndex = -1
-
-                        fun invoke() {
-                            val localHandler: () -> Unit = {
-                                if (currentIndex == handlers.lastIndex)
-                                    handler.invoke(categories, queryResult)
-                                else
-                                    invoke()
-                            }
-
-                            currentIndex++
-
-                            if (currentIndex <= handlers.lastIndex)
-                                handlers[currentIndex].invoke(localHandler)
+                    if (rows.size() > 0)
+                        rows.forEach { row ->
+                            categories.add(
+                                TicketCategory(
+                                    row.getInteger(0),
+                                    row.getString(1),
+                                    row.getString(2)
+                                )
+                            )
                         }
 
-                        invoke()
-                    } else
-                        handler.invoke(categories, queryResult)
+                    handler.invoke(categories, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
@@ -266,6 +217,44 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
                     )
 
                     handler.invoke(ticket, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getByIDList(
+        ticketCategoryIDList: List<Int>,
+        sqlConnection: SqlConnection,
+        handler: (ticketCategoryList: Map<Int, TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        var listText = ""
+
+        ticketCategoryIDList.forEach { id ->
+            if (listText == "")
+                listText = "'$id'"
+            else
+                listText += ", '$id'"
+        }
+
+        val query =
+            "SELECT `id`, `title`, `description` FROM `${getTablePrefix() + tableName}` WHERE  `id` IN ($listText)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val ticketList = mutableMapOf<Int, TicketCategory>()
+
+                    rows.forEach { row ->
+                        ticketList[row.getInteger(0)] = TicketCategory(
+                            id = row.getInteger(0),
+                            title = row.getString(1),
+                            description = row.getString(2),
+                        )
+                    }
+
+                    handler.invoke(ticketList, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }

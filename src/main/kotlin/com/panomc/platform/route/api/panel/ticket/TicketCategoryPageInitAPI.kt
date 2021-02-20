@@ -1,6 +1,8 @@
 package com.panomc.platform.route.api.panel.ticket
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.Ticket
+import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -73,18 +75,73 @@ class TicketCategoryPageInitAPI : PanelApi() {
         sqlConnection: SqlConnection,
         count: Int,
         totalPage: Int
-    ) = handler@{ categories: List<Map<String, Any>>?, _: AsyncResult<*> ->
-        databaseManager.closeConnection(sqlConnection) {
-            if (categories == null) {
+    ) = handler@{ categories: List<TicketCategory>?, _: AsyncResult<*> ->
+        if (categories == null) {
+            databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_79))
-
-                return@closeConnection
             }
 
+            return@handler
+        }
+
+        val categoriesDataList = mutableListOf<Map<String, Any?>>()
+
+        val handlers: List<(handler: () -> Unit) -> Any> =
+            categories.map { category ->
+                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                    databaseManager.getDatabase().ticketDao.countByCategory(
+                        category.id,
+                        sqlConnection,
+                        (this::countByCategoryHandler)(
+                            handler,
+                            sqlConnection,
+                            category,
+                            localHandler,
+                            categoriesDataList
+                        )
+                    )
+                }
+
+                localHandler
+            }
+
+        var currentIndex = -1
+
+        fun invoke() {
+            val localHandler: () -> Unit = {
+                if (currentIndex == handlers.lastIndex)
+                    returnResult(handler, sqlConnection, categoriesDataList, count, totalPage)
+                else
+                    invoke()
+            }
+
+            currentIndex++
+
+            if (currentIndex <= handlers.lastIndex)
+                handlers[currentIndex].invoke(localHandler)
+        }
+
+        if (categories.isNotEmpty()) {
+            invoke()
+
+            return@handler
+        }
+
+        returnResult(handler, sqlConnection, categoriesDataList, count, totalPage)
+    }
+
+    private fun returnResult(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        categoryDataList: MutableList<Map<String, Any?>>,
+        count: Int,
+        totalPage: Int
+    ) {
+        databaseManager.closeConnection(sqlConnection) {
             handler.invoke(
                 Successful(
                     mutableMapOf<String, Any?>(
-                        "categories" to categories,
+                        "categories" to categoryDataList,
                         "category_count" to count,
                         "total_page" to totalPage,
                         "host" to "http://"
@@ -92,5 +149,67 @@ class TicketCategoryPageInitAPI : PanelApi() {
                 )
             )
         }
+    }
+
+    private fun countByCategoryHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        category: TicketCategory,
+        localHandler: () -> Unit,
+        categoryDataList: MutableList<Map<String, Any?>>
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_150))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().ticketDao.getByCategory(
+            category.id,
+            sqlConnection,
+            (this::getByCategoryHandler)(handler, sqlConnection, category, count, categoryDataList, localHandler)
+        )
+    }
+
+    private fun getByCategoryHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        category: TicketCategory,
+        count: Int,
+        categoryDataList: MutableList<Map<String, Any?>>,
+        localHandler: () -> Unit
+    ) = handler@{ tickets: List<Ticket>?, _: AsyncResult<*> ->
+        if (tickets == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_151))
+            }
+
+            return@handler
+        }
+
+        val ticketDataList = mutableListOf<Map<String, Any?>>()
+
+        tickets.forEach { ticket ->
+            ticketDataList.add(
+                mapOf(
+                    "id" to ticket.id,
+                    "title" to ticket.title
+                )
+            )
+        }
+
+        categoryDataList.add(
+            mapOf(
+                "id" to category.id,
+                "title" to category.title,
+                "description" to category.description,
+                "ticket_count" to count,
+                "tickets" to ticketDataList
+            )
+        )
+
+        localHandler.invoke()
     }
 }

@@ -213,11 +213,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                     post.categoryId,
                     post.writerUserID,
                     post.post,
-                    System.currentTimeMillis(),
-                    System.currentTimeMillis(),
-                    1,
-                    post.imageCode,
-                    0
+                    post.date,
+                    post.moveDate,
+                    post.status,
+                    post.image,
+                    post.views
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -249,7 +249,7 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                     System.currentTimeMillis(),
                     System.currentTimeMillis(),
                     1,
-                    post.imageCode,
+                    post.image,
                     post.id
                 )
             ) { queryResult ->
@@ -345,10 +345,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     override fun getByCategory(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `date` DESC LIMIT 5"
+            "SELECT id, title, category_id, writer_user_id, post, `date`, move_date, status, image, views FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `date` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
@@ -358,13 +358,21 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val posts = mutableListOf<Map<String, Any>>()
+                    val posts = mutableListOf<Post>()
 
                     rows.forEach { row ->
                         posts.add(
-                            mapOf(
-                                "id" to row.getInteger(0),
-                                "title" to row.getString(1)
+                            Post(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getBuffer(4).toString(),
+                                row.getString(5),
+                                row.getString(6),
+                                row.getInteger(7),
+                                row.getBuffer(8).toString(),
+                                row.getString(9)
                             )
                         )
                     }

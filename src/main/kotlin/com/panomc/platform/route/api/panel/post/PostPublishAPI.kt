@@ -78,7 +78,18 @@ class PostPublishAPI : PanelApi() {
             return@handler
         }
 
-        val post = Post(id, title, categoryID, userID, text, imageCode)
+        val post = Post(
+            id,
+            title,
+            categoryID,
+            userID,
+            text,
+            System.currentTimeMillis().toString(),
+            System.currentTimeMillis().toString(),
+            1,
+            imageCode,
+            "0"
+        )
 
         if (id == -1) {
             databaseManager.getDatabase().postDao.insertAndPublish(

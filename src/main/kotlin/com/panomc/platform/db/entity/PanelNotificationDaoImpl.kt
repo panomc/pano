@@ -90,7 +90,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
     override fun getAllByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id`"
@@ -105,17 +105,17 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
             ) { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val notifications = mutableListOf<Map<String, Any>>()
+                    val notifications = mutableListOf<PanelNotification>()
 
                     if (rows.size() > 0)
                         rows.forEach { row ->
                             notifications.add(
-                                mapOf(
-                                    "id" to row.getInteger(0),
-                                    "type_ID" to row.getString(2),
-                                    "date" to row.getString(3).toLong(),
-                                    "status" to row.getString(4),
-                                    "isPersonal" to (row.getInteger(1) == userID)
+                                PanelNotification(
+                                    row.getInteger(0),
+                                    row.getInteger(1),
+                                    row.getString(2),
+                                    row.getString(3),
+                                    NotificationStatus.valueOf(row.getString(4))
                                 )
                             )
                         }
@@ -153,7 +153,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
     override fun getLast5ByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (notifications: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
             "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
@@ -169,17 +169,17 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
 
-                    val notifications = mutableListOf<Map<String, Any>>()
+                    val notifications = mutableListOf<PanelNotification>()
 
                     if (rows.size() > 0)
-                        rows.forEach { rows ->
+                        rows.forEach { row ->
                             notifications.add(
-                                mapOf(
-                                    "id" to rows.getInteger(0),
-                                    "type_ID" to rows.getString(2),
-                                    "date" to rows.getString(3).toLong(),
-                                    "status" to rows.getString(4),
-                                    "isPersonal" to (rows.getInteger(1) == userID)
+                                PanelNotification(
+                                    row.getInteger(0),
+                                    row.getInteger(1),
+                                    row.getString(2),
+                                    row.getString(3),
+                                    NotificationStatus.valueOf(row.getString(4))
                                 )
                             )
                         }

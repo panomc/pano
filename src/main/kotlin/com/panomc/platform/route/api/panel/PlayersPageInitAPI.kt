@@ -79,20 +79,78 @@ class PlayersPageInitAPI : PanelApi() {
         count: Int,
         totalPage: Int
     ) = handler@{ userList: List<Map<String, Any>>?, _: AsyncResult<*> ->
-        databaseManager.closeConnection(sqlConnection) {
-            if (userList == null) {
+        if (userList == null) {
+            databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_125))
-
-                return@closeConnection
             }
 
-            val result = mutableMapOf<String, Any?>(
-                "players" to userList,
-                "players_count" to count,
-                "total_page" to totalPage
-            )
-
-            handler.invoke(Successful(result))
+            return@handler
         }
+
+        val playerList = mutableListOf<Map<String, Any>>()
+
+        val result = mutableMapOf(
+            "players" to playerList,
+            "players_count" to count,
+            "total_page" to totalPage
+        )
+
+        val handlers: List<(handler: () -> Unit) -> Any> =
+            userList.map { user ->
+                val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
+                    databaseManager.getDatabase().ticketDao.countByUserID(
+                        user["id"] as Int,
+                        sqlConnection,
+                        (this::countByUserIDHandler)(handler, sqlConnection, user, playerList, localHandler)
+                    )
+                }
+
+                localHandler
+            }
+
+        var currentIndex = -1
+
+        fun invoke() {
+            val localHandler: () -> Unit = {
+                if (currentIndex == handlers.lastIndex)
+                    handler.invoke(Successful(result))
+                else
+                    invoke()
+            }
+
+            currentIndex++
+
+            if (currentIndex <= handlers.lastIndex)
+                handlers[currentIndex].invoke(localHandler)
+        }
+
+        invoke()
+    }
+
+    private fun countByUserIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        user: Map<String, Any?>,
+        playerList: MutableList<Map<String, Any>>,
+        localHandler: () -> Unit
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_158))
+            }
+
+            return@handler
+        }
+
+        playerList.add(
+            mapOf(
+                "id" to user["id"] as Int,
+                "username" to user["username"] as String,
+                "ticket_count" to count,
+                "register_date" to user["register_date"] as String
+            )
+        )
+
+        localHandler.invoke()
     }
 }

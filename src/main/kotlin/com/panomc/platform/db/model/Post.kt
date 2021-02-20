@@ -6,5 +6,9 @@ data class Post(
     val categoryId: Int,
     val writerUserID: Int,
     val post: String,
-    val imageCode: String,
+    val date: String,
+    val moveDate: String,
+    val status: Int,
+    val image: String,
+    val views: String
 )

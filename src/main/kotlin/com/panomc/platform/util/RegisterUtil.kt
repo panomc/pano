@@ -63,7 +63,7 @@ object RegisterUtil {
                 addUser(newUser, databaseManager, sqlConnection) { result, asyncResultOfAddUser ->
                     if (result == null) {
                         handler.invoke(
-                            Error(ErrorCode.UNKNOWN_ERROR_2),
+                            Error(ErrorCode.UNKNOWN_ERROR_157),
                             asyncResultOfAddUser
                         )
 
