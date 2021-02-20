@@ -275,12 +275,15 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ?" else ""}"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ?" else if (pageType == 0) "WHERE banned = ?" else ""}"
 
         val parameters = Tuple.tuple()
 
         if (pageType == 2)
             parameters.addInteger(-1)
+
+        if (pageType == 0)
+            parameters.addInteger(1)
 
         sqlConnection
             .preparedQuery(query)
