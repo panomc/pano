@@ -6,5 +6,6 @@ data class Ticket(
     val categoryID: Int,
     val userID: Int,
     val date: String,
+    val lastUpdate: String,
     val status: Int
 )
