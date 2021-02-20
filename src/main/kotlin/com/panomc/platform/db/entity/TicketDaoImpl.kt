@@ -74,7 +74,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` ORDER BY `date` DESC, `id` LIMIT 5"
+            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` ORDER BY `last_update` DESC, `id` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
@@ -110,7 +110,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`date` DESC, `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` ${if (pageType != 2) "WHERE status = ? " else ""}ORDER BY ${if (pageType == 2) "`status` ASC, " else ""}`last_update` DESC, `id` DESC LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = Tuple.tuple()
 
@@ -176,7 +176,7 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
         handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `id` DESC LIMIT 5"
+            "SELECT id, title, category_id, user_id, `date`, `last_update`, status FROM `${getTablePrefix() + tableName}` WHERE category_id = ? ORDER BY `last_update` DESC, `id` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
