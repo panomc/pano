@@ -56,6 +56,12 @@ interface UserDao : Dao<User> {
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun getByUsername(
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun countByPageType(
         pageType: Int,
         sqlConnection: SqlConnection,
@@ -79,5 +85,11 @@ interface UserDao : Dao<User> {
         userIDList: List<Int>,
         sqlConnection: SqlConnection,
         handler: (usernameList: Map<Int, String>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun isExistsByUsername(
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

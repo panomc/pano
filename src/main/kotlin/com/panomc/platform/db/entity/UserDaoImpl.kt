@@ -63,11 +63,11 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     user.username,
                     user.email,
                     DigestUtils.md5Hex(user.password),
-                    user.ipAddress,
+                    user.registeredIp,
                     user.permissionID,
                     Base64.getEncoder().encodeToString(key.private.encoded),
                     Base64.getEncoder().encodeToString(key.public.encoded),
-                    System.currentTimeMillis()
+                    user.registerDate
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
@@ -244,7 +244,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `username`, `email`, `password`, `registered_ip`, `permission_id` FROM `${getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT `username`, `email`, `password`, `registered_ip`, `permission_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -260,7 +260,44 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                             row.getString(1),
                             row.getString(2),
                             row.getString(3),
-                            row.getInteger(4)
+                            row.getInteger(4),
+                            row.getString(5),
+                            row.getInteger(6),
+                            row.getInteger(7)
+                        ),
+                        queryResult
+                    )
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getByUsername(
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `username`, `email`, `password`, `registered_ip`, `permission_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `username` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(username)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    handler.invoke(
+                        User(
+                            row.getInteger(0),
+                            row.getString(1),
+                            row.getString(2),
+                            row.getString(3),
+                            row.getString(4),
+                            row.getInteger(5),
+                            row.getString(6),
+                            row.getInteger(7),
+                            row.getInteger(8)
                         ),
                         queryResult
                     )
@@ -387,6 +424,25 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     }
 
                     handler.invoke(listOfUsers, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun isExistsByUsername(
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "SELECT COUNT(username) FROM `${getTablePrefix() + tableName}` where `username` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(username)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }

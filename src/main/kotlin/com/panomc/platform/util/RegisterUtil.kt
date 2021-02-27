@@ -58,7 +58,15 @@ object RegisterUtil {
                     return@getPermissionID
                 }
 
-                val newUser = User(user.id, user.username, user.email, user.password, user.ipAddress, permissionID)
+                val newUser = User(
+                    user.id,
+                    user.username,
+                    user.email,
+                    user.password,
+                    user.registeredIp,
+                    permissionID,
+                    System.currentTimeMillis().toString()
+                )
 
                 addUser(newUser, databaseManager, sqlConnection) { result, asyncResultOfAddUser ->
                     if (result == null) {
