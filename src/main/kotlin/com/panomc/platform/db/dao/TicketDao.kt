@@ -25,6 +25,13 @@ interface TicketDao : Dao<Ticket> {
         handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun getAllByUserIDAndPage(
+        userID: Int,
+        page: Int,
+        sqlConnection: SqlConnection,
+        handler: (tickets: List<Ticket>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getCountByPageType(
         pageType: Int,
         sqlConnection: SqlConnection,
