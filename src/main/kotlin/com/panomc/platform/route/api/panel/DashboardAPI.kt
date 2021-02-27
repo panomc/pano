@@ -115,7 +115,7 @@ class DashboardAPI : PanelApi() {
         }
 
         result["getting_started_blocks"] = mapOf(
-            "welcome_board" to systemProperty.value
+            "welcome_board" to systemProperty.value.toBoolean()
         )
 
         databaseManager.getDatabase().userDao.count(

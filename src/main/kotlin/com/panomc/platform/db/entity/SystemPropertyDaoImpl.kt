@@ -66,9 +66,10 @@ class SystemPropertyDaoImpl(override val tableName: String = "system_property") 
         val params = Tuple.tuple()
 
         params.addString(systemProperty.value)
-        params.addString(systemProperty.option)
 
-        if (systemProperty.id != -1)
+        if (systemProperty.id == -1)
+            params.addString(systemProperty.option)
+        else
             params.addInteger(systemProperty.id)
 
         val query =
