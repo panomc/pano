@@ -356,13 +356,35 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "DELETE FROM `${getTablePrefix() + tableName}` WHERE id = ?"
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun deleteAllByUserID(
+        userID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    userID
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())

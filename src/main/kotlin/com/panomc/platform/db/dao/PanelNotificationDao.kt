@@ -81,4 +81,10 @@ interface PanelNotificationDao : Dao<PanelNotification> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun deleteAllByUserID(
+        userID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
