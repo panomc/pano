@@ -9,6 +9,7 @@ import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
+import kotlin.math.ceil
 
 class PlayerDetailAPI : PanelApi() {
     override val routeType = RouteType.POST
@@ -18,13 +19,15 @@ class PlayerDetailAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val username = data.getString("username")
+        val page = data.getInteger("page")
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, username))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, username, page))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        username: String
+        username: String,
+        page: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -35,7 +38,7 @@ class PlayerDetailAPI : PanelApi() {
         databaseManager.getDatabase().userDao.isExistsByUsername(
             username,
             sqlConnection,
-            (this::isExistsByHandler)(handler, username, sqlConnection)
+            (this::isExistsByHandler)(handler, username, sqlConnection, page)
         )
     }
 
@@ -43,6 +46,7 @@ class PlayerDetailAPI : PanelApi() {
         handler: (result: Result) -> Unit,
         username: String,
         sqlConnection: SqlConnection,
+        page: Int
     ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
         if (exists == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -63,13 +67,14 @@ class PlayerDetailAPI : PanelApi() {
         databaseManager.getDatabase().userDao.getByUsername(
             username,
             sqlConnection,
-            (this::getByUsernameHandler)(handler, sqlConnection)
+            (this::getByUsernameHandler)(handler, sqlConnection, page)
         )
     }
 
     private fun getByUsernameHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
+        page: Int
     ) = handler@{ user: User?, _: AsyncResult<*> ->
         if (user == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -90,7 +95,7 @@ class PlayerDetailAPI : PanelApi() {
         databaseManager.getDatabase().permissionDao.getPermissionByID(
             user.permissionID,
             sqlConnection,
-            (this::getPermissionByIDHandler)(handler, sqlConnection, result, user)
+            (this::getPermissionByIDHandler)(handler, sqlConnection, result, user, page)
         )
     }
 
@@ -98,7 +103,8 @@ class PlayerDetailAPI : PanelApi() {
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
         result: MutableMap<String, Any?>,
-        user: User
+        user: User,
+        page: Int
     ) = handler@{ permission: Permission?, _: AsyncResult<*> ->
         if (permission == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -111,9 +117,60 @@ class PlayerDetailAPI : PanelApi() {
         @Suppress("UNCHECKED_CAST")
         (result["player"] as MutableMap<String, Any?>)["permission"] = permission.name
 
+        databaseManager.getDatabase().ticketDao.countByUserID(
+            user.id,
+            sqlConnection,
+            (this::countByUserIDHandler)(handler, sqlConnection, result, user, page)
+        )
+    }
+
+    private fun countByUserIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        result: MutableMap<String, Any?>,
+        user: User,
+        page: Int
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_165))
+            }
+
+            return@handler
+        }
+
+        var totalPage = ceil(count.toDouble() / 10).toInt()
+
+        if (totalPage < 1)
+            totalPage = 1
+
+        if (page > totalPage || page < 1) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.PAGE_NOT_FOUND))
+            }
+
+            return@handler
+        }
+
+        result["ticketCount"] = count
+        result["ticketTotalPage"] = totalPage
+
+        if (count == 0) {
+            prepareTickets(
+                handler,
+                sqlConnection,
+                result,
+                listOf(),
+                mapOf(),
+                user.username
+            )
+
+            return@handler
+        }
+
         databaseManager.getDatabase().ticketDao.getAllByUserIDAndPage(
             user.id,
-            1,
+            page,
             sqlConnection,
             (this::getAllByUserIDAndPageHandler)(handler, sqlConnection, result, user.username)
         )
@@ -129,19 +186,6 @@ class PlayerDetailAPI : PanelApi() {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_162))
             }
-
-            return@handler
-        }
-
-        if (tickets.isEmpty()) {
-            prepareTickets(
-                handler,
-                sqlConnection,
-                result,
-                tickets,
-                mapOf(),
-                username
-            )
 
             return@handler
         }

@@ -163,4 +163,5 @@ enum class ErrorCode {
     UNKNOWN_ERROR_162,
     UNKNOWN_ERROR_163,
     UNKNOWN_ERROR_164,
+    UNKNOWN_ERROR_165,
 }
