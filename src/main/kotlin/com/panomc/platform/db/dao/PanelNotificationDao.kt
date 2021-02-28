@@ -63,4 +63,22 @@ interface PanelNotificationDao : Dao<PanelNotification> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun existsByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun getByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (notification: PanelNotification?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun deleteByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

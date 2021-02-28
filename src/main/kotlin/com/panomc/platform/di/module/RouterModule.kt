@@ -136,7 +136,8 @@ class RouterModule(private val mVertx: Vertx) {
 
             PlayerDetailAPI(),
 
-            PanelNotificationsPageAPI()
+            PanelNotificationsPageAPI(),
+            PanelNotificationDeleteAPI()
         )
     }
 

@@ -67,14 +67,13 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE (`user_id` = ? OR `user_id` = ?) AND `status` = ? ORDER BY `date` DESC, `id` DESC"
+            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? AND `status` = ? ORDER BY `date` DESC, `id` DESC"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     userID,
-                    -1,
                     NotificationStatus.NOT_READ,
                 )
             ) { queryResult ->
@@ -93,14 +92,13 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE (`user_id` = ? OR `user_id` = ?) ORDER BY `date` DESC, `id` DESC"
+            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? ORDER BY `date` DESC, `id` DESC"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    userID,
-                    -1
+                    userID
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -118,14 +116,13 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    userID,
-                    -1
+                    userID
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -158,14 +155,13 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE (`user_id` = ? OR `user_id` = ?) AND id < ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? AND id < ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     userID,
-                    -1,
                     notificationID
                 )
             ) { queryResult ->
@@ -198,15 +194,14 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 10"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     NotificationStatus.READ,
-                    userID,
-                    -1
+                    userID
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
@@ -223,7 +218,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE (`user_id` = ? OR `user_id` = ?) AND id < ?  ORDER BY `date` DESC, `id` DESC LIMIT 10"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? AND id < ?  ORDER BY `date` DESC, `id` DESC LIMIT 10"
 
         sqlConnection
             .preparedQuery(query)
@@ -231,7 +226,6 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                 Tuple.of(
                     NotificationStatus.READ,
                     userID,
-                    -1,
                     notificationID
                 )
             ) { queryResult ->
@@ -248,14 +242,13 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
         handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    userID,
-                    -1
+                    userID
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -282,57 +275,94 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
             }
     }
 
-//    private fun getNotifications(
-//        connection: Connection,
-//        userID: Int,
-//        resultHandler: (result: Result) -> Unit,
-//        handler: (notifications: List<Map<String, Any>>) -> Unit
-//    ) {
-//        val query =
-//            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM ${(configManager.getConfig()["database"] as Map<*, *>)["prefix"].toString()}panel_notification WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
-//
-//        databaseManager.getSqlConnection(connection)
-//            .queryWithParams(query, JsonArray().add(userID).add(-1)) { queryResult ->
-//                if (queryResult.succeeded()) {
-//                    val notifications = mutableListOf<Map<String, Any>>()
-//
-//                    if (queryResult.result().results.size > 0)
-//                        queryResult.result().results.forEach { categoryInDB ->
-//                            notifications.add(
-//                                mapOf(
-//                                    "id" to categoryInDB.getInteger(0),
-//                                    "type_ID" to categoryInDB.getString(2),
-//                                    "date" to categoryInDB.getString(3).toLong(),
-//                                    "status" to categoryInDB.getString(4),
-//                                    "isPersonal" to (categoryInDB.getInteger(1) == userID)
-//                                )
-//                            )
-//                        }
-//
-//                    handler.invoke(notifications)
-//                } else
-//                    databaseManager.closeConnection(connection) {
-//                        resultHandler.invoke(Error(ErrorCode.PANEL_QUICK_NOTIFICATIONS_AND_READ_API_SORRY_AN_ERROR_OCCURRED_ERROR_CODE_71))
-//                    }
-//            }
-//    }
-
-
     override fun markReadLat5ByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? OR `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+            "UPDATE `${getTablePrefix() + tableName}` SET status = ? WHERE `user_id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     NotificationStatus.READ,
-                    userID,
-                    -1
+                    userID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun existsByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(id)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (notification: PanelNotification?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `user_id`, `type_ID`, `date`, `status` FROM `${getTablePrefix() + tableName}` WHERE `id` = ? ORDER BY `date` DESC, `id` DESC LIMIT 5"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    val notification = PanelNotification(
+                        row.getInteger(0),
+                        row.getInteger(1),
+                        row.getString(2),
+                        row.getString(3),
+                        NotificationStatus.valueOf(row.getString(4))
+                    )
+
+                    handler.invoke(notification, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun deleteByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE id = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
