@@ -134,7 +134,9 @@ class RouterModule(private val mVertx: Vertx) {
             TicketDetailMessagePageAPI(),
             TicketDetailSendMessageAPI(),
 
-            PlayerDetailAPI()
+            PlayerDetailAPI(),
+
+            PanelNotificationsPageAPI()
         )
     }
 

@@ -7,20 +7,23 @@ import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
 
-class PanelNotificationsAPI : PanelApi() {
-    override val routeType = RouteType.GET
+class PanelNotificationsPageAPI : PanelApi() {
+    override val routeType = RouteType.POST
 
-    override val routes = arrayListOf("/api/panel/notifications")
+    override val routes = arrayListOf("/api/panel/notifications/loadMore")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+        val data = context.bodyAsJson
+        val id = data.getInteger("id")
         val token = context.getCookie("pano_token").value
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, token))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, token, id))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        token: String
+        token: String,
+        lastNotificationID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -31,80 +34,62 @@ class PanelNotificationsAPI : PanelApi() {
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
             token,
             sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection)
+            (this::getUserIDFromTokenHandler)(handler, sqlConnection, lastNotificationID)
         )
     }
 
     private fun getUserIDFromTokenHandler(
         handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection
+        sqlConnection: SqlConnection,
+        lastNotificationID: Int
     ) = handler@{ userID: Int?, _: AsyncResult<*> ->
         if (userID == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_66))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_166))
             }
 
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
+        databaseManager.getDatabase().panelNotificationDao.get10ByUserIDAndStartFromID(
             userID,
+            lastNotificationID,
             sqlConnection,
-            (this::getCountByUserIDHandler)(handler, sqlConnection, userID)
+            (this::get10ByUserIDAndStartFromIDHandler)(handler, sqlConnection, userID, lastNotificationID)
         )
     }
 
-    private fun getCountByUserIDHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        userID: Int
-    ) = handler@{ count: Int?, _: AsyncResult<*> ->
-        if (count == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_65))
-            }
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().panelNotificationDao.getLast10ByUserID(
-            userID,
-            sqlConnection,
-            (this::getLast10ByUserIDHandler)(handler, sqlConnection, userID, count)
-        )
-    }
-
-    private fun getLast10ByUserIDHandler(
+    private fun get10ByUserIDAndStartFromIDHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
         userID: Int,
-        count: Int
+        lastNotificationID: Int
     ) = handler@{ notifications: List<PanelNotification>?, _: AsyncResult<*> ->
         if (notifications == null) {
             databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_110))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_167))
             }
 
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.markReadLast10(
+        databaseManager.getDatabase().panelNotificationDao.markReadLast10StartFromID(
             userID,
+            lastNotificationID,
             sqlConnection,
-            (this::markReadLast10Handler)(handler, sqlConnection, count, userID, notifications)
+            (this::markReadLast10StartFromIDHandler)(handler, sqlConnection, userID, notifications)
         )
     }
 
-    private fun markReadLast10Handler(
+    private fun markReadLast10StartFromIDHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
-        count: Int,
         userID: Int,
         notifications: List<PanelNotification>
     ) = handler@{ result: Result?, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
             if (result == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_111))
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_168))
 
                 return@closeConnection
             }
@@ -127,7 +112,6 @@ class PanelNotificationsAPI : PanelApi() {
                 Successful(
                     mutableMapOf(
                         "notifications" to notificationsDataList,
-                        "notifications_count" to count
                     )
                 )
             )

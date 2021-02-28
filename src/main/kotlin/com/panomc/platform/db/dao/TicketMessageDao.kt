@@ -11,7 +11,6 @@ import io.vertx.sqlclient.SqlConnection
 interface TicketMessageDao : Dao<TicketMessage> {
     fun getByTicketIDAndPage(
         ticketID: Int,
-        page: Int,
         sqlConnection: SqlConnection,
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     )
@@ -19,7 +18,6 @@ interface TicketMessageDao : Dao<TicketMessage> {
     fun getByTicketIDPageAndStartFromID(
         lastMessageID: Int,
         ticketID: Int,
-        page: Int,
         sqlConnection: SqlConnection,
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     )

@@ -102,7 +102,6 @@ class TicketDetailAPI : PanelApi() {
 
         databaseManager.getDatabase().ticketMessageDao.getByTicketIDAndPage(
             id,
-            1,
             sqlConnection,
             (this::getByTicketIDAndPageHandler)(handler, sqlConnection, ticket, username)
         )

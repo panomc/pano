@@ -37,7 +37,6 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
 
     override fun getByTicketIDAndPage(
         ticketID: Int,
-        page: Int,
         sqlConnection: SqlConnection,
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
@@ -74,7 +73,6 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
     override fun getByTicketIDPageAndStartFromID(
         lastMessageID: Int,
         ticketID: Int,
-        page: Int,
         sqlConnection: SqlConnection,
         handler: (messages: List<TicketMessage>?, asyncResult: AsyncResult<*>) -> Unit
     ) {

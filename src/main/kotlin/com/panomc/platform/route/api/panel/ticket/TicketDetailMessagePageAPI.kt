@@ -64,7 +64,6 @@ class TicketDetailMessagePageAPI : PanelApi() {
             databaseManager.getDatabase().ticketMessageDao.getByTicketIDPageAndStartFromID(
                 lastMessageID,
                 id,
-                1,
                 sqlConnection,
                 (this::getByTicketIDAndPageHandler)(handler, sqlConnection)
             )

@@ -67,7 +67,7 @@ class PanelQuickNotificationsAndReadAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
+        databaseManager.getDatabase().panelNotificationDao.getCountOfNotReadByUserID(
             userID,
             sqlConnection,
             (this::getCountByUserIDHandler)(handler, sqlConnection, userID, notifications)

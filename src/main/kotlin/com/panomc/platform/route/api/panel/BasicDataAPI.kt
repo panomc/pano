@@ -84,7 +84,7 @@ class BasicDataAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.getCountByUserID(
+        databaseManager.getDatabase().panelNotificationDao.getCountOfNotReadByUserID(
             userID,
             sqlConnection,
             (this::getCountByUserIDHandler)(handler, context, sqlConnection, user)

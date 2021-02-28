@@ -14,20 +14,40 @@ interface PanelNotificationDao : Dao<PanelNotification> {
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun getCountOfNotReadByUserID(
+        userID: Int,
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getCountByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun getAllByUserID(
+    fun getLast10ByUserID(
         userID: Int,
         sqlConnection: SqlConnection,
         handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun markReadAll(
+    fun get10ByUserIDAndStartFromID(
         userID: Int,
+        notificationID: Int,
+        sqlConnection: SqlConnection,
+        handler: (notifications: List<PanelNotification>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun markReadLast10(
+        userID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun markReadLast10StartFromID(
+        userID: Int,
+        notificationID: Int,
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
