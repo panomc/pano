@@ -1,7 +1,7 @@
 plugins {
     java
-    kotlin("jvm") version "1.4.30"
-    kotlin("kapt") version "1.4.30"
+    kotlin("jvm") version "1.4.31"
+    kotlin("kapt") version "1.4.31"
     id("io.vertx.vertx-plugin") version "1.2.0"
 }
 
@@ -41,8 +41,8 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.30")
 
     // dagger 2x
-    implementation("com.google.dagger:dagger:2.32")
-    kapt("com.google.dagger:dagger-compiler:2.32")
+    implementation("com.google.dagger:dagger:2.33")
+    kapt("com.google.dagger:dagger-compiler:2.33")
 
     // recaptcha v2 1.0.3
     implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.4")
