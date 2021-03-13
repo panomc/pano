@@ -13,11 +13,18 @@ import java.util.jar.Manifest
 import javax.inject.Inject
 
 class Main : AbstractVerticle() {
+    private val mLogger = LoggerFactory.getLogger("Pano Platform")
+    private val mConfigManager by lazy {
+        ConfigManager(mLogger, vertx)
+    }
+
     companion object {
-        private val mOptions = VertxOptions()
-        private val mVertx = Vertx.vertx(mOptions)
-        private val mLogger = LoggerFactory.getLogger("Pano Platform")
-        private val mConfigManager = ConfigManager(mLogger, mVertx)
+        private val mOptions by lazy {
+            VertxOptions()
+        }
+        private val mVertx by lazy {
+            Vertx.vertx(mOptions)
+        }
 
         private val mURLClassLoader = Main::class.java.classLoader as URLClassLoader
         private val mMode by lazy {
@@ -44,16 +51,7 @@ class Main : AbstractVerticle() {
             mVertx.deployVerticle(Main())
         }
 
-        private val mComponent: ApplicationComponent by lazy {
-            DaggerApplicationComponent
-                .builder()
-                .vertxModule(VertxModule(mVertx))
-                .loggerModule(LoggerModule(mLogger))
-                .routerModule(RouterModule(mVertx))
-                .configManagerModule(ConfigManagerModule(mConfigManager))
-                .mailClientModule(MailClientModule(mConfigManager))
-                .build()
-        }
+        private lateinit var mComponent: ApplicationComponent
 
         internal fun getComponent() = mComponent
 
@@ -79,6 +77,15 @@ class Main : AbstractVerticle() {
     }
 
     private fun init() = Future.future<Boolean> { init ->
+        mComponent = DaggerApplicationComponent
+            .builder()
+            .vertxModule(VertxModule(vertx))
+            .loggerModule(LoggerModule(mLogger))
+            .routerModule(RouterModule(vertx))
+            .configManagerModule(ConfigManagerModule(mConfigManager))
+            .mailClientModule(MailClientModule(mConfigManager))
+            .build()
+
         getComponent().inject(this)
 
         init.complete(true)
