@@ -31,14 +31,22 @@ class SrcFolderRoute : Route() {
         val normalisedPath = context.normalisedPath()
 
         if (normalisedPath.startsWith("/panel/"))
-            LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
-                handle(context, isAdmin)
+            LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+                if (!isLoggedIn) {
+                    handle(context, false)
+
+                    return@isLoggedIn
+                }
+
+                LoginUtil.hasAccessPanel(databaseManager, context) { hasAccess, _ ->
+                    handle(context, hasAccess)
+                }
             }
         else
             handle(context)
     }
 
-    private fun handle(context: RoutingContext, isAdmin: Boolean = false) {
+    private fun handle(context: RoutingContext, hasAccess: Boolean = false) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var srcFolderRoot = if (setupManager.isSetupDone())
             "src/main/resources/themes/" + configManager.getConfig().string("current-theme") + "/"
         else
@@ -48,7 +56,7 @@ class SrcFolderRoute : Route() {
         val normalisedPath = context.normalisedPath()
 
         if (setupManager.isSetupDone())
-            if (normalisedPath.startsWith("/panel/") && isAdmin)
+            if (normalisedPath.startsWith("/panel/") && hasAccess)
                 srcFolderRoot = "src/main/resources/"
             else if (normalisedPath.startsWith("/panel/")) {
                 context.reroute("/error-404")
@@ -72,7 +80,7 @@ class SrcFolderRoute : Route() {
             )
         else
             if (setupManager.isSetupDone())
-                if (normalisedPath.startsWith("/panel/") && isAdmin)
+                if (normalisedPath.startsWith("/panel/") && hasAccess)
                     context.reroute("/panel/error-404")
                 else
                     context.reroute("/error-404")

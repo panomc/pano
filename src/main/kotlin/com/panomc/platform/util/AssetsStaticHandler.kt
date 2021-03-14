@@ -23,15 +23,23 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl() {
     }
 
     override fun handle(context: RoutingContext) {
-        if (context.normalisedPath().startsWith("/panel/"))
-            LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
-                handle(context, isAdmin)
+        if (context.normalizedPath().startsWith("/panel/"))
+            LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+                if (!isLoggedIn) {
+                    handle(context, false)
+
+                    return@isLoggedIn
+                }
+
+                LoginUtil.hasAccessPanel(databaseManager, context) { hasAccess, _ ->
+                    handle(context, hasAccess)
+                }
             }
         else
             handle(context, false)
     }
 
-    private fun handle(context: RoutingContext, isAdmin: Boolean) {
+    private fun handle(context: RoutingContext, hasAccess: Boolean) {
         @Suppress("VARIABLE_WITH_REDUNDANT_INITIALIZER") var assetsFolderRoot = if (setupManager.isSetupDone())
             "src/main/resources/themes/" + configManager.getConfig().string("current-theme") + "/assets/"
         else
@@ -39,7 +47,7 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl() {
 
         val normalisedPath = context.normalisedPath()
 
-        if (normalisedPath.startsWith("/panel/") && isAdmin)
+        if (normalisedPath.startsWith("/panel/") && hasAccess)
             assetsFolderRoot = "src/main/resources/panel/assets/"
         else if (normalisedPath.startsWith("/panel/")) {
             context.reroute("/error-404")

@@ -41,20 +41,28 @@ class IndexTemplate : Template() {
                 mHotLinks[normalisedPath.toLowerCase()]
             ).setStatusCode(302).end()
         else if (normalisedPath.startsWith("/panel") && setupManager.isSetupDone())
-            LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
-                handleTemplateEngine(context, isAdmin)
+            LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+                if (!isLoggedIn) {
+                    handleTemplateEngine(context, false)
+
+                    return@isLoggedIn
+                }
+
+                LoginUtil.hasAccessPanel(databaseManager, context) { hasAccess, _ ->
+                    handleTemplateEngine(context, hasAccess)
+                }
             }
         else
             handleTemplateEngine(context)
     }
 
-    private fun handleTemplateEngine(context: RoutingContext, isAdmin: Boolean = false) {
+    private fun handleTemplateEngine(context: RoutingContext, hasAccess: Boolean = false) {
         val response = context.response()
 
         templateEngine
             .render(
                 JsonObject()
-                    .put("is_panel", isAdmin)
+                    .put("is_panel", hasAccess)
                     .put("is_setup", !setupManager.isSetupDone()),
                 "src/main/resources/index-template.hbs"
             ) { res ->

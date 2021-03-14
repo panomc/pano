@@ -27,11 +27,19 @@ abstract class PanelApi : Api() {
             return@Handler
         }
 
-        LoginUtil.isAdmin(databaseManager, context) { isAdmin, _ ->
-            if (isAdmin)
-                getHandler(context)
-            else
+        LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+            if (!isLoggedIn) {
                 context.reroute("/")
+
+                return@isLoggedIn
+            }
+
+            LoginUtil.hasAccessPanel(databaseManager, context) { isAdmin, _ ->
+                if (isAdmin)
+                    getHandler(context)
+                else
+                    context.reroute("/")
+            }
         }
     }
 }
