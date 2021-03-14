@@ -1,10 +1,7 @@
 package com.panomc.platform.route.api.panel.playerDetail
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.db.model.Permission
-import com.panomc.platform.db.model.Ticket
-import com.panomc.platform.db.model.TicketCategory
-import com.panomc.platform.db.model.User
+import com.panomc.platform.db.model.*
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -92,8 +89,8 @@ class PlayerDetailAPI : PanelApi() {
             "isBanned" to user.banned
         )
 
-        databaseManager.getDatabase().permissionDao.getPermissionByID(
-            user.permissionID,
+        databaseManager.getDatabase().permissionGroupDao.getPermissionGroupByID(
+            user.permissionGroupID,
             sqlConnection,
             (this::getPermissionByIDHandler)(handler, sqlConnection, result, user, page)
         )
@@ -105,8 +102,8 @@ class PlayerDetailAPI : PanelApi() {
         result: MutableMap<String, Any?>,
         user: User,
         page: Int
-    ) = handler@{ permission: Permission?, _: AsyncResult<*> ->
-        if (permission == null) {
+    ) = handler@{ permissionGroup: PermissionGroup?, _: AsyncResult<*> ->
+        if (permissionGroup == null) {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_164))
             }
@@ -115,7 +112,7 @@ class PlayerDetailAPI : PanelApi() {
         }
 
         @Suppress("UNCHECKED_CAST")
-        (result["player"] as MutableMap<String, Any?>)["permission"] = permission.name
+        (result["player"] as MutableMap<String, Any?>)["permissionGroup"] = permissionGroup.name
 
         databaseManager.getDatabase().ticketDao.countByUserID(
             user.id,

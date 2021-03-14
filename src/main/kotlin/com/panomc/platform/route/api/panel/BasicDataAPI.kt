@@ -110,7 +110,7 @@ class BasicDataAPI : PanelApi() {
                         "user" to mapOf(
                             "username" to user.username,
                             "email" to user.email,
-                            "permission_id" to user.permissionID
+                            "permission_id" to user.permissionGroupID
                         ),
                         "website" to mapOf(
                             "name" to configManager.getConfig()["website-name"],

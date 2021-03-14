@@ -16,7 +16,9 @@ data class Database(
     val postCategoryDao: PostCategoryDao = PostCategoryDaoImpl(),
     val ticketDao: TicketDao = TicketDaoImpl(),
     val ticketCategoryDao: TicketCategoryDao = TicketCategoryDaoImpl(),
-    val ticketMessageDao: TicketMessageDao = TicketMessageDaoImpl()
+    val ticketMessageDao: TicketMessageDao = TicketMessageDaoImpl(),
+    val permissionGroupDao: PermissionGroupDao = PermissionGroupDaoImpl(),
+    val permissionGroupPermsDao: PermissionGroupPermsDao = PermissionGroupPermsDaoImpl()
 ) {
     fun init() = listOf(
         schemeVersionDao.init(),
@@ -31,6 +33,8 @@ data class Database(
         postCategoryDao.init(),
         ticketDao.init(),
         ticketCategoryDao.init(),
-        ticketMessageDao.init()
+        ticketMessageDao.init(),
+        permissionGroupDao.init(),
+        permissionGroupPermsDao.init()
     )
 }

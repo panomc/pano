@@ -23,10 +23,10 @@ interface UserDao : Dao<User> {
         handler: (userID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun getPermissionIDFromUserID(
+    fun getPermissionGroupIDFromUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionGroupID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getSecretKeyByID(

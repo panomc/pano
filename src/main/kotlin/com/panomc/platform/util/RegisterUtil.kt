@@ -2,7 +2,7 @@ package com.panomc.platform.util
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.DatabaseManager
-import com.panomc.platform.db.model.Permission
+import com.panomc.platform.db.model.PermissionGroup
 import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.db.model.User
 import com.panomc.platform.model.Error
@@ -45,17 +45,17 @@ object RegisterUtil {
                 return@isEmailExists
             }
 
-            databaseManager.getDatabase().permissionDao.getPermissionID(
-                Permission(-1, "admin"),
+            databaseManager.getDatabase().permissionGroupDao.getPermissionGroupID(
+                PermissionGroup(-1, "admin"),
                 sqlConnection
-            ) { permissionID, asyncResultOfGetPermissionID ->
-                if (permissionID == null) {
+            ) { permissionGroupID, asyncResultOfGetPermissionGroupID ->
+                if (permissionGroupID == null) {
                     handler.invoke(
                         Error(ErrorCode.UNKNOWN_ERROR_3),
-                        asyncResultOfGetPermissionID
+                        asyncResultOfGetPermissionGroupID
                     )
 
-                    return@getPermissionID
+                    return@getPermissionGroupID
                 }
 
                 val newUser = User(
@@ -64,7 +64,7 @@ object RegisterUtil {
                     user.email,
                     user.password,
                     user.registeredIp,
-                    permissionID,
+                    permissionGroupID,
                     System.currentTimeMillis().toString()
                 )
 

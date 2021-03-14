@@ -29,7 +29,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                               `username` varchar(16) NOT NULL UNIQUE,
                               `email` varchar(255) NOT NULL UNIQUE,
                               `password` varchar(255) NOT NULL,
-                              `permission_id` int(11) NOT NULL,
+                              `permission_group_id` int(11) NOT NULL,
                               `registered_ip` varchar(255) NOT NULL,
                               `secret_key` text NOT NULL,
                               `public_key` text NOT NULL,
@@ -51,7 +51,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, registered_ip, permission_id, secret_key, public_key, register_date) " +
+            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, registered_ip, permission_group_id, secret_key, public_key, register_date) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
@@ -64,7 +64,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     user.email,
                     DigestUtils.md5Hex(user.password),
                     user.registeredIp,
-                    user.permissionID,
+                    user.permissionGroupID,
                     Base64.getEncoder().encodeToString(key.private.encoded),
                     Base64.getEncoder().encodeToString(key.public.encoded),
                     user.registerDate
@@ -128,13 +128,13 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             }
     }
 
-    override fun getPermissionIDFromUserID(
+    override fun getPermissionGroupIDFromUserID(
         userID: Int,
         sqlConnection: SqlConnection,
-        handler: (permissionID: Int?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (permissionGroupID: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT permission_id FROM `${getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT permission_group_id FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -244,7 +244,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `username`, `email`, `password`, `registered_ip`, `permission_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT `username`, `email`, `password`, `registered_ip`, `permission_group_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -278,7 +278,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (user: User?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `username`, `email`, `password`, `registered_ip`, `permission_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `username` = ?"
+            "SELECT `id`, `username`, `email`, `password`, `registered_ip`, `permission_group_id`, `register_date`, `email_verified`, `banned` FROM `${getTablePrefix() + tableName}` where `username` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -312,7 +312,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ?" else if (pageType == 0) "WHERE banned = ?" else ""}"
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_group_id != ?" else if (pageType == 0) "WHERE banned = ?" else ""}"
 
         val parameters = Tuple.tuple()
 
@@ -341,7 +341,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, username, register_date FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_id != ? " else if (pageType == 0) "WHERE banned = ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, username, register_date FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_group_id != ? " else if (pageType == 0) "WHERE banned = ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = Tuple.tuple()
 

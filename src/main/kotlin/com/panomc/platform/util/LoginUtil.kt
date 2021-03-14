@@ -174,44 +174,44 @@ object LoginUtil {
                         return@getUserIDFromToken
                     }
 
-                    databaseManager.getDatabase().userDao.getPermissionIDFromUserID(
+                    databaseManager.getDatabase().userDao.getPermissionGroupIDFromUserID(
                         userID,
                         sqlConnection
-                    ) { permissionID, asyncResultOfGetPermissionIDFromUserID ->
-                        if (permissionID == null) {
+                    ) { permissionGroupID, asyncResultOfGetPermissionGroupIDFromUserID ->
+                        if (permissionGroupID == null) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(false, asyncResultOfGetPermissionIDFromUserID)
+                                handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
                             }
 
-                            return@getPermissionIDFromUserID
+                            return@getPermissionGroupIDFromUserID
                         }
 
-                        if (permissionID == 0) {
+                        if (permissionGroupID == 0) {
                             databaseManager.closeConnection(sqlConnection) {
-                                handler.invoke(false, asyncResultOfGetPermissionIDFromUserID)
+                                handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
                             }
 
-                            return@getPermissionIDFromUserID
+                            return@getPermissionGroupIDFromUserID
                         }
 
-                        databaseManager.getDatabase().permissionDao.getPermissionByID(
-                            permissionID,
+                        databaseManager.getDatabase().permissionGroupDao.getPermissionGroupByID(
+                            permissionGroupID,
                             sqlConnection
-                        ) { permission, asyncResultOfGetPermissionID ->
+                        ) { permissionGroup, asyncResultOfGetPermissionGroupID ->
                             databaseManager.closeConnection(sqlConnection) {
-                                if (permission == null) {
-                                    handler.invoke(false, asyncResultOfGetPermissionID)
+                                if (permissionGroup == null) {
+                                    handler.invoke(false, asyncResultOfGetPermissionGroupID)
 
                                     return@closeConnection
                                 }
 
-                                if (permission.name != "admin") {
-                                    handler.invoke(false, asyncResultOfGetPermissionID)
+                                if (permissionGroup.name != "admin") {
+                                    handler.invoke(false, asyncResultOfGetPermissionGroupID)
 
                                     return@closeConnection
                                 }
 
-                                handler.invoke(true, asyncResultOfGetPermissionID)
+                                handler.invoke(true, asyncResultOfGetPermissionGroupID)
                             }
                         }
                     }
