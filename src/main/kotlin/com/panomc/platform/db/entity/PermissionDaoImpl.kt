@@ -26,6 +26,12 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                         """
                 )
                 .execute {
+                    if (it.failed()) {
+                        handler.invoke(it)
+
+                        return@execute
+                    }
+
                     val permissionAddHandlerList = listOf(
                         add(Permission(-1, "manage_servers", "fa-cubes")),
                         add(Permission(-1, "manage_posts", "fa-sticky-note")),
@@ -39,10 +45,10 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                     var currentIndex = 0
 
                     fun invoke() {
-                        val localHandler: (AsyncResult<*>) -> Unit = {
+                        val localHandler: (AsyncResult<*>) -> Unit = { localHandlerResult ->
                             when {
-                                it.failed() -> handler.invoke(it)
-                                currentIndex == permissionAddHandlerList.lastIndex -> handler.invoke(it)
+                                localHandlerResult.failed() -> handler.invoke(localHandlerResult)
+                                currentIndex == permissionAddHandlerList.lastIndex -> handler.invoke(localHandlerResult)
                                 else -> {
                                     currentIndex++
 
