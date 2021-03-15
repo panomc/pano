@@ -42,13 +42,15 @@ class DatabaseManager(
             DatabaseMigration_14_15(),
             DatabaseMigration_15_16(),
             DatabaseMigration_16_17(),
-            DatabaseMigration_17_18()
+            DatabaseMigration_17_18(),
+            DatabaseMigration_18_19()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 18
-        const val DATABASE_SCHEME_VERSION_INFO = "Add banned field to user table."
+        const val DATABASE_SCHEME_VERSION = 19
+        const val DATABASE_SCHEME_VERSION_INFO =
+            "Improve permission name type, add icon_name field and create system permissions."
     }
 
     init {

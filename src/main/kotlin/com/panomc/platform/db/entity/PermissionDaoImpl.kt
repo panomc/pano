@@ -19,13 +19,43 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                     """
                             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
                               `id` int NOT NULL AUTO_INCREMENT,
-                              `name` varchar(16) NOT NULL UNIQUE,
+                              `name` varchar(128) NOT NULL UNIQUE,
+                              `icon_name` varchar(128) NOT NULL DEFAULT '',
                               PRIMARY KEY (`id`)
                             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Permission Table';
                         """
                 )
                 .execute {
-                    handler.invoke(it)
+                    val permissionAddHandlerList = listOf(
+                        add(Permission(-1, "manage_servers", "fa-cubes")),
+                        add(Permission(-1, "manage_posts", "fa-sticky-note")),
+                        add(Permission(-1, "manage_tickets", "fa-ticket-alt")),
+                        add(Permission(-1, "manage_players", "fa-users")),
+                        add(Permission(-1, "manage_view", "fa-palette")),
+                        add(Permission(-1, "manage_addons", "fa-puzzle-piece")),
+                        add(Permission(-1, "manage_platform_settings", "fa-cog"))
+                    )
+
+                    var currentIndex = 0
+
+                    fun invoke() {
+                        val localHandler: (AsyncResult<*>) -> Unit = {
+                            when {
+                                it.failed() -> handler.invoke(it)
+                                currentIndex == permissionAddHandlerList.lastIndex -> handler.invoke(it)
+                                else -> {
+                                    currentIndex++
+
+                                    invoke()
+                                }
+                            }
+                        }
+
+                        if (currentIndex <= permissionAddHandlerList.lastIndex)
+                            permissionAddHandlerList[currentIndex].invoke(sqlConnection, localHandler)
+                    }
+
+                    invoke()
                 }
         }
 
@@ -35,7 +65,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(name) FROM `${getTablePrefix() + tableName}` where name = ?"
+            "SELECT COUNT(`name`) FROM `${getTablePrefix() + tableName}` where `name` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -58,13 +88,14 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        val query = "INSERT INTO `${getTablePrefix() + tableName}` (name) VALUES (?)"
+        val query = "INSERT INTO `${getTablePrefix() + tableName}` (`name`, `icon_name`) VALUES (?, ?)"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    permission.name
+                    permission.name,
+                    permission.iconName
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
@@ -73,6 +104,13 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                     handler.invoke(null, queryResult)
             }
     }
+
+    private fun add(permission: Permission): (sqlConnection: SqlConnection, handler: (asyncResult: AsyncResult<*>) -> Unit) -> Unit =
+        { sqlConnection, handler ->
+            add(permission, sqlConnection) { _, asyncResult ->
+                handler.invoke(asyncResult)
+            }
+        }
 
     override fun getPermissionID(
         permission: Permission,
@@ -104,7 +142,7 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
         handler: (permission: Permission?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `name` FROM `${getTablePrefix() + tableName}` where `id` = ?"
+            "SELECT `name`, `icon_name` FROM `${getTablePrefix() + tableName}` where `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -115,8 +153,10 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
             ) { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
+                    val permissionRow = rows.toList()[0]
+                    val permission = Permission(id, permissionRow.getString(0), permissionRow.getString(1))
 
-                    handler.invoke(Permission(id, rows.toList()[0].getString(0)), queryResult)
+                    handler.invoke(permission, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
