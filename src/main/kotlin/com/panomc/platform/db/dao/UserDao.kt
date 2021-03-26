@@ -105,4 +105,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun removePermissionGroupByPermissionGroupID(
+        permissionGroupID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

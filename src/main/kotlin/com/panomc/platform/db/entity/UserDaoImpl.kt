@@ -493,4 +493,27 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun removePermissionGroupByPermissionGroupID(
+        permissionGroupID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${getTablePrefix() + tableName}` SET `permission_group_id` = ? WHERE `permission_group_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    0,
+                    permissionGroupID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
