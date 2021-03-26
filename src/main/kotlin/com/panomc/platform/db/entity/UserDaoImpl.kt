@@ -447,4 +447,30 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getUsernamesByPermissionGroupID(
+        permissionGroupID: Int,
+        limit: Int,
+        sqlConnection: SqlConnection,
+        handler: (usernameList: List<String>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT username FROM `${getTablePrefix() + tableName}` WHERE `permission_group_id` = ? ${if (limit == -1) "" else "LIMIT $limit"}"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(permissionGroupID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val listOfUsernames = mutableListOf<String>()
+
+                    rows.forEach { row ->
+                        listOfUsernames.add(row.getString(0))
+                    }
+
+                    handler.invoke(listOfUsernames, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }

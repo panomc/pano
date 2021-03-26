@@ -92,4 +92,11 @@ interface UserDao : Dao<User> {
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getUsernamesByPermissionGroupID(
+        permissionGroupID: Int,
+        limit: Int,
+        sqlConnection: SqlConnection,
+        handler: (usernameList: List<String>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
