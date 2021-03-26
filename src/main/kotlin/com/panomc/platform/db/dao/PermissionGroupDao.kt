@@ -42,4 +42,10 @@ interface PermissionGroupDao : Dao<PermissionGroup> {
         sqlConnection: SqlConnection,
         handler: (permissionGroups: List<PermissionGroup>?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun deleteByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

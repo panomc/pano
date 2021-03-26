@@ -176,6 +176,28 @@ class PermissionGroupDaoImpl(override val tableName: String = "permission_group"
             }
     }
 
+    override fun deleteByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     private fun createAdminPermission(
         sqlConnection: SqlConnection,
         handler: (asyncResult: AsyncResult<*>) -> Unit
