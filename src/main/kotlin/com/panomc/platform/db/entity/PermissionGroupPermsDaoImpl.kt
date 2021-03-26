@@ -7,6 +7,7 @@ import io.vertx.core.AsyncResult
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
+import io.vertx.sqlclient.Tuple
 
 class PermissionGroupPermsDaoImpl(
     override val tableName: String = "permission_group_perms"
@@ -47,6 +48,32 @@ class PermissionGroupPermsDaoImpl(
                     }
 
                     handler.invoke(permissionGroupPerms, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun doesPermissionGroupHavePermission(
+        permissionGroupID: Int,
+        permissionID: Int,
+        sqlConnection: SqlConnection,
+        handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `permission_group_id` = ? AND  `permission_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    permissionGroupID,
+                    permissionID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }
