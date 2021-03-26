@@ -3,6 +3,8 @@ package com.panomc.platform.db.entity
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.PermissionGroupPermsDao
 import com.panomc.platform.db.model.PermissionGroupPerms
+import com.panomc.platform.model.Result
+import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
 import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
@@ -75,6 +77,30 @@ class PermissionGroupPermsDaoImpl(
 
                     handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
                 } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun addPermission(
+        permissionGroupID: Int,
+        permissionID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "INSERT INTO `${getTablePrefix() + tableName}` (`permission_id`, `permission_group_id`) VALUES (?, ?)"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    permissionID,
+                    permissionGroupID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
                     handler.invoke(null, queryResult)
             }
     }

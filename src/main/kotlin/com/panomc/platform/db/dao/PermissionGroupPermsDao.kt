@@ -2,6 +2,7 @@ package com.panomc.platform.db.dao
 
 import com.panomc.platform.db.Dao
 import com.panomc.platform.db.model.PermissionGroupPerms
+import com.panomc.platform.model.Result
 import io.vertx.core.AsyncResult
 import io.vertx.sqlclient.SqlConnection
 
@@ -17,5 +18,12 @@ interface PermissionGroupPermsDao : Dao<PermissionGroupPerms> {
         permissionID: Int,
         sqlConnection: SqlConnection,
         handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun addPermission(
+        permissionGroupID: Int,
+        permissionID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 }
