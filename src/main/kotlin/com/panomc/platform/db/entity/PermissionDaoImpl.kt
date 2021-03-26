@@ -89,6 +89,30 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
             }
     }
 
+    override fun isTherePermissionByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (isTherePermission: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     override fun add(
         permission: Permission,
         sqlConnection: SqlConnection,
