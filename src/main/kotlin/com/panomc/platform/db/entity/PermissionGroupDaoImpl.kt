@@ -42,13 +42,37 @@ class PermissionGroupDaoImpl(override val tableName: String = "permission_group"
         handler: (isTherePermissionGroup: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(name) FROM `${getTablePrefix() + tableName}` where name = ?"
+            "SELECT COUNT(`name`) FROM `${getTablePrefix() + tableName}` where `name` = ?"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     permissionGroup.name
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) != 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun isThereByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (isTherePermissionGroup: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    id
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {

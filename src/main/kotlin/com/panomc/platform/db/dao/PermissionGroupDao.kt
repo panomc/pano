@@ -14,6 +14,12 @@ interface PermissionGroupDao : Dao<PermissionGroup> {
         handler: (isTherePermissionGroup: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun isThereByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (isTherePermissionGroup: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun add(
         permissionGroup: PermissionGroup,
         sqlConnection: SqlConnection,
