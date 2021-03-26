@@ -31,4 +31,9 @@ interface PermissionDao : Dao<Permission> {
         sqlConnection: SqlConnection,
         handler: (permission: Permission?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getPermissions(
+        sqlConnection: SqlConnection,
+        handler: (permissions: List<Permission>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

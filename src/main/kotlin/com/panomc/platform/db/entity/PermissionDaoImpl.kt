@@ -167,4 +167,27 @@ class PermissionDaoImpl(override val tableName: String = "permission") : DaoImpl
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getPermissions(
+        sqlConnection: SqlConnection,
+        handler: (permissions: List<Permission>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `name`, `icon_name` FROM `${getTablePrefix() + tableName}`"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    val permissions = rows.map { row ->
+                        Permission(row.getInteger(0), row.getString(1), row.getString(2))
+                    }
+
+                    handler.invoke(permissions, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
