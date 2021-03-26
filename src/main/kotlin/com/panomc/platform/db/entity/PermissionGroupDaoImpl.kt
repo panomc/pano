@@ -129,6 +129,29 @@ class PermissionGroupDaoImpl(override val tableName: String = "permission_group"
             }
     }
 
+    override fun getPermissionGroups(
+        sqlConnection: SqlConnection,
+        handler: (permissionGroups: List<PermissionGroup>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `name` FROM `${getTablePrefix() + tableName}`"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    val permissionsGroups = rows.map { row ->
+                        PermissionGroup(row.getInteger(0), row.getString(1))
+                    }
+
+                    handler.invoke(permissionsGroups, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     private fun createAdminPermission(
         sqlConnection: SqlConnection,
         handler: (asyncResult: AsyncResult<*>) -> Unit

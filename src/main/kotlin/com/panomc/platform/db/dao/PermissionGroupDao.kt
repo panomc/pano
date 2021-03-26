@@ -31,4 +31,9 @@ interface PermissionGroupDao : Dao<PermissionGroup> {
         sqlConnection: SqlConnection,
         handler: (permissionGroupID: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getPermissionGroups(
+        sqlConnection: SqlConnection,
+        handler: (permissionGroups: List<PermissionGroup>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
