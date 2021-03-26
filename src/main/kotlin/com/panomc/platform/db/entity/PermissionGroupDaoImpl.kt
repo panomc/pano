@@ -198,6 +198,29 @@ class PermissionGroupDaoImpl(override val tableName: String = "permission_group"
             }
     }
 
+    override fun update(
+        permissionGroup: PermissionGroup,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "UPDATE `${getTablePrefix() + tableName}` SET `name` = ? WHERE `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    permissionGroup.name,
+                    permissionGroup.id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     private fun createAdminPermission(
         sqlConnection: SqlConnection,
         handler: (asyncResult: AsyncResult<*>) -> Unit

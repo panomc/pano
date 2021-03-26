@@ -48,4 +48,10 @@ interface PermissionGroupDao : Dao<PermissionGroup> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun update(
+        permissionGroup: PermissionGroup,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
