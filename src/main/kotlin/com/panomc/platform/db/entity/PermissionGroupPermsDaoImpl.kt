@@ -104,4 +104,28 @@ class PermissionGroupPermsDaoImpl(
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun removePermission(
+        permissionGroupID: Int,
+        permissionID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "DELETE FROM `${getTablePrefix() + tableName}` WHERE `permission_group_id` = ? AND `permission_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    permissionGroupID,
+                    permissionID
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded())
+                    handler.invoke(Successful(), queryResult)
+                else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }

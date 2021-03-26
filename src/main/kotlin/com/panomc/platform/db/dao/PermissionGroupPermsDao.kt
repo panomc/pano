@@ -26,4 +26,11 @@ interface PermissionGroupPermsDao : Dao<PermissionGroupPerms> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun removePermission(
+        permissionGroupID: Int,
+        permissionID: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
