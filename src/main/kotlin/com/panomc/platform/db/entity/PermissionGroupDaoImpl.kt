@@ -158,7 +158,7 @@ class PermissionGroupDaoImpl(override val tableName: String = "permission_group"
         handler: (permissionGroups: List<PermissionGroup>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `name` FROM `${getTablePrefix() + tableName}`"
+            "SELECT `id`, `name` FROM `${getTablePrefix() + tableName}` ORDER BY `ID` ASC"
 
         sqlConnection
             .preparedQuery(query)
