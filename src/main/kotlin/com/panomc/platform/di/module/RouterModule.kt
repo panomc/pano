@@ -7,10 +7,7 @@ import com.panomc.platform.route.api.auth.LogoutAPI
 import com.panomc.platform.route.api.panel.*
 import com.panomc.platform.route.api.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.panel.dashboard.CloseGettingStartedCardAPI
-import com.panomc.platform.route.api.panel.permission.PermissionAddGroupAPI
-import com.panomc.platform.route.api.panel.permission.PermissionDeleteGroupAPI
-import com.panomc.platform.route.api.panel.permission.PermissionSetAPI
-import com.panomc.platform.route.api.panel.permission.PermissionsPageInitAPI
+import com.panomc.platform.route.api.panel.permission.*
 import com.panomc.platform.route.api.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.panel.playerDetail.PlayerDetailAPI
 import com.panomc.platform.route.api.panel.post.*
@@ -147,7 +144,8 @@ class RouterModule(private val mVertx: Vertx) {
             PermissionsPageInitAPI(),
             PermissionSetAPI(),
             PermissionDeleteGroupAPI(),
-            PermissionAddGroupAPI()
+            PermissionAddGroupAPI(),
+            PermissionUpdateGroupAPI()
         )
     }
 
