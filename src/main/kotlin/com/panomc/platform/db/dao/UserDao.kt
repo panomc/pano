@@ -99,4 +99,10 @@ interface UserDao : Dao<User> {
         sqlConnection: SqlConnection,
         handler: (usernameList: List<String>?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getCountOfUsersByPermissionGroupID(
+        permissionGroupID: Int,
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

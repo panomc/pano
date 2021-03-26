@@ -473,4 +473,24 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getCountOfUsersByPermissionGroupID(
+        permissionGroupID: Int,
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` WHERE `permission_group_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(permissionGroupID)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
