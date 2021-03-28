@@ -145,7 +145,8 @@ class RouterModule(private val mVertx: Vertx) {
             PermissionSetAPI(),
             PermissionDeleteGroupAPI(),
             PermissionAddGroupAPI(),
-            PermissionUpdateGroupAPI()
+            PermissionUpdateGroupAPI(),
+            PermissionGetGroupsAPI()
         )
     }
 

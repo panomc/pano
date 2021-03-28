@@ -199,4 +199,5 @@ enum class ErrorCode {
     UNKNOWN_ERROR_198,
     UNKNOWN_ERROR_199,
     UNKNOWN_ERROR_200,
+    UNKNOWN_ERROR_201,
 }
