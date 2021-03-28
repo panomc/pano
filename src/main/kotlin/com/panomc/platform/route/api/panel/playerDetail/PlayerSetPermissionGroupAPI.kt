@@ -16,7 +16,7 @@ class PlayerSetPermissionGroupAPI : PanelApi() {
         val data = context.bodyAsJson
 
         val username = data.getString("username")
-        val permissionGroup = data.getString("permissionGroup")
+        val permissionGroup = data.getString("permission_group")
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(
