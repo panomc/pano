@@ -261,12 +261,12 @@ object LoginUtil {
 
                         if (permissionGroupID == 0) {
                             handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
+
+                            return@closeConnection
                         }
 
-                        return@closeConnection
+                        handler.invoke(true, asyncResultOfGetPermissionGroupIDFromUserID)
                     }
-
-                    handler.invoke(true, asyncResultOfGetPermissionGroupIDFromUserID)
                 }
             }
         }
