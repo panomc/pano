@@ -77,6 +77,88 @@ class PlayerSetPermissionGroupAPI : PanelApi() {
             return@handler
         }
 
+        databaseManager.getDatabase().userDao.getPermissionGroupIDFromUsername(
+            username,
+            sqlConnection,
+            (this::getPermissionGroupIDFromUsernameHandler)(sqlConnection, handler, username, permissionGroupID)
+        )
+    }
+
+    private fun getPermissionGroupIDFromUsernameHandler(
+        sqlConnection: SqlConnection,
+        handler: (result: Result) -> Unit,
+        username: String,
+        permissionGroupID: Int
+    ) = handler@{ userPermissionGroupID: Int?, _: AsyncResult<*> ->
+        if (userPermissionGroupID == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_206))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().permissionGroupDao.getPermissionGroupByID(
+            userPermissionGroupID,
+            sqlConnection,
+            (this::getPermissionGroupByIDHandler)(sqlConnection, handler, username, permissionGroupID)
+        )
+    }
+
+    private fun getPermissionGroupByIDHandler(
+        sqlConnection: SqlConnection,
+        handler: (result: Result) -> Unit,
+        username: String,
+        permissionGroupID: Int
+    ) = handler@{ permissionGroup: PermissionGroup?, _: AsyncResult<*> ->
+        if (permissionGroup == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_207))
+            }
+
+            return@handler
+        }
+
+        if (permissionGroup.name == "admin") {
+            databaseManager.getDatabase().userDao.getCountOfUsersByPermissionGroupID(
+                permissionGroup.id,
+                sqlConnection,
+                (this::getCountOfUsersByPermissionGroupIDHandler)(sqlConnection, handler, username, permissionGroupID)
+            )
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().userDao.setPermissionGroupByUsername(
+            permissionGroupID,
+            username,
+            sqlConnection,
+            (this::setPermissionGroupByUsernameHandler)(sqlConnection, handler)
+        )
+    }
+
+    private fun getCountOfUsersByPermissionGroupIDHandler(
+        sqlConnection: SqlConnection,
+        handler: (result: Result) -> Unit,
+        username: String,
+        permissionGroupID: Int
+    ) = handler@{ count: Int?, _: AsyncResult<*> ->
+        if (count == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_208))
+            }
+
+            return@handler
+        }
+
+        if (count == 1) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Errors(mapOf("LAST_ADMIN" to true)))
+            }
+
+            return@handler
+        }
+
         databaseManager.getDatabase().userDao.setPermissionGroupByUsername(
             permissionGroupID,
             username,

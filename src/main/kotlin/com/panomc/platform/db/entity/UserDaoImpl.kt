@@ -152,6 +152,30 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             }
     }
 
+    override fun getPermissionGroupIDFromUsername(
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (permissionGroupID: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT permission_group_id FROM `${getTablePrefix() + tableName}` where `username` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    username
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     override fun getSecretKeyByID(
         userID: Int,
         sqlConnection: SqlConnection,
