@@ -341,7 +341,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         val parameters = Tuple.tuple()
 
         if (pageType == 2)
-            parameters.addInteger(-1)
+            parameters.addInteger(0)
 
         if (pageType == 0)
             parameters.addInteger(1)
@@ -370,7 +370,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         val parameters = Tuple.tuple()
 
         if (pageType == 2)
-            parameters.addInteger(-1)
+            parameters.addInteger(0)
 
         if (pageType == 0)
             parameters.addInteger(1)
