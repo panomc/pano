@@ -89,6 +89,19 @@ class PlayerDetailAPI : PanelApi() {
             "isBanned" to user.banned
         )
 
+        if (user.permissionGroupID == 0) {
+            @Suppress("UNCHECKED_CAST")
+            (result["player"] as MutableMap<String, Any?>)["permissionGroup"] = "-"
+
+            databaseManager.getDatabase().ticketDao.countByUserID(
+                user.id,
+                sqlConnection,
+                (this::countByUserIDHandler)(handler, sqlConnection, result, user, page)
+            )
+
+            return@handler
+        }
+
         databaseManager.getDatabase().permissionGroupDao.getPermissionGroupByID(
             user.permissionGroupID,
             sqlConnection,
