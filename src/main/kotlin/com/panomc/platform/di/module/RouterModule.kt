@@ -10,6 +10,7 @@ import com.panomc.platform.route.api.panel.dashboard.CloseGettingStartedCardAPI
 import com.panomc.platform.route.api.panel.permission.*
 import com.panomc.platform.route.api.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.panel.playerDetail.PlayerDetailAPI
+import com.panomc.platform.route.api.panel.playerDetail.PlayerSetPermissionGroupAPI
 import com.panomc.platform.route.api.panel.post.*
 import com.panomc.platform.route.api.panel.post.category.CategoriesAPI
 import com.panomc.platform.route.api.panel.post.category.PostCategoryAddAPI
@@ -146,7 +147,8 @@ class RouterModule(private val mVertx: Vertx) {
             PermissionDeleteGroupAPI(),
             PermissionAddGroupAPI(),
             PermissionUpdateGroupAPI(),
-            PermissionGetGroupsAPI()
+            PermissionGetGroupsAPI(),
+            PlayerSetPermissionGroupAPI()
         )
     }
 
