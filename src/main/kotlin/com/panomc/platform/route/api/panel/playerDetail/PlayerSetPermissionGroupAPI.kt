@@ -223,6 +223,8 @@ class PlayerSetPermissionGroupAPI : PanelApi() {
         databaseManager.closeConnection(sqlConnection) {
             if (result == null) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_204))
+
+                return@closeConnection
             }
 
             handler.invoke(Successful())
