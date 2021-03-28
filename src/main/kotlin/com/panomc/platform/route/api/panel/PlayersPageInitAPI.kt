@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.panel
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.PermissionGroup
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -152,15 +153,57 @@ class PlayersPageInitAPI : PanelApi() {
             return@handler
         }
 
+        if (user["permission_group_id"] as Int == 0) {
+            addToPlayerList(user, playerList, count, null)
+
+            localHandler.invoke()
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().permissionGroupDao.getPermissionGroupByID(
+            user["permission_group_id"] as Int,
+            sqlConnection,
+            (this::getPermissionGroupByIDHandler)(handler, sqlConnection, user, playerList, count, localHandler)
+        )
+    }
+
+    private fun getPermissionGroupByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        user: Map<String, Any?>,
+        playerList: MutableList<Map<String, Any>>,
+        ticketCount: Int,
+        localHandler: () -> Unit
+    ) = handler@{ permissionGroup: PermissionGroup?, _: AsyncResult<*> ->
+        if (permissionGroup == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_200))
+            }
+
+            return@handler
+        }
+
+        addToPlayerList(user, playerList, ticketCount, permissionGroup)
+
+        localHandler.invoke()
+    }
+
+    private fun addToPlayerList(
+        user: Map<String, Any?>,
+        playerList: MutableList<Map<String, Any>>,
+        ticketCount: Int,
+        permissionGroup: PermissionGroup?
+    ) {
         playerList.add(
             mapOf(
                 "id" to user["id"] as Int,
                 "username" to user["username"] as String,
-                "ticket_count" to count,
+                "permission_group_id" to user["permission_group_id"] as Int,
+                "permission_group" to (permissionGroup?.name ?: "-"),
+                "ticket_count" to ticketCount,
                 "register_date" to user["register_date"] as String
             )
         )
-
-        localHandler.invoke()
     }
 }
