@@ -111,4 +111,11 @@ interface UserDao : Dao<User> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun setPermissionGroupByUsername(
+        permissionGroupID: Int,
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
