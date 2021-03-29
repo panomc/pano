@@ -199,6 +199,7 @@ class PlayersPageInitAPI : PanelApi() {
             mapOf(
                 "id" to user["id"] as Int,
                 "username" to user["username"] as String,
+                "email" to user["email"] as String,
                 "permission_group_id" to user["permission_group_id"] as Int,
                 "permission_group" to (permissionGroup?.name ?: "-"),
                 "ticket_count" to ticketCount,

@@ -365,7 +365,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (userList: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT id, username, register_date, permission_group_id FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_group_id != ? " else if (pageType == 0) "WHERE banned = ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
+            "SELECT id, username, email, register_date, permission_group_id FROM `${getTablePrefix() + tableName}` ${if (pageType == 2) "WHERE permission_group_id != ? " else if (pageType == 0) "WHERE banned = ? " else ""}ORDER BY `id` LIMIT 10 ${if (page == 1) "" else "OFFSET ${(page - 1) * 10}"}"
 
         val parameters = Tuple.tuple()
 
@@ -388,8 +388,9 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                                 mapOf(
                                     "id" to row.getInteger(0),
                                     "username" to row.getString(1),
-                                    "register_date" to row.getString(2),
-                                    "permission_group_id" to row.getInteger(3)
+                                    "email" to row.getString(2),
+                                    "register_date" to row.getString(3),
+                                    "permission_group_id" to row.getInteger(4)
                                 )
                             )
                         }
