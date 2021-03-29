@@ -129,7 +129,7 @@ class PostCategoryUpdateAPI : PanelApi() {
         if (description.isEmpty())
             errors["description"] = true
 
-        if (url.isEmpty() || url.length < 3 || url.length > 32 || !url.matches(Regex("^[a-zA-Z0-9]+\$")))
+        if (url.isEmpty() || url.length < 3 || url.length > 32 || !url.matches(Regex("^[a-zA-Z0-9-]+\$")))
             errors["url"] = true
 
         if (errors.isNotEmpty()) {
