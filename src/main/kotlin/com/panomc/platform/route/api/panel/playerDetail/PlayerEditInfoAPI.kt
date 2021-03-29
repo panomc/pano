@@ -208,19 +208,11 @@ class PlayerEditInfoAPI : PanelApi() {
         }
 
         if (email == user.email) {
-            if (newPassword.isEmpty()) {
-                databaseManager.closeConnection(sqlConnection) {
-                    handler.invoke(Successful())
-                }
-
-                return@handler
-            }
-
-            databaseManager.getDatabase().userDao.setPasswordByID(
-                user.id,
-                newPassword,
+            databaseManager.getDatabase().userDao.setUsernameByID(
+                id,
+                username,
                 sqlConnection,
-                (this::setPasswordByIDHandler)(sqlConnection, handler)
+                (this::setUsernameByIDHandler)(sqlConnection, handler, id, email, newPassword)
             )
 
             return@handler
