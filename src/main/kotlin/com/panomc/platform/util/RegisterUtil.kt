@@ -183,7 +183,7 @@ object RegisterUtil {
             return
         }
 
-        if (username.length > 32) {
+        if (username.length > 16) {
             handler.invoke(Error(ErrorCode.REGISTER_USERNAME_TOO_LONG))
 
             return
