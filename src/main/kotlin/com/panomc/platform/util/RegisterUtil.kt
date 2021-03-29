@@ -201,7 +201,7 @@ object RegisterUtil {
             return
         }
 
-        if (!username.matches(Regex("^[a-zA-Z]+\$"))) {
+        if (!username.matches(Regex("^[a-zA-Z0-9_]+\$"))) {
             handler.invoke(Error(ErrorCode.REGISTER_INVALID_USERNAME))
 
             return
