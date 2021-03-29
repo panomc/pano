@@ -1,10 +1,25 @@
 package com.panomc.platform.model
 
 import com.beust.klaxon.JsonObject
+import com.panomc.platform.Main
+import com.panomc.platform.db.DatabaseManager
+import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
+import javax.inject.Inject
 
 abstract class Api : Route() {
+    @Inject
+    lateinit var setupManager: SetupManager
+
+    @Inject
+    lateinit var databaseManager: DatabaseManager
+
+    init {
+        @Suppress("LeakingThis")
+        Main.getComponent().inject(this)
+    }
+
     fun getResultHandler(result: Result, context: RoutingContext) {
         val response = context.response()
 

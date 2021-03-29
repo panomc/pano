@@ -4,8 +4,7 @@ import com.panomc.platform.Main
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.DatabaseMigration
 import com.panomc.platform.di.module.*
-import com.panomc.platform.model.LoggedInApi
-import com.panomc.platform.model.PanelApi
+import com.panomc.platform.model.Api
 import com.panomc.platform.model.SetupApi
 import com.panomc.platform.route.api.panel.BasicDataAPI
 import com.panomc.platform.route.api.panel.platformAuth.RefreshKeyAPI
@@ -55,9 +54,7 @@ interface ApplicationComponent {
 
     fun inject(connectNewAPI: ConnectNewAPI)
 
-    fun inject(loggedInApi: LoggedInApi)
-
-    fun inject(panelApi: PanelApi)
+    fun inject(api: Api)
 
     fun inject(daoImpl: DaoImpl)
 
