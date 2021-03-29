@@ -130,4 +130,25 @@ interface UserDao : Dao<User> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun setUsernameByID(
+        id: Int,
+        username: String,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun setEmailByID(
+        id: Int,
+        email: String,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun setPasswordByID(
+        id: Int,
+        password: String,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
