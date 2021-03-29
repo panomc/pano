@@ -84,7 +84,9 @@ class PlayerDetailAPI : PanelApi() {
         val result = mutableMapOf<String, Any?>()
 
         result["player"] = mutableMapOf<String, Any?>(
+            "id" to user.id,
             "username" to user.username,
+            "email" to user.email,
             "registerDate" to user.registerDate,
             "isBanned" to user.banned
         )
