@@ -99,6 +99,12 @@ interface UserDao : Dao<User> {
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
+    fun isExistsByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
     fun getUsernamesByPermissionGroupID(
         permissionGroupID: Int,
         limit: Int,

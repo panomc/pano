@@ -473,6 +473,25 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             }
     }
 
+    override fun isExistsByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query = "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` where `id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(Tuple.of(id)) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     override fun getUsernamesByPermissionGroupID(
         permissionGroupID: Int,
         limit: Int,
