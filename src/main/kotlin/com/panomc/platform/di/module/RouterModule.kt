@@ -3,6 +3,7 @@ package com.panomc.platform.di.module
 import com.panomc.platform.model.RouteType
 import com.panomc.platform.model.Template
 import com.panomc.platform.route.api.TestSendNotificationAPI
+import com.panomc.platform.route.api.auth.LoginAPI
 import com.panomc.platform.route.api.auth.LogoutAPI
 import com.panomc.platform.route.api.panel.*
 import com.panomc.platform.route.api.panel.dashboard.CloseConnectServerCardAPI
@@ -149,8 +150,11 @@ class RouterModule(private val mVertx: Vertx) {
             PermissionAddGroupAPI(),
             PermissionUpdateGroupAPI(),
             PermissionGetGroupsAPI(),
+
             PlayerSetPermissionGroupAPI(),
-            PlayerEditInfoAPI()
+            PlayerEditInfoAPI(),
+
+            LoginAPI(),
         )
     }
 
