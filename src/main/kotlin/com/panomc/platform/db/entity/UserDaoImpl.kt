@@ -207,7 +207,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
         handler: (isLoginCorrect: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` where (username = ? or email = ?) and password = ?"
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` where (`username` = ? or `email` = ?) and `password` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -654,6 +654,31 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                 if (queryResult.succeeded())
                     handler.invoke(Successful(), queryResult)
                 else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun isEmailVerifiedByID(
+        userID: Int,
+        sqlConnection: SqlConnection,
+        handler: (isVerified: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(email) FROM `${getTablePrefix() + tableName}` WHERE `id` = ? and `email_verified` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    userID,
+                    1
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) == 1, queryResult)
+                } else
                     handler.invoke(null, queryResult)
             }
     }
