@@ -2,7 +2,6 @@ package com.panomc.platform.route.api.setup
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
 import com.panomc.platform.util.LoginUtil
@@ -10,7 +9,6 @@ import com.panomc.platform.util.RegisterUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
-import javax.inject.Inject
 
 class FinishAPI : SetupApi() {
     override val routeType = RouteType.POST
@@ -20,9 +18,6 @@ class FinishAPI : SetupApi() {
     init {
         getComponent().inject(this)
     }
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (setupManager.getStep() != 3) {
@@ -150,7 +145,6 @@ class FinishAPI : SetupApi() {
 
         LoginUtil.login(
             username,
-            password,
             true,
             context,
             databaseManager,
@@ -162,23 +156,23 @@ class FinishAPI : SetupApi() {
     private fun loginHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection
-    ) = handler@{ isLoggedIn: Boolean?, _: AsyncResult<*> ->
+    ) = handler@{ isLoggedIn: Any, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
-            if (isLoggedIn == null) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_129))
+            if (isLoggedIn is Error) {
+                handler.invoke(isLoggedIn)
 
                 return@closeConnection
             }
 
-            if (isLoggedIn) {
-                setupManager.finishSetup()
-
-                handler.invoke(Successful())
+            if (isLoggedIn is Boolean && !isLoggedIn) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_130))
 
                 return@closeConnection
             }
 
-            handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_130))
+            setupManager.finishSetup()
+
+            handler.invoke(Successful())
         }
     }
 }

@@ -2,11 +2,9 @@ package com.panomc.platform.route.api.server
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.Server
 import com.panomc.platform.model.*
 import com.panomc.platform.util.PlatformCodeManager
-import com.panomc.platform.util.SetupManager
 import io.vertx.ext.web.RoutingContext
 import javax.inject.Inject
 
@@ -18,12 +16,6 @@ class ConnectNewAPI : Api() {
     init {
         getComponent().inject(this)
     }
-
-    @Inject
-    lateinit var setupManager: SetupManager
-
-    @Inject
-    lateinit var databaseManager: DatabaseManager
 
     @Inject
     lateinit var platformCodeManager: PlatformCodeManager
