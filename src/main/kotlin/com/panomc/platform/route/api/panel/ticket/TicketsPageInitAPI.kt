@@ -119,7 +119,7 @@ class TicketsPageInitAPI : PanelApi() {
             return@handler
         }
 
-        val categoryIDList = tickets.filter { it.categoryID != -1 }.distinctBy { it.userID }.map { it.categoryID }
+        val categoryIDList = tickets.filter { it.categoryID != -1 }.distinctBy { it.categoryID }.map { it.categoryID }
 
         if (categoryIDList.isEmpty()) {
             sendResults(handler, sqlConnection, tickets, mapOf(), usernameList, count, totalPage)
