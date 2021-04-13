@@ -1,7 +1,9 @@
 package com.panomc.platform.util
 
+import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.db.model.Token
+import com.panomc.platform.model.Error
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
@@ -15,72 +17,53 @@ object LoginUtil {
 
     fun login(
         usernameOrEmail: String,
-        password: String,
         rememberMe: Boolean,
         routingContext: RoutingContext,
         databaseManager: DatabaseManager,
         sqlConnection: SqlConnection,
-        handler: (isLoggedIn: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (isLoggedIn: Any, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        databaseManager.getDatabase().userDao.isLoginCorrect(
+        databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
             usernameOrEmail,
-            password,
             sqlConnection
-        ) { loginCorrect, asyncResult ->
-            if (loginCorrect == null) {
-                handler.invoke(null, asyncResult)
+        ) { userID, asyncResultOfUserID ->
+            if (userID == null) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_219), asyncResultOfUserID)
 
-                return@isLoginCorrect
+                return@getUserIDFromUsernameOrEmail
             }
 
-            if (loginCorrect) {
-                databaseManager.getDatabase().userDao.getUserIDFromUsernameOrEmail(
-                    usernameOrEmail,
+            if (rememberMe)
+                TokenUtil.createToken(
+                    TokenUtil.SUBJECT.LOGIN_SESSION,
+                    userID,
+                    databaseManager,
                     sqlConnection
-                ) { userID, asyncResultOfUserID ->
-                    if (userID == null) {
-                        handler.invoke(null, asyncResultOfUserID)
+                ) { token, asyncResultOfCreateToken ->
+                    if (token == null) {
+                        handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_220), asyncResultOfCreateToken)
 
-                        return@getUserIDFromUsernameOrEmail
+                        return@createToken
                     }
 
-                    if (rememberMe)
-                        TokenUtil.createToken(
-                            TokenUtil.SUBJECT.LOGIN_SESSION,
-                            userID,
-                            databaseManager,
-                            sqlConnection
-                        ) { token, asyncResultOfCreateToken ->
-                            if (token == null) {
-                                handler.invoke(null, asyncResultOfCreateToken)
+                    val age = 60 * 60 * 24 * 365 * 2L // 2 years valid
+                    val path = "/" // root dir
 
-                                return@createToken
-                            }
+                    val tokenCookie = Cookie.cookie(COOKIE_NAME, token)
 
-                            val age = 60 * 60 * 24 * 365 * 2L // 2 years valid
-                            val path = "/" // root dir
+                    tokenCookie.setMaxAge(age)
+                    tokenCookie.path = path
 
-                            val tokenCookie = Cookie.cookie(COOKIE_NAME, token)
+                    routingContext.addCookie(tokenCookie)
 
-                            tokenCookie.setMaxAge(age)
-                            tokenCookie.path = path
-
-                            routingContext.addCookie(tokenCookie)
-
-                            handler.invoke(true, asyncResultOfCreateToken)
-                        }
-                    else {
-                        routingContext.session().put(SESSION_NAME, userID)
-
-
-                        handler.invoke(true, asyncResult)
-                    }
+                    handler.invoke(true, asyncResultOfCreateToken)
                 }
+            else {
+                routingContext.session().put(SESSION_NAME, userID)
 
-                return@isLoginCorrect
+
+                handler.invoke(true, asyncResultOfUserID)
             }
-
-            handler.invoke(false, asyncResult)
         }
     }
 
@@ -89,7 +72,7 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedIn: Boolean, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<String?>(SESSION_NAME)
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
 
         if (session != null) {
             handler.invoke(true, null)
