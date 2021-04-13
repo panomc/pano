@@ -96,32 +96,71 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
             }
     }
 
-    override fun getCategories(
+    override fun getByIDList(
+        IDList: List<Int>,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: Map<Int, PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
+        var listText = ""
+
+        IDList.forEach { id ->
+            if (listText == "")
+                listText = "'$id'"
+            else
+                listText += ", '$id'"
+        }
+
         val query =
-            "SELECT id, title, description, url, color FROM `${getTablePrefix() + tableName}` ORDER BY id DESC"
+            "SELECT `id`, `title`, `description`, `url`, `color` FROM `${getTablePrefix() + tableName}` WHERE  `id` IN ($listText) ORDER BY id DESC"
 
         sqlConnection
             .preparedQuery(query)
             .execute { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val categories = mutableListOf<Map<String, Any>>()
+                    val categories = mutableMapOf<Int, PostCategory>()
 
-                    if (rows.size() > 0)
-                        rows.forEach { row ->
-                            categories.add(
-                                mapOf(
-                                    "id" to row.getInteger(0),
-                                    "title" to row.getString(1),
-                                    "description" to row.getString(2),
-                                    "url" to row.getString(3),
-                                    "color" to row.getString(4)
-                                )
+                    rows.forEach { row ->
+                        categories[row.getInteger(0)] = PostCategory(
+                            row.getInteger(0),
+                            row.getString(1),
+                            row.getString(2),
+                            row.getString(3),
+                            row.getString(4)
+                        )
+                    }
+
+                    handler.invoke(categories, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getAll(
+        sqlConnection: SqlConnection,
+        handler: (categories: List<PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `description`, `url`, `color` FROM `${getTablePrefix() + tableName}` ORDER BY id DESC"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val categories = mutableListOf<PostCategory>()
+
+                    rows.forEach { row ->
+                        categories.add(
+                            PostCategory(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getString(2),
+                                row.getString(3),
+                                row.getString(4)
                             )
-                        }
+                        )
+                    }
 
                     handler.invoke(categories, queryResult)
                 } else

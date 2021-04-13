@@ -84,6 +84,11 @@ interface PostDao : Dao<Post> {
         page: Int,
         pageType: Int,
         sqlConnection: SqlConnection,
-        handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun countOfPublished(
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
 }

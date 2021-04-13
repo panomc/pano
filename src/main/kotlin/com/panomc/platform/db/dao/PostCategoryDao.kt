@@ -22,9 +22,15 @@ interface PostCategoryDao : Dao<PostCategory> {
 
     fun getCount(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
-    fun getCategories(
+    fun getByIDList(
+        IDList: List<Int>,
         sqlConnection: SqlConnection,
-        handler: (categories: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (categories: Map<Int, PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
+    )
+
+    fun getAll(
+        sqlConnection: SqlConnection,
+        handler: (categories: List<PostCategory>?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getCategories(

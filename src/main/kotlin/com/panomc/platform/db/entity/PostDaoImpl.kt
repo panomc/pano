@@ -3,6 +3,7 @@ package com.panomc.platform.db.entity
 import com.panomc.platform.db.DaoImpl
 import com.panomc.platform.db.dao.PostDao
 import com.panomc.platform.db.model.Post
+import com.panomc.platform.model.PostStatus
 import com.panomc.platform.model.Result
 import com.panomc.platform.model.Successful
 import io.vertx.core.AsyncResult
@@ -11,7 +12,6 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
 import io.vertx.sqlclient.Tuple
-import java.util.*
 
 class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao {
 
@@ -387,10 +387,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
         page: Int,
         pageType: Int,
         sqlConnection: SqlConnection,
-        handler: (posts: List<Map<String, Any>>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         var query =
-            "SELECT id, title, category_id, writer_user_id, `date`, views, status FROM `${getTablePrefix() + tableName}` WHERE status = ? ORDER BY ${if (pageType == 1) "`date` DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? ORDER BY ${if (pageType == 1) "`date` DESC" else "move_date DESC"} LIMIT 10 OFFSET ${(page - 1) * 10}"
 
         sqlConnection
             .preparedQuery(query)
@@ -400,87 +400,48 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             { queryResult ->
                 if (queryResult.succeeded()) {
                     val rows: RowSet<Row> = queryResult.result()
-                    val posts = mutableListOf<Map<String, Any>>()
+                    val posts = mutableListOf<Post>()
 
-                    if (rows.size() > 0) {
-                        databaseManager.getDatabase().postCategoryDao.getCategories(sqlConnection) { categories, asyncResult ->
-                            if (categories == null) {
-                                handler.invoke(null, asyncResult)
+                    rows.forEach { row ->
+                        posts.add(
+                            Post(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getBuffer(4).toString(),
+                                row.getString(5),
+                                row.getString(6),
+                                row.getInteger(7),
+                                row.getBuffer(8).toString(),
+                                row.getString(9)
+                            )
+                        )
+                    }
 
-                                return@getCategories
-                            }
+                    handler.invoke(posts, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 
-                            val handlers: List<(handler: () -> Unit) -> Any> =
-                                rows.map { row ->
-                                    val localHandler: (handler: () -> Unit) -> Any = { localHandler ->
-                                        databaseManager.getDatabase().userDao.getUsernameFromUserID(
-                                            row.getInteger(3),
-                                            sqlConnection
-                                        ) { username, asyncResult ->
-                                            if (username == null) {
-                                                handler.invoke(null, asyncResult)
+    override fun countOfPublished(
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(id) FROM `${getTablePrefix() + tableName}` WHERE status = ?"
 
-                                                return@getUsernameFromUserID
-                                            }
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(PostStatus.PUBLISHED.code)
+            )
+            { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
 
-                                            var category: Any = "null"
-
-                                            categories.forEach { categoryInDB ->
-                                                if (categoryInDB["id"] == row.getInteger(2).toInt())
-                                                    category = mapOf(
-                                                        "id" to categoryInDB["id"] as Int,
-                                                        "title" to categoryInDB["title"] as String,
-                                                        "url" to categoryInDB["url"] as String,
-                                                        "color" to categoryInDB["color"] as String
-                                                    )
-                                            }
-
-                                            if (category == "null")
-                                                category = mapOf(
-                                                    "title" to "-"
-                                                )
-
-                                            posts.add(
-                                                mapOf(
-                                                    "id" to row.getInteger(0),
-                                                    "title" to row.getString(1),
-                                                    "category" to category,
-                                                    "writer" to mapOf(
-                                                        "username" to username
-                                                    ),
-                                                    "date" to row.getString(4),
-                                                    "views" to row.getString(5),
-                                                    "status" to row.getInteger(6)
-                                                )
-                                            )
-
-                                            localHandler.invoke()
-                                        }
-                                    }
-
-                                    localHandler
-                                }
-
-                            var currentIndex = -1
-
-                            fun invoke() {
-                                val localHandler: () -> Unit = {
-                                    if (currentIndex == handlers.lastIndex)
-                                        handler.invoke(posts, asyncResult)
-                                    else
-                                        invoke()
-                                }
-
-                                currentIndex++
-
-                                if (currentIndex <= handlers.lastIndex)
-                                    handlers[currentIndex].invoke(localHandler)
-                            }
-
-                            invoke()
-                        }
-                    } else
-                        handler.invoke(posts, queryResult)
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
                 } else
                     handler.invoke(null, queryResult)
             }

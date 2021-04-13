@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.panel.post.category
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -39,14 +40,14 @@ class CategoriesAPI : PanelApi() {
                 return@handler
             }
 
-            databaseManager.getDatabase().postCategoryDao.getCategories(
+            databaseManager.getDatabase().postCategoryDao.getAll(
                 sqlConnection,
                 (this::getCategoriesHandler)(handler, sqlConnection, count)
             )
         }
 
     private fun getCategoriesHandler(handler: (result: Result) -> Unit, sqlConnection: SqlConnection, count: Int) =
-        handler@{ categories: List<Map<String, Any>>?, _: AsyncResult<*> ->
+        handler@{ categories: List<PostCategory>?, _: AsyncResult<*> ->
             databaseManager.closeConnection(sqlConnection) {
                 if (categories == null) {
                     handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_87))

@@ -1,6 +1,8 @@
 package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.Post
+import com.panomc.platform.db.model.PostCategory
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -75,27 +77,128 @@ class PostsPageInitAPI : PanelApi() {
             page,
             pageType,
             sqlConnection,
-            (this::getByPageAndPageTypeHandler)(handler, sqlConnection, count, totalPage)
+            (this::getByPageAndPageTypeHandler)(count, totalPage, handler, sqlConnection)
         )
     }
 
     private fun getByPageAndPageTypeHandler(
+        count: Int,
+        totalPage: Int,
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
-        count: Int,
-        totalPage: Int
-    ) = handler@{ posts: List<Map<String, Any>>?, _: AsyncResult<*> ->
-        databaseManager.closeConnection(sqlConnection) {
-            if (posts == null) {
+    ) = handler@{ posts: List<Post>?, _: AsyncResult<*> ->
+        if (posts == null) {
+            databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_82))
+            }
+            return@handler
+        }
 
-                return@closeConnection
+        if (posts.isEmpty()) {
+            sendResults(posts, mapOf(), mapOf(), count, totalPage, handler, sqlConnection)
+
+            return@handler
+        }
+
+        val userIDList = posts.distinctBy { it.writerUserID }.map { it.writerUserID }
+
+        databaseManager.getDatabase().userDao.getUsernameByListOfID(
+            userIDList,
+            sqlConnection,
+            (this::getUsernameByListOfIDHandler)(posts, count, totalPage, handler, sqlConnection)
+        )
+    }
+
+    private fun getUsernameByListOfIDHandler(
+        posts: List<Post>,
+        count: Int,
+        totalPage: Int,
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+    ) = handler@{ usernameList: Map<Int, String>?, _: AsyncResult<*> ->
+        if (usernameList == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_221))
+            }
+
+            return@handler
+        }
+
+        val categoryIDList = posts.filter { it.categoryId != -1 }.distinctBy { it.categoryId }.map { it.categoryId }
+
+        if (categoryIDList.isEmpty()) {
+            sendResults(posts, usernameList, mapOf(), count, totalPage, handler, sqlConnection)
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postCategoryDao.getByIDList(
+            categoryIDList,
+            sqlConnection,
+            (this::getByIDListHandler)(posts, count, totalPage, usernameList, handler, sqlConnection)
+        )
+    }
+
+    private fun getByIDListHandler(
+        posts: List<Post>,
+        count: Int,
+        totalPage: Int,
+        usernameList: Map<Int, String>,
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) = handler@{ categories: Map<Int, PostCategory>?, _: AsyncResult<*> ->
+        if (categories == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_222))
+            }
+
+            return@handler
+        }
+
+        sendResults(
+            posts, usernameList, categories, count, totalPage, handler, sqlConnection
+        )
+    }
+
+    private fun sendResults(
+        posts: List<Post>,
+        usernameList: Map<Int, String>,
+        categories: Map<Int, PostCategory>,
+        count: Int,
+        totalPage: Int,
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection
+    ) {
+        databaseManager.closeConnection(sqlConnection) {
+            val postsDataList = mutableListOf<Map<String, Any?>>()
+
+            posts.forEach { post ->
+                postsDataList.add(
+                    mapOf(
+                        "id" to post.id,
+                        "title" to post.title,
+                        "category" to
+                                if (post.categoryId == -1)
+                                    mapOf("id" to -1, "title" to "-")
+                                else
+                                    categories.getOrDefault(
+                                        post.categoryId,
+                                        mapOf("id" to -1, "title" to "-")
+                                    ),
+                        "writer" to mapOf(
+                            "username" to usernameList[post.writerUserID]
+                        ),
+                        "date" to post.date,
+                        "views" to post.views,
+                        "status" to post.status
+                    )
+                )
             }
 
             handler.invoke(
                 Successful(
                     mutableMapOf<String, Any?>(
-                        "posts" to posts,
+                        "posts" to postsDataList,
                         "posts_count" to count,
                         "total_page" to totalPage
                     )
