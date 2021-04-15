@@ -91,4 +91,10 @@ interface PostDao : Dao<Post> {
         sqlConnection: SqlConnection,
         handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getPublishedListByPage(
+        page: Int,
+        sqlConnection: SqlConnection,
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

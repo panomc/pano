@@ -446,4 +446,45 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getPublishedListByPage(
+        page: Int,
+        sqlConnection: SqlConnection,
+        handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        var query =
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? ORDER BY `date` DESC LIMIT 5 OFFSET ${(page - 1) * 5}"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(PostStatus.PUBLISHED.code)
+            )
+            { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val posts = mutableListOf<Post>()
+
+                    rows.forEach { row ->
+                        posts.add(
+                            Post(
+                                row.getInteger(0),
+                                row.getString(1),
+                                row.getInteger(2),
+                                row.getInteger(3),
+                                row.getBuffer(4).toString(),
+                                row.getString(5),
+                                row.getString(6),
+                                row.getInteger(7),
+                                row.getBuffer(8).toString(),
+                                row.getString(9)
+                            )
+                        )
+                    }
+
+                    handler.invoke(posts, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
