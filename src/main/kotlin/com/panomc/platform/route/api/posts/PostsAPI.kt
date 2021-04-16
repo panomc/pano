@@ -7,6 +7,7 @@ import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
+import util.StringUtil
 import java.lang.Math.ceil
 
 class PostsAPI : Api() {
@@ -179,7 +180,7 @@ class PostsAPI : Api() {
                                         post.categoryId,
                                         mapOf("id" to -1, "title" to "-")
                                     ),
-                        "post" to post.post,
+                        "post" to StringUtil.truncateHTML(post.post, 144, "&hellip;"),
                         "writer" to mapOf(
                             "username" to usernameList[post.writerUserID]
                         ),
