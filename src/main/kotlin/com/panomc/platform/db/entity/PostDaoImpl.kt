@@ -88,10 +88,10 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     override fun getByID(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (post: Map<String, Any>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE  `id` = ?"
 
         sqlConnection
             .preparedQuery(query)
@@ -104,16 +104,17 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                     val rows: RowSet<Row> = queryResult.result()
                     val row = rows.toList()[0]
 
-                    val post = mapOf(
-                        "id" to row.getInteger(0),
-                        "title" to row.getString(1),
-                        "category" to row.getInteger(2),
-                        "writer_user_id" to row.getInteger(3),
-                        "text" to row.getBuffer(4).toString(),
-                        "date" to row.getString(5),
-                        "status" to row.getInteger(6),
-                        "image" to row.getBuffer(7),
-                        "views" to row.getString(8)
+                    val post = Post(
+                        row.getInteger(0),
+                        row.getString(1),
+                        row.getInteger(2),
+                        row.getInteger(3),
+                        row.getBuffer(4).toString(),
+                        row.getString(5),
+                        row.getString(6),
+                        row.getInteger(7),
+                        row.getBuffer(8).toString(),
+                        row.getString(9)
                     )
 
                     handler.invoke(post, queryResult)

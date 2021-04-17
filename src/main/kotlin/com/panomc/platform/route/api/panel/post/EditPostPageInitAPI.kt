@@ -1,6 +1,7 @@
 package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
+import com.panomc.platform.db.model.Post
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -73,7 +74,7 @@ class EditPostPageInitAPI : PanelApi() {
     private fun getByIDHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
-    ) = handler@{ post: Map<String, Any>?, _: AsyncResult<*> ->
+    ) = handler@{ post: Post?, _: AsyncResult<*> ->
         databaseManager.closeConnection(sqlConnection) {
             if (post == null) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_99))
@@ -84,7 +85,17 @@ class EditPostPageInitAPI : PanelApi() {
             handler.invoke(
                 Successful(
                     mapOf(
-                        "post" to post
+                        "post" to mapOf(
+                            "id" to post.id,
+                            "title" to post.title,
+                            "category" to post.categoryId,
+                            "writer_user_id" to post.writerUserID,
+                            "text" to post.post,
+                            "date" to post.date,
+                            "status" to post.status,
+                            "image" to post.image,
+                            "views" to post.views
+                        )
                     )
                 )
             )

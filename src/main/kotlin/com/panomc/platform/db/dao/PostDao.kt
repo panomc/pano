@@ -23,7 +23,7 @@ interface PostDao : Dao<Post> {
     fun getByID(
         id: Int,
         sqlConnection: SqlConnection,
-        handler: (post: Map<String, Any>?, asyncResult: AsyncResult<*>) -> Unit
+        handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun moveTrashByID(
