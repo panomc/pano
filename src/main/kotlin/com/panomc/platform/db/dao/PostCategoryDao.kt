@@ -63,4 +63,10 @@ interface PostCategoryDao : Dao<PostCategory> {
         sqlConnection: SqlConnection,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getByID(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (category: PostCategory?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
