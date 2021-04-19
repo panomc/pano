@@ -63,6 +63,26 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
+        databaseManager.getDatabase().postDao.increaseViewByOne(
+            id,
+            sqlConnection,
+            (this::increaseViewByOneHandler)(handler, sqlConnection, id)
+        )
+    }
+
+    private fun increaseViewByOneHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int
+    ) = handler@{ result: Result?, _: AsyncResult<*> ->
+        if (result == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_237))
+            }
+
+            return@handler
+        }
+
         databaseManager.getDatabase().postDao.getByID(
             id,
             sqlConnection,

@@ -224,4 +224,5 @@ enum class ErrorCode {
     UNKNOWN_ERROR_234,
     UNKNOWN_ERROR_235,
     UNKNOWN_ERROR_236,
+    UNKNOWN_ERROR_237,
 }
