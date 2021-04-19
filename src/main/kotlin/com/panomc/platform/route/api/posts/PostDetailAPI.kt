@@ -102,7 +102,7 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        if (post.categoryId == 0) {
+        if (post.categoryId == -1) {
             databaseManager.getDatabase().userDao.getUsernameFromUserID(
                 post.writerUserID,
                 sqlConnection,
