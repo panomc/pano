@@ -162,7 +162,7 @@ object LoginUtil {
 //                        return@getPermissionGroupIDFromUserID
 //                    }
 //
-//                    if (permissionGroupID == 0) {
+//                    if (permissionGroupID == -1) {
 //                        databaseManager.closeConnection(sqlConnection) {
 //                            handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
 //                        }
@@ -223,7 +223,7 @@ object LoginUtil {
                     return@getUserIDFromToken
                 }
 
-                if (userID == 0) {
+                if (userID == -1) {
                     databaseManager.closeConnection(sqlConnection) {
                         handler.invoke(false, asyncResultGetUserIDFromToken)
                     }
@@ -242,7 +242,7 @@ object LoginUtil {
                             return@closeConnection
                         }
 
-                        if (permissionGroupID == 0) {
+                        if (permissionGroupID == -1) {
                             handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
 
                             return@closeConnection

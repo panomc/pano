@@ -551,7 +551,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
             .preparedQuery(query)
             .execute(
                 Tuple.of(
-                    0,
+                    -1,
                     permissionGroupID
                 )
             ) { queryResult ->

@@ -1,7 +1,10 @@
 package com.panomc.platform.route.api.panel.playerDetail
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.db.model.*
+import com.panomc.platform.db.model.PermissionGroup
+import com.panomc.platform.db.model.Ticket
+import com.panomc.platform.db.model.TicketCategory
+import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -91,7 +94,7 @@ class PlayerDetailAPI : PanelApi() {
             "isBanned" to user.banned
         )
 
-        if (user.permissionGroupID == 0) {
+        if (user.permissionGroupID == -1) {
             @Suppress("UNCHECKED_CAST")
             (result["player"] as MutableMap<String, Any?>)["permission_group"] = "-"
 

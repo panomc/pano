@@ -153,7 +153,7 @@ class PlayersPageInitAPI : PanelApi() {
             return@handler
         }
 
-        if (user["permission_group_id"] as Int == 0) {
+        if (user["permission_group_id"] as Int == -1) {
             addToPlayerList(user, playerList, count, null)
 
             localHandler.invoke()
