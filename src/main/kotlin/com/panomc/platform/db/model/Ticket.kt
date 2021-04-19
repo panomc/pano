@@ -5,7 +5,7 @@ data class Ticket(
     val title: String,
     val categoryID: Int,
     val userID: Int,
-    val date: String,
-    val lastUpdate: String,
+    val date: Long,
+    val lastUpdate: Long,
     val status: Int
 )

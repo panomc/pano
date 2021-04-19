@@ -65,7 +65,7 @@ object RegisterUtil {
                     user.password,
                     user.registeredIp,
                     permissionGroupID,
-                    System.currentTimeMillis().toString()
+                    System.currentTimeMillis()
                 )
 
                 addUser(newUser, databaseManager, sqlConnection) { result, asyncResultOfAddUser ->

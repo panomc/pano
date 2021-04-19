@@ -26,11 +26,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                               `category_id` int(11) NOT NULL,
                               `writer_user_id` int(11) NOT NULL,
                               `post` longblob NOT NULL,
-                              `date` MEDIUMTEXT NOT NULL,
-                              `move_date` MEDIUMTEXT NOT NULL,
+                              `date` BIGINT(20) NOT NULL,
+                              `move_date` BIGINT(20) NOT NULL,
                               `status` int(1) NOT NULL,
                               `image` longblob NOT NULL,
-                              `views` MEDIUMTEXT NOT NULL,
+                              `views` BIGINT(20) NOT NULL,
                               PRIMARY KEY (`id`)
                             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Posts table.';
                         """
@@ -110,11 +110,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                         row.getInteger(2),
                         row.getInteger(3),
                         row.getBuffer(4).toString(),
-                        row.getString(5),
-                        row.getString(6),
+                        row.getLong(5),
+                        row.getLong(6),
                         row.getInteger(7),
                         row.getBuffer(8).toString(),
-                        row.getString(9)
+                        row.getLong(9)
                     )
 
                     handler.invoke(post, queryResult)
@@ -369,11 +369,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                                 row.getInteger(2),
                                 row.getInteger(3),
                                 row.getBuffer(4).toString(),
-                                row.getString(5),
-                                row.getString(6),
+                                row.getLong(5),
+                                row.getLong(6),
                                 row.getInteger(7),
                                 row.getBuffer(8).toString(),
-                                row.getString(9)
+                                row.getLong(9)
                             )
                         )
                     }
@@ -411,11 +411,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                                 row.getInteger(2),
                                 row.getInteger(3),
                                 row.getBuffer(4).toString(),
-                                row.getString(5),
-                                row.getString(6),
+                                row.getLong(5),
+                                row.getLong(6),
                                 row.getInteger(7),
                                 row.getBuffer(8).toString(),
-                                row.getString(9)
+                                row.getLong(9)
                             )
                         )
                     }
@@ -500,11 +500,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                                 row.getInteger(2),
                                 row.getInteger(3),
                                 row.getBuffer(4).toString(),
-                                row.getString(5),
-                                row.getString(6),
+                                row.getLong(5),
+                                row.getLong(6),
                                 row.getInteger(7),
                                 row.getBuffer(8).toString(),
-                                row.getString(9)
+                                row.getLong(9)
                             )
                         )
                     }
@@ -545,11 +545,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                                 row.getInteger(2),
                                 row.getInteger(3),
                                 row.getBuffer(4).toString(),
-                                row.getString(5),
-                                row.getString(6),
+                                row.getLong(5),
+                                row.getLong(6),
                                 row.getInteger(7),
                                 row.getBuffer(8).toString(),
-                                row.getString(9)
+                                row.getLong(9)
                             )
                         )
                     }
@@ -583,21 +583,20 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     }
 
     override fun isPreviousPostExistsByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` < ? OR `id` < ?) ORDER BY `id` DESC LIMIT 1"
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` < ? ORDER BY `id` DESC LIMIT 1"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     PostStatus.PUBLISHED.code,
-                    date,
-                    id
+                    date
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -610,21 +609,20 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     }
 
     override fun isNextPostExistsByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` > ? OR `id` > ?) ORDER BY `id` LIMIT 1"
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` > ? ORDER BY `id` LIMIT 1"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     PostStatus.PUBLISHED.code,
-                    date,
-                    id
+                    date
                 )
             ) { queryResult ->
                 if (queryResult.succeeded()) {
@@ -637,21 +635,20 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     }
 
     override fun getPreviousPostByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` < ? OR `id` < ?) ORDER BY `id` DESC LIMIT 1"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` < ? ORDER BY `id` DESC LIMIT 1"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     PostStatus.PUBLISHED.code,
-                    date,
-                    id
+                    date
                 )
             )
             { queryResult ->
@@ -665,11 +662,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                         row.getInteger(2),
                         row.getInteger(3),
                         row.getBuffer(4).toString(),
-                        row.getString(5),
-                        row.getString(6),
+                        row.getLong(5),
+                        row.getLong(6),
                         row.getInteger(7),
                         row.getBuffer(8).toString(),
-                        row.getString(9)
+                        row.getLong(9)
                     )
 
                     handler.invoke(post, queryResult)
@@ -679,21 +676,20 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
     }
 
     override fun getNextPostByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` > ? OR `id` > ?) ORDER BY `id` LIMIT 1"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` > ? ORDER BY `id` LIMIT 1"
 
         sqlConnection
             .preparedQuery(query)
             .execute(
                 Tuple.of(
                     PostStatus.PUBLISHED.code,
-                    date,
-                    id
+                    date
                 )
             )
             { queryResult ->
@@ -707,11 +703,11 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                         row.getInteger(2),
                         row.getInteger(3),
                         row.getBuffer(4).toString(),
-                        row.getString(5),
-                        row.getString(6),
+                        row.getLong(5),
+                        row.getLong(6),
                         row.getInteger(7),
                         row.getBuffer(8).toString(),
-                        row.getString(9)
+                        row.getLong(9)
                     )
 
                     handler.invoke(post, queryResult)

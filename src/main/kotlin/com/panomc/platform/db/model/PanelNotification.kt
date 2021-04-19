@@ -6,6 +6,6 @@ data class PanelNotification(
     val id: Int,
     val userID: Int,
     val typeID: String,
-    val date: String,
+    val date: Long,
     val status: NotificationStatus
 )

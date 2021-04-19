@@ -24,8 +24,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                               `title` MEDIUMTEXT NOT NULL,
                               `category_id` int(11) NOT NULL,
                               `user_id` int(11) NOT NULL,
-                              `date` MEDIUMTEXT NOT NULL,
-                              `last_update` MEDIUMTEXT NOT NULL,
+                              `date` BIGINT(20) NOT NULL,
+                              `last_update` BIGINT(20) NOT NULL,
                               `status` int(1) NOT NULL,
                               PRIMARY KEY (`id`)
                             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Tickets table.';
@@ -90,8 +90,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                 row.getString(1),
                                 row.getInteger(2),
                                 row.getInteger(3),
-                                row.getString(4),
-                                row.getString(5),
+                                row.getLong(4),
+                                row.getLong(5),
                                 row.getInteger(6)
                             )
                         )
@@ -131,8 +131,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                 row.getString(1),
                                 row.getInteger(2),
                                 row.getInteger(3),
-                                row.getString(4),
-                                row.getString(5),
+                                row.getLong(4),
+                                row.getLong(5),
                                 row.getInteger(6)
                             )
                         )
@@ -171,8 +171,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                 row.getString(1),
                                 row.getInteger(2),
                                 row.getInteger(3),
-                                row.getString(4),
-                                row.getString(5),
+                                row.getLong(4),
+                                row.getLong(5),
                                 row.getInteger(6)
                             )
                         )
@@ -232,8 +232,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                                 row.getString(1),
                                 row.getInteger(2),
                                 row.getInteger(3),
-                                row.getString(4),
-                                row.getString(5),
+                                row.getLong(4),
+                                row.getLong(5),
                                 row.getInteger(6)
                             )
                         )
@@ -369,8 +369,8 @@ class TicketDaoImpl(override val tableName: String = "ticket") : DaoImpl(), Tick
                         title = row.getString(1),
                         categoryID = row.getInteger(2),
                         userID = row.getInteger(3),
-                        date = row.getString(4),
-                        lastUpdate = row.getString(5),
+                        date = row.getLong(4),
+                        lastUpdate = row.getLong(5),
                         status = row.getInteger(6),
                     )
 

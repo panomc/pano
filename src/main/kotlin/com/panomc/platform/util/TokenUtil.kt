@@ -47,7 +47,7 @@ object TokenUtil {
                 .compact()
 
             databaseManager.getDatabase().tokenDao.add(
-                Token(-1, token, userID, subject.toString()),
+                Token(-1, token, -1, userID, subject.toString()),
                 sqlConnection
             ) { result, asyncResult ->
                 if (result == null) {

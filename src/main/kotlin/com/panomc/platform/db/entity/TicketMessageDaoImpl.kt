@@ -24,7 +24,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                               `user_id` int NOT NULL,
                               `ticket_id` int NOT NULL,
                               `message` text NOT NULL,
-                              `date` MEDIUMTEXT NOT NULL,
+                              `date` BIGINT(20) NOT NULL,
                               `panel` int NOT NULL,
                               PRIMARY KEY (`id`)
                             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Ticket message table.';
@@ -58,7 +58,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                                     userID = row.getInteger(1),
                                     ticketID = row.getInteger(2),
                                     message = row.getString(3),
-                                    date = row.getString(4),
+                                    date = row.getLong(4),
                                     panel = row.getInteger(5)
                                 )
                             )
@@ -94,7 +94,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                                     userID = row.getInteger(1),
                                     ticketID = row.getInteger(2),
                                     message = row.getString(3),
-                                    date = row.getString(4),
+                                    date = row.getLong(4),
                                     panel = row.getInteger(5)
                                 )
                             )
@@ -205,7 +205,7 @@ class TicketMessageDaoImpl(override val tableName: String = "ticket_message") : 
                         ticketRow.getInteger(1),
                         ticketRow.getInteger(2),
                         ticketRow.getString(3),
-                        ticketRow.getString(4),
+                        ticketRow.getLong(4),
                         ticketRow.getInteger(5)
                     )
 

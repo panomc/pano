@@ -5,6 +5,6 @@ data class TicketMessage(
     val userID: Int,
     val ticketID: Int,
     val message: String,
-    val date: String,
+    val date: Long,
     val panel: Int
 )

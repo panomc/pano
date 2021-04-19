@@ -6,9 +6,9 @@ data class Post(
     val categoryId: Int,
     val writerUserID: Int,
     val post: String,
-    val date: String,
-    val moveDate: String,
+    val date: Long,
+    val moveDate: Long,
     val status: Int,
     val image: String,
-    val views: String
+    val views: Long
 )

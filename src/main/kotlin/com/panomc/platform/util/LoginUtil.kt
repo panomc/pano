@@ -289,6 +289,7 @@ object LoginUtil {
                         -1,
                         token,
                         -1,
+                        -1,
                         TokenUtil.SUBJECT.LOGIN_SESSION.toString()
                     ), sqlConnection
                 ) { result, asyncResultOfDelete ->

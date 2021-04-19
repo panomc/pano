@@ -114,7 +114,7 @@ class FinishAPI : SetupApi() {
         RegisterUtil.register(
             databaseManager,
             sqlConnection,
-            User(-1, username, email, password, remoteIP, 0, System.currentTimeMillis().toString()),
+            User(-1, username, email, password, remoteIP, 0, System.currentTimeMillis()),
             true,
             (this::registerHandler)(handler, context, sqlConnection, username, password)
         )

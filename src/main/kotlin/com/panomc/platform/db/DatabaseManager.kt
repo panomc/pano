@@ -43,14 +43,15 @@ class DatabaseManager(
             DatabaseMigration_15_16(),
             DatabaseMigration_16_17(),
             DatabaseMigration_17_18(),
-            DatabaseMigration_18_19()
+            DatabaseMigration_18_19(),
+            DatabaseMigration_19_20()
         )
     }
 
     companion object {
-        const val DATABASE_SCHEME_VERSION = 19
+        const val DATABASE_SCHEME_VERSION = 20
         const val DATABASE_SCHEME_VERSION_INFO =
-            "Improve permission name type, add icon_name field and create system permissions."
+            "Convert dates from string to BigInt."
     }
 
     init {

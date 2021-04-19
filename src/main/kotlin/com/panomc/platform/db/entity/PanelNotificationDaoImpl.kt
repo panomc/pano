@@ -24,7 +24,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                               `id` int NOT NULL AUTO_INCREMENT,
                               `user_id` int NOT NULL,
                               `type_ID` varchar(255) NOT NULL,
-                              `date` MEDIUMTEXT NOT NULL,
+                              `date` BIGINT(20) NOT NULL,
                               `status` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
                             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Panel Notification table.';
@@ -136,7 +136,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                                     row.getInteger(0),
                                     row.getInteger(1),
                                     row.getString(2),
-                                    row.getString(3),
+                                    row.getLong(3),
                                     NotificationStatus.valueOf(row.getString(4))
                                 )
                             )
@@ -176,7 +176,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                                     row.getInteger(0),
                                     row.getInteger(1),
                                     row.getString(2),
-                                    row.getString(3),
+                                    row.getLong(3),
                                     NotificationStatus.valueOf(row.getString(4))
                                 )
                             )
@@ -263,7 +263,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                                     row.getInteger(0),
                                     row.getInteger(1),
                                     row.getString(2),
-                                    row.getString(3),
+                                    row.getLong(3),
                                     NotificationStatus.valueOf(row.getString(4))
                                 )
                             )
@@ -340,7 +340,7 @@ class PanelNotificationDaoImpl(override val tableName: String = "panel_notificat
                         row.getInteger(0),
                         row.getInteger(1),
                         row.getString(2),
-                        row.getString(3),
+                        row.getLong(3),
                         NotificationStatus.valueOf(row.getString(4))
                     )
 

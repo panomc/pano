@@ -113,7 +113,7 @@ class TicketDetailSendMessageAPI : PanelApi() {
             return@handler
         }
 
-        val ticketMessage = TicketMessage(-1, userID, ticketID, message, System.currentTimeMillis().toString(), 1)
+        val ticketMessage = TicketMessage(-1, userID, ticketID, message, System.currentTimeMillis(), 1)
 
         databaseManager.getDatabase().ticketMessageDao.addMessage(
             ticketMessage,

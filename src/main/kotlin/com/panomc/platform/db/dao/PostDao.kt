@@ -118,28 +118,28 @@ interface PostDao : Dao<Post> {
     )
 
     fun isPreviousPostExistsByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun isNextPostExistsByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getPreviousPostByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     )
 
     fun getNextPostByDateAndID(
-        date: String,
+        date: Long,
         id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit

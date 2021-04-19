@@ -8,7 +8,7 @@ import io.vertx.sqlclient.SqlConnection
 
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface TokenDao : Dao<Token> {
-    fun add(token: Token, SqlConnection: SqlConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
+    fun add(token: Token, sqlConnection: SqlConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getUserIDFromToken(
         token: String,

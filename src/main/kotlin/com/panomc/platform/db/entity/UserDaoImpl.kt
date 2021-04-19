@@ -33,7 +33,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                               `registered_ip` varchar(255) NOT NULL,
                               `secret_key` text NOT NULL,
                               `public_key` text NOT NULL,
-                              `register_date` MEDIUMTEXT NOT NULL,
+                              `register_date` BIGINT(20) NOT NULL,
                               `email_verified` int(1) NOT NULL DEFAULT 0,
                               `banned` int(1) NOT NULL DEFAULT 0,
                               PRIMARY KEY (`id`)
@@ -285,7 +285,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                             row.getString(2),
                             row.getString(3),
                             row.getInteger(4),
-                            row.getString(5),
+                            row.getLong(5),
                             row.getInteger(6),
                             row.getInteger(7)
                         ),
@@ -319,7 +319,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                             row.getString(3),
                             row.getString(4),
                             row.getInteger(5),
-                            row.getString(6),
+                            row.getLong(6),
                             row.getInteger(7),
                             row.getInteger(8)
                         ),
@@ -389,7 +389,7 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                                     "id" to row.getInteger(0),
                                     "username" to row.getString(1),
                                     "email" to row.getString(2),
-                                    "register_date" to row.getString(3),
+                                    "register_date" to row.getLong(3),
                                     "permission_group_id" to row.getInteger(4)
                                 )
                             )

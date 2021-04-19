@@ -84,11 +84,11 @@ class PostPublishAPI : PanelApi() {
             categoryID,
             userID,
             text,
-            System.currentTimeMillis().toString(),
-            System.currentTimeMillis().toString(),
+            System.currentTimeMillis(),
+            System.currentTimeMillis(),
             1,
             imageCode,
-            "0"
+            0
         )
 
         if (id == -1) {

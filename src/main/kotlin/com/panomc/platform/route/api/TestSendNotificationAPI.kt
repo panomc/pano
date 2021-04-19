@@ -38,7 +38,7 @@ class TestSendNotificationAPI : PanelApi() {
                         -1,
                         userID,
                         "TEST NOTIFICATION",
-                        System.currentTimeMillis().toString(),
+                        System.currentTimeMillis(),
                         NotificationStatus.NOT_READ
                     ),
                     sqlConnection

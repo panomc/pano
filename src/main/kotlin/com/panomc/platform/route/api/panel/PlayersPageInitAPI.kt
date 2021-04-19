@@ -203,7 +203,7 @@ class PlayersPageInitAPI : PanelApi() {
                 "permission_group_id" to user["permission_group_id"] as Int,
                 "permission_group" to (permissionGroup?.name ?: "-"),
                 "ticket_count" to ticketCount,
-                "register_date" to user["register_date"] as String
+                "register_date" to user["register_date"] as Long
             )
         )
     }

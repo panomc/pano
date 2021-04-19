@@ -20,7 +20,7 @@ class TokenDaoImpl(override val tableName: String = "token") : DaoImpl(), TokenD
                             CREATE TABLE IF NOT EXISTS `${getTablePrefix() + tableName}` (
                               `id` int NOT NULL AUTO_INCREMENT,
                               `token` text NOT NULL,
-                              `created_time` MEDIUMTEXT NOT NULL,
+                              `created_time` BIGINT(20) NOT NULL,
                               `user_id` int(11) NOT NULL,
                               `subject` varchar(255) NOT NULL,
                               PRIMARY KEY (`id`)
