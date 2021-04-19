@@ -581,4 +581,142 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun isPreviousPostExistsByDateAndID(
+        date: String,
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` < ? OR `id` < ?) ORDER BY `id` DESC LIMIT 1"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    PostStatus.PUBLISHED.code,
+                    date,
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) > 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun isNextPostExistsByDateAndID(
+        date: String,
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` > ? OR `id` > ?) ORDER BY `id` LIMIT 1"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    PostStatus.PUBLISHED.code,
+                    date,
+                    id
+                )
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0) > 0, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getPreviousPostByDateAndID(
+        date: String,
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` < ? OR `id` < ?) ORDER BY `id` DESC LIMIT 1"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    PostStatus.PUBLISHED.code,
+                    date,
+                    id
+                )
+            )
+            { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    val post = Post(
+                        row.getInteger(0),
+                        row.getString(1),
+                        row.getInteger(2),
+                        row.getInteger(3),
+                        row.getBuffer(4).toString(),
+                        row.getString(5),
+                        row.getString(6),
+                        row.getInteger(7),
+                        row.getBuffer(8).toString(),
+                        row.getString(9)
+                    )
+
+                    handler.invoke(post, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
+    override fun getNextPostByDateAndID(
+        date: String,
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND (`date` > ? OR `id` > ?) ORDER BY `id` LIMIT 1"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    PostStatus.PUBLISHED.code,
+                    date,
+                    id
+                )
+            )
+            { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    val post = Post(
+                        row.getInteger(0),
+                        row.getString(1),
+                        row.getInteger(2),
+                        row.getInteger(3),
+                        row.getBuffer(4).toString(),
+                        row.getString(5),
+                        row.getString(6),
+                        row.getInteger(7),
+                        row.getBuffer(8).toString(),
+                        row.getString(9)
+                    )
+
+                    handler.invoke(post, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
