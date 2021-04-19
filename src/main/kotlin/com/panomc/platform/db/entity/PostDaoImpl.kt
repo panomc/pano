@@ -582,14 +582,13 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             }
     }
 
-    override fun isPreviousPostExistsByDateAndID(
+    override fun isPreviousPostExistsByDate(
         date: Long,
-        id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` < ? ORDER BY `id` DESC LIMIT 1"
+            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE (`id`,`date`) IN ( SELECT `id`, max(`date`) FROM `${getTablePrefix() + tableName}` where `status`= ? and `date` < ? GROUP BY `id`) order by `date` DESC limit 1"
 
         sqlConnection
             .preparedQuery(query)
@@ -608,14 +607,13 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             }
     }
 
-    override fun isNextPostExistsByDateAndID(
+    override fun isNextPostExistsByDate(
         date: Long,
-        id: Int,
         sqlConnection: SqlConnection,
         handler: (exists: Boolean?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` > ? ORDER BY `id` LIMIT 1"
+            "SELECT count(`id`) FROM `${getTablePrefix() + tableName}` WHERE (`id`,`date`) IN ( SELECT `id`, MIN(`date`) FROM `${getTablePrefix() + tableName}`where `status`= ? and `date` > ? GROUP BY `id`) order by `date` limit 1"
 
         sqlConnection
             .preparedQuery(query)
@@ -634,14 +632,13 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             }
     }
 
-    override fun getPreviousPostByDateAndID(
+    override fun getPreviousPostByDate(
         date: Long,
-        id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` < ? ORDER BY `id` DESC LIMIT 1"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE (`id`,`date`) IN ( SELECT `id`, max(`date`) FROM `${getTablePrefix() + tableName}` where `status` = ? and `date` < ? GROUP BY `id` ) order by `date` DESC limit 1"
 
         sqlConnection
             .preparedQuery(query)
@@ -675,14 +672,13 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             }
     }
 
-    override fun getNextPostByDateAndID(
+    override fun getNextPostByDate(
         date: Long,
-        id: Int,
         sqlConnection: SqlConnection,
         handler: (post: Post?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `date` > ? ORDER BY `id` LIMIT 1"
+            "SELECT `id`, `title`, `category_id`, `writer_user_id`, `post`, `date`, `move_date`, `status`, `image`, `views` FROM `${getTablePrefix() + tableName}` WHERE (`id`,`date`) IN (SELECT `id`, MIN(`date`) FROM `${getTablePrefix() + tableName}` where `status` = ? and `date` > ? GROUP BY `id` ) order by `date` limit 1"
 
         sqlConnection
             .preparedQuery(query)

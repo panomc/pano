@@ -153,9 +153,8 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        databaseManager.getDatabase().postDao.isPreviousPostExistsByDateAndID(
+        databaseManager.getDatabase().postDao.isPreviousPostExistsByDate(
             post.date,
-            post.id,
             sqlConnection,
             (this::isPreviousPostExistsByDateHandler)(handler, sqlConnection, post, category, username)
         )
@@ -177,9 +176,8 @@ class PostDetailAPI : Api() {
         }
 
         if (!exists) {
-            databaseManager.getDatabase().postDao.isNextPostExistsByDateAndID(
+            databaseManager.getDatabase().postDao.isNextPostExistsByDate(
                 post.date,
-                post.id,
                 sqlConnection,
                 (this::isNextPostExistsByDateHandler)(handler, sqlConnection, post, category, username, null)
             )
@@ -187,9 +185,8 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        databaseManager.getDatabase().postDao.getPreviousPostByDateAndID(
+        databaseManager.getDatabase().postDao.getPreviousPostByDate(
             post.date,
-            post.id,
             sqlConnection,
             (this::getPreviousPostByDateHandler)(handler, sqlConnection, post, category, username)
         )
@@ -210,9 +207,8 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        databaseManager.getDatabase().postDao.isNextPostExistsByDateAndID(
+        databaseManager.getDatabase().postDao.isNextPostExistsByDate(
             post.date,
-            post.id,
             sqlConnection,
             (this::isNextPostExistsByDateHandler)(handler, sqlConnection, post, category, username, previousPost)
         )
@@ -240,9 +236,8 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        databaseManager.getDatabase().postDao.getNextPostByDateAndID(
+        databaseManager.getDatabase().postDao.getNextPostByDate(
             post.date,
-            post.id,
             sqlConnection,
             (this::getNextPostByDateHandler)(handler, sqlConnection, post, category, username, previousPost)
         )
