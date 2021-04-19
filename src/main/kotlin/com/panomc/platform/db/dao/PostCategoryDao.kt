@@ -69,4 +69,10 @@ interface PostCategoryDao : Dao<PostCategory> {
         sqlConnection: SqlConnection,
         handler: (category: PostCategory?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun getByURL(
+        url: String,
+        sqlConnection: SqlConnection,
+        handler: (category: PostCategory?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }

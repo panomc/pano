@@ -326,4 +326,35 @@ class PostCategoryDaoImpl(override val tableName: String = "post_category") : Da
                     handler.invoke(null, queryResult)
             }
     }
+
+    override fun getByURL(
+        url: String,
+        sqlConnection: SqlConnection,
+        handler: (category: PostCategory?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT `id`, `title`, `description`, `url`, `color` FROM `${getTablePrefix() + tableName}` WHERE `url` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(url)
+            ) { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+                    val row = rows.toList()[0]
+
+                    val category = PostCategory(
+                        row.getInteger(0),
+                        row.getString(1),
+                        row.getString(2),
+                        row.getString(3),
+                        row.getString(4)
+                    )
+
+                    handler.invoke(category, queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
 }
