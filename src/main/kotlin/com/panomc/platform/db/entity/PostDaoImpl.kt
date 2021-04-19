@@ -448,6 +448,32 @@ class PostDaoImpl(override val tableName: String = "post") : DaoImpl(), PostDao 
             }
     }
 
+    override fun countOfPublishedByCategoryID(
+        categoryID: Int,
+        sqlConnection: SqlConnection,
+        handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit
+    ) {
+        val query =
+            "SELECT COUNT(`id`) FROM `${getTablePrefix() + tableName}` WHERE `status` = ? AND `category_id` = ?"
+
+        sqlConnection
+            .preparedQuery(query)
+            .execute(
+                Tuple.of(
+                    PostStatus.PUBLISHED.code,
+                    categoryID
+                )
+            )
+            { queryResult ->
+                if (queryResult.succeeded()) {
+                    val rows: RowSet<Row> = queryResult.result()
+
+                    handler.invoke(rows.toList()[0].getInteger(0), queryResult)
+                } else
+                    handler.invoke(null, queryResult)
+            }
+    }
+
     override fun getPublishedListByPage(
         page: Int,
         sqlConnection: SqlConnection,
