@@ -110,4 +110,10 @@ interface PostDao : Dao<Post> {
         sqlConnection: SqlConnection,
         handler: (posts: List<Post>?, asyncResult: AsyncResult<*>) -> Unit
     )
+
+    fun increaseViewByOne(
+        id: Int,
+        sqlConnection: SqlConnection,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 }
