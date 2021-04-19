@@ -153,7 +153,118 @@ class PostDetailAPI : Api() {
             return@handler
         }
 
-        sendResultHandler(handler, sqlConnection, post, category, username)
+        databaseManager.getDatabase().postDao.isPreviousPostExistsByDateAndID(
+            post.date,
+            post.id,
+            sqlConnection,
+            (this::isPreviousPostExistsByDateHandler)(handler, sqlConnection, post, category, username)
+        )
+    }
+
+    private fun isPreviousPostExistsByDateHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        post: Post,
+        category: PostCategory?,
+        username: String
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_238))
+            }
+
+            return@handler
+        }
+
+        if (!exists) {
+            databaseManager.getDatabase().postDao.isNextPostExistsByDateAndID(
+                post.date,
+                post.id,
+                sqlConnection,
+                (this::isNextPostExistsByDateHandler)(handler, sqlConnection, post, category, username, null)
+            )
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.getPreviousPostByDateAndID(
+            post.date,
+            post.id,
+            sqlConnection,
+            (this::getPreviousPostByDateHandler)(handler, sqlConnection, post, category, username)
+        )
+    }
+
+    private fun getPreviousPostByDateHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        post: Post,
+        category: PostCategory?,
+        username: String
+    ) = handler@{ previousPost: Post?, _: AsyncResult<*> ->
+        if (previousPost == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_239))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.isNextPostExistsByDateAndID(
+            post.date,
+            post.id,
+            sqlConnection,
+            (this::isNextPostExistsByDateHandler)(handler, sqlConnection, post, category, username, previousPost)
+        )
+    }
+
+    private fun isNextPostExistsByDateHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        post: Post,
+        category: PostCategory?,
+        username: String,
+        previousPost: Post?
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_240))
+            }
+
+            return@handler
+        }
+
+        if (!exists) {
+            sendResultHandler(handler, sqlConnection, post, category, username, previousPost, null)
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.getNextPostByDateAndID(
+            post.date,
+            post.id,
+            sqlConnection,
+            (this::getNextPostByDateHandler)(handler, sqlConnection, post, category, username, previousPost)
+        )
+    }
+
+    private fun getNextPostByDateHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        post: Post,
+        category: PostCategory?,
+        username: String,
+        previousPost: Post?
+    ) = handler@{ nextPost: Post?, _: AsyncResult<*> ->
+        if (nextPost == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_241))
+            }
+
+            return@handler
+        }
+
+        sendResultHandler(handler, sqlConnection, post, category, username, previousPost, nextPost)
     }
 
     private fun sendResultHandler(
@@ -161,7 +272,9 @@ class PostDetailAPI : Api() {
         sqlConnection: SqlConnection,
         post: Post,
         category: PostCategory?,
-        username: String
+        username: String,
+        previousPost: Post?,
+        nextPost: Post?
     ) {
         databaseManager.closeConnection(sqlConnection) {
             handler.invoke(
@@ -186,7 +299,23 @@ class PostDetailAPI : Api() {
                             "status" to post.status,
                             "image" to post.image,
                             "views" to post.views
-                        )
+                        ),
+                        "previous_post" to
+                                if (previousPost == null)
+                                    "-"
+                                else
+                                    mapOf<String, Any?>(
+                                        "id" to previousPost.id,
+                                        "title" to previousPost.title
+                                    ),
+                        "next_post" to
+                                if (nextPost == null)
+                                    "-"
+                                else
+                                    mapOf<String, Any?>(
+                                        "id" to nextPost.id,
+                                        "title" to nextPost.title
+                                    )
                     )
                 )
             )
