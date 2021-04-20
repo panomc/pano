@@ -21,7 +21,13 @@ class PostPublishAPI : PanelApi() {
         val text = data.getString("text")
         val imageCode = data.getString("imageCode") ?: ""
 
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
+
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(
@@ -31,7 +37,7 @@ class PostPublishAPI : PanelApi() {
                 categoryID,
                 text,
                 imageCode,
-                token
+                idOrToken
             )
         )
     }
@@ -43,7 +49,7 @@ class PostPublishAPI : PanelApi() {
         categoryID: Int,
         text: String,
         imageCode: String,
-        token: String
+        idOrToken: Any
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -51,8 +57,14 @@ class PostPublishAPI : PanelApi() {
             return@handler
         }
 
+        if (idOrToken is Int) {
+            updateOrInsert(handler, sqlConnection, id, title, categoryID, text, imageCode, idOrToken)
+
+            return@handler
+        }
+
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken as String,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, sqlConnection, id, title, categoryID, text, imageCode)
         )
@@ -79,6 +91,19 @@ class PostPublishAPI : PanelApi() {
             return@handler
         }
 
+        updateOrInsert(handler, sqlConnection, id, title, categoryID, text, imageCode, userID)
+    }
+
+    private fun updateOrInsert(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int,
+        title: String,
+        categoryID: Int,
+        text: String,
+        imageCode: String,
+        userID: Int
+    ) {
         val post = Post(
             id,
             title,
@@ -99,7 +124,7 @@ class PostPublishAPI : PanelApi() {
                 (this::insertAndPublishHandler)(handler, sqlConnection)
             )
 
-            return@handler
+            return
         }
 
         databaseManager.getDatabase().postDao.updateAndPublish(

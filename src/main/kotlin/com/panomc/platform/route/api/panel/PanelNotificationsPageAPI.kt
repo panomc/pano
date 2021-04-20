@@ -16,14 +16,21 @@ class PanelNotificationsPageAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, token, id))
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
+
+        if (idOrToken == null) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
+        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken, id))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        token: String,
+        idOrToken: Any?,
         lastNotificationID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
@@ -32,8 +39,27 @@ class PanelNotificationsPageAPI : PanelApi() {
             return@handler
         }
 
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().panelNotificationDao.get10ByUserIDAndStartFromID(
+                idOrToken,
+                lastNotificationID,
+                sqlConnection,
+                (this::get10ByUserIDAndStartFromIDHandler)(handler, sqlConnection, idOrToken, lastNotificationID)
+            )
+
+            return@handler
+        }
+
+        if (idOrToken !is String) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+            }
+
+            return@handler
+        }
+
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, sqlConnection, lastNotificationID)
         )

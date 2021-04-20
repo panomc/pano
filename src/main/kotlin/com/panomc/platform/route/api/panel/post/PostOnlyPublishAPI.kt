@@ -16,13 +16,19 @@ class PostOnlyPublishAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
+
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(
                 handler,
                 id,
-                token
+                idOrToken
             )
         )
     }
@@ -30,7 +36,7 @@ class PostOnlyPublishAPI : PanelApi() {
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         id: Int,
-        token: String
+        idOrToken: Any
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -38,37 +44,18 @@ class PostOnlyPublishAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().postDao.isExistsByID(
-            id,
-            sqlConnection,
-            (this::isExistsByIDHandler)(handler, sqlConnection, id, token)
-        )
-    }
-
-    private fun isExistsByIDHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        id: Int,
-        token: String
-    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
-        if (exists == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_104))
-            }
-
-            return@handler
-        }
-
-        if (!exists) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.NOT_EXISTS))
-            }
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().postDao.isExistsByID(
+                id,
+                sqlConnection,
+                (this::isExistsByIDHandler)(handler, sqlConnection, id, idOrToken)
+            )
 
             return@handler
         }
 
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken as String,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, sqlConnection, id)
         )
@@ -82,6 +69,35 @@ class PostOnlyPublishAPI : PanelApi() {
         if (userID == null) {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_105))
+            }
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().postDao.isExistsByID(
+            id,
+            sqlConnection,
+            (this::isExistsByIDHandler)(handler, sqlConnection, id, userID)
+        )
+    }
+
+    private fun isExistsByIDHandler(
+        handler: (result: Result) -> Unit,
+        sqlConnection: SqlConnection,
+        id: Int,
+        userID: Int
+    ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
+        if (exists == null) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_104))
+            }
+
+            return@handler
+        }
+
+        if (!exists) {
+            databaseManager.closeConnection(sqlConnection) {
+                handler.invoke(Error(ErrorCode.NOT_EXISTS))
             }
 
             return@handler

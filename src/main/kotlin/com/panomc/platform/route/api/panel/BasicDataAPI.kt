@@ -28,15 +28,21 @@ class BasicDataAPI : PanelApi() {
     lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, context, token))
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
+        databaseManager.createConnection((this::createConnectionHandler)(handler, context, idOrToken))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         context: RoutingContext,
-        token: String
+        idOrToken: Any
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -44,8 +50,18 @@ class BasicDataAPI : PanelApi() {
             return@handler
         }
 
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().userDao.getByID(
+                idOrToken,
+                sqlConnection,
+                (this::getByIDHandler)(handler, context, sqlConnection, idOrToken)
+            )
+
+            return@handler
+        }
+
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken as String,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, context, sqlConnection)
         )

@@ -19,16 +19,22 @@ class TicketDetailSendMessageAPI : PanelApi() {
         val ticketID = data.getInteger("ticket_id")
         val message = data.getString("message")
 
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, ticketID, message, token))
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
+        databaseManager.createConnection((this::createConnectionHandler)(handler, ticketID, message, idOrToken))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         ticketID: Int,
         message: String,
-        token: String
+        idOrToken: Any
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -36,10 +42,25 @@ class TicketDetailSendMessageAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().ticketDao.isExistsByID(
-            ticketID,
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().ticketDao.isExistsByID(
+                ticketID,
+                sqlConnection,
+                (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, idOrToken)
+            )
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+            idOrToken as String,
             sqlConnection,
-            (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, token)
+            (this::getUserIDFromTokenHandler)(
+                handler,
+                sqlConnection,
+                ticketID,
+                message
+            )
         )
     }
 
@@ -48,7 +69,7 @@ class TicketDetailSendMessageAPI : PanelApi() {
         ticketID: Int,
         message: String,
         sqlConnection: SqlConnection,
-        token: String
+        userID: Int
     ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
         if (exists == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -66,15 +87,10 @@ class TicketDetailSendMessageAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+        databaseManager.getDatabase().userDao.getUsernameFromUserID(
+            userID,
             sqlConnection,
-            (this::getUserIDFromTokenHandler)(
-                handler,
-                sqlConnection,
-                ticketID,
-                message
-            )
+            (this::getUsernameFromUserIDHandler)(handler, sqlConnection, ticketID, message, userID)
         )
     }
 
@@ -92,10 +108,10 @@ class TicketDetailSendMessageAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().userDao.getUsernameFromUserID(
-            userID,
+        databaseManager.getDatabase().ticketDao.isExistsByID(
+            ticketID,
             sqlConnection,
-            (this::getUsernameFromUserIDHandler)(handler, sqlConnection, ticketID, message, userID)
+            (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, userID)
         )
     }
 

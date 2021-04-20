@@ -16,7 +16,14 @@ class DashboardAPI : PanelApi() {
     override val routes = arrayListOf("/api/panel/initPage/dashboard")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
+
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
         val result = mutableMapOf<String, Any?>(
             "getting_started_blocks" to mapOf(
                 "welcome_board" to false
@@ -28,12 +35,12 @@ class DashboardAPI : PanelApi() {
             "tickets" to mutableListOf<Map<String, Any?>>()
         )
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, token, result))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken, result))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        token: String,
+        idOrToken: Any,
         result: MutableMap<String, Any?>
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
@@ -42,8 +49,18 @@ class DashboardAPI : PanelApi() {
             return@handler
         }
 
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().systemPropertyDao.isUserInstalledSystemByUserID(
+                idOrToken,
+                sqlConnection,
+                (this::isUserInstalledSystemByUserIDHandler)(handler, sqlConnection, result)
+            )
+
+            return@handler
+        }
+
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken as String,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, sqlConnection, result)
         )

@@ -72,23 +72,25 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedIn: Boolean, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<Int?>(SESSION_NAME)
+        val idOrToken = getUserIDOrToken(routingContext)
 
-        if (session != null) {
-            handler.invoke(true, null)
-
-            return
-        }
-
-        val cookie = routingContext.getCookie(COOKIE_NAME)
-
-        if (cookie == null) {
+        if (idOrToken == null) {
             handler.invoke(false, null)
 
             return
         }
 
-        val token = cookie.value
+        if (idOrToken is Int) {
+            handler.invoke(true, null)
+
+            return
+        }
+
+        if (idOrToken !is String) {
+            handler.invoke(false, null)
+
+            return
+        }
 
         databaseManager.createConnection { sqlConnection, asyncResult ->
             if (sqlConnection == null) {
@@ -98,7 +100,7 @@ object LoginUtil {
             }
 
             databaseManager.getDatabase().tokenDao.isTokenExists(
-                token,
+                idOrToken,
                 sqlConnection
             ) { isTokenExists, asyncResultOfIsTokenExists ->
                 databaseManager.closeConnection(sqlConnection) {
@@ -200,9 +202,13 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (hasAccess: Boolean, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val cookie = routingContext.getCookie(COOKIE_NAME)
+        val idOrToken = getUserIDOrToken(routingContext)
 
-        val token = cookie.value
+        if (idOrToken == null) {
+            handler.invoke(false, null)
+
+            return
+        }
 
         databaseManager.createConnection { sqlConnection, asyncResultOfCreateConnection ->
             if (sqlConnection == null) {
@@ -211,45 +217,61 @@ object LoginUtil {
                 return@createConnection
             }
 
-            databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-                token,
-                sqlConnection
-            ) { userID, asyncResultGetUserIDFromToken ->
-                if (userID == null) {
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(false, asyncResultGetUserIDFromToken)
-                    }
-
-                    return@getUserIDFromToken
-                }
-
-                if (userID == -1) {
-                    databaseManager.closeConnection(sqlConnection) {
-                        handler.invoke(false, asyncResultGetUserIDFromToken)
-                    }
-
-                    return@getUserIDFromToken
-                }
-
+            if (idOrToken is Int) {
                 databaseManager.getDatabase().userDao.getPermissionGroupIDFromUserID(
-                    userID,
-                    sqlConnection
-                ) { permissionGroupID, asyncResultOfGetPermissionGroupIDFromUserID ->
+                    idOrToken,
+                    sqlConnection,
+                    (this::getPermissionGroupIDFromUserIDHandler)(databaseManager, sqlConnection, handler)
+                )
+
+                return@createConnection
+            }
+
+            if (idOrToken !is String) {
+                databaseManager.closeConnection(sqlConnection) {
+                    handler.invoke(false, null)
+                }
+
+                return@createConnection
+            }
+
+            databaseManager.getDatabase().tokenDao.isTokenExists(
+                idOrToken,
+                sqlConnection
+            ) { isTokenExists: Boolean?, asyncResultOfIsTokenExists: AsyncResult<*> ->
+                if (isTokenExists == null) {
                     databaseManager.closeConnection(sqlConnection) {
-                        if (permissionGroupID == null) {
-                            handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
-
-                            return@closeConnection
-                        }
-
-                        if (permissionGroupID == -1) {
-                            handler.invoke(false, asyncResultOfGetPermissionGroupIDFromUserID)
-
-                            return@closeConnection
-                        }
-
-                        handler.invoke(true, asyncResultOfGetPermissionGroupIDFromUserID)
+                        handler.invoke(false, asyncResultOfIsTokenExists)
                     }
+
+                    return@isTokenExists
+                }
+
+                if (!isTokenExists) {
+                    databaseManager.closeConnection(sqlConnection) {
+                        handler.invoke(false, asyncResultOfIsTokenExists)
+                    }
+
+                    return@isTokenExists
+                }
+
+                databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+                    idOrToken,
+                    sqlConnection
+                ) { userID, asyncResultGetUserIDFromToken ->
+                    if (userID == null) {
+                        databaseManager.closeConnection(sqlConnection) {
+                            handler.invoke(false, asyncResultGetUserIDFromToken)
+                        }
+
+                        return@getUserIDFromToken
+                    }
+
+                    databaseManager.getDatabase().userDao.getPermissionGroupIDFromUserID(
+                        userID,
+                        sqlConnection,
+                        (this::getPermissionGroupIDFromUserIDHandler)(databaseManager, sqlConnection, handler)
+                    )
                 }
             }
         }
@@ -309,5 +331,42 @@ object LoginUtil {
         }
 
         handler.invoke(Successful(), null)
+    }
+
+    fun getUserIDOrToken(routingContext: RoutingContext): Any? {
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
+
+        if (session != null) {
+            return session
+        }
+
+        val cookie = routingContext.getCookie(COOKIE_NAME) ?: return null
+
+        if (cookie.value !is String)
+            return null
+
+        return cookie
+    }
+
+    private fun getPermissionGroupIDFromUserIDHandler(
+        databaseManager: DatabaseManager,
+        sqlConnection: SqlConnection,
+        handler: (hasAccess: Boolean, asyncResult: AsyncResult<*>?) -> Unit
+    ) = handler@{ permissionGroupID: Int?, asyncResult: AsyncResult<*> ->
+        databaseManager.closeConnection(sqlConnection) {
+            if (permissionGroupID == null) {
+                handler.invoke(false, asyncResult)
+
+                return@closeConnection
+            }
+
+            if (permissionGroupID == -1) {
+                handler.invoke(false, asyncResult)
+
+                return@closeConnection
+            }
+
+            handler.invoke(true, asyncResult)
+        }
     }
 }

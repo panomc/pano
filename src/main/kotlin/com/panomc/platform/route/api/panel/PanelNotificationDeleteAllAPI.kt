@@ -13,14 +13,20 @@ class PanelNotificationDeleteAllAPI : PanelApi() {
     override val routes = arrayListOf("/api/panel/notifications/deleteAll")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, token))
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
+        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        token: String
+        idOrToken: Any
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -28,8 +34,18 @@ class PanelNotificationDeleteAllAPI : PanelApi() {
             return@handler
         }
 
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().panelNotificationDao.deleteAllByUserID(
+                idOrToken,
+                sqlConnection,
+                (this::deleteAllByUserIDHandler)(handler, sqlConnection)
+            )
+
+            return@handler
+        }
+
         databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+            idOrToken as String,
             sqlConnection,
             (this::getUserIDFromTokenHandler)(handler, sqlConnection)
         )

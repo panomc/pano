@@ -16,14 +16,20 @@ class PanelNotificationDeleteAPI : PanelApi() {
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
-        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
+        val idOrToken = LoginUtil.getUserIDOrToken(context)
 
-        databaseManager.createConnection((this::createConnectionHandler)(handler, token, id))
+        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
+            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
+
+            return
+        }
+
+        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken, id))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        token: String,
+        idOrToken: Any,
         id: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
@@ -32,18 +38,28 @@ class PanelNotificationDeleteAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.existsByID(
-            id,
+        if (idOrToken is Int) {
+            databaseManager.getDatabase().panelNotificationDao.existsByID(
+                id,
+                sqlConnection,
+                (this::existsByIDHandler)(handler, sqlConnection, id, idOrToken)
+            )
+
+            return@handler
+        }
+
+        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
+            idOrToken as String,
             sqlConnection,
-            (this::existsByIDHandler)(handler, sqlConnection, token, id)
+            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id)
         )
     }
 
     private fun existsByIDHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection,
-        token: String,
-        id: Int
+        id: Int,
+        userID: Int
     ) = handler@{ exists: Boolean?, _: AsyncResult<*> ->
         if (exists == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -61,10 +77,10 @@ class PanelNotificationDeleteAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            token,
+        databaseManager.getDatabase().panelNotificationDao.getByID(
+            id,
             sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id)
+            (this::getByIDHandler)(handler, sqlConnection, userID)
         )
     }
 
@@ -81,10 +97,10 @@ class PanelNotificationDeleteAPI : PanelApi() {
             return@handler
         }
 
-        databaseManager.getDatabase().panelNotificationDao.getByID(
+        databaseManager.getDatabase().panelNotificationDao.existsByID(
             id,
             sqlConnection,
-            (this::getByIDHandler)(handler, sqlConnection, userID)
+            (this::existsByIDHandler)(handler, sqlConnection, id, userID)
         )
     }
 
