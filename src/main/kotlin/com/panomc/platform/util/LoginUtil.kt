@@ -282,7 +282,7 @@ object LoginUtil {
         routingContext: RoutingContext,
         handler: (isLoggedOut: Result?, asyncResult: AsyncResult<*>?) -> Unit
     ) {
-        val session = routingContext.session().get<String?>(SESSION_NAME)
+        val session = routingContext.session().get<Int?>(SESSION_NAME)
 
         if (session != null) {
             routingContext.session().destroy()
