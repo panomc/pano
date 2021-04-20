@@ -23,6 +23,9 @@ abstract class Api : Route() {
     fun getResultHandler(result: Result, context: RoutingContext) {
         val response = context.response()
 
+        response
+            .putHeader("content-type", "application/json; charset=utf-8")
+
         when (result) {
             is Successful -> {
                 val responseMap = mutableMapOf<String, Any?>(
@@ -57,11 +60,6 @@ abstract class Api : Route() {
     }
 
     fun getHandler(context: RoutingContext) {
-        val response = context.response()
-
-        response
-            .putHeader("content-type", "application/json; charset=utf-8")
-
         getHandler(context) { result ->
             getResultHandler(result, context)
         }
