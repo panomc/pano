@@ -35,6 +35,9 @@ enum class ErrorCode {
     NOT_EXISTS,
 
     POST_NOT_FOUND,
+
+    NOT_LOGGED_IN,
+
     UNKNOWN,
 
     UNKNOWN_ERROR_1,

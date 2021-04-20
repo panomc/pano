@@ -5,6 +5,7 @@ import com.panomc.platform.db.model.SystemProperty
 import com.panomc.platform.db.model.Ticket
 import com.panomc.platform.db.model.TicketCategory
 import com.panomc.platform.model.*
+import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -15,7 +16,7 @@ class DashboardAPI : PanelApi() {
     override val routes = arrayListOf("/api/panel/initPage/dashboard")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie("pano_token").value
+        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
         val result = mutableMapOf<String, Any?>(
             "getting_started_blocks" to mapOf(
                 "welcome_board" to false

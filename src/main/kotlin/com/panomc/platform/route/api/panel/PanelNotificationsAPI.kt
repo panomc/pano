@@ -3,6 +3,7 @@ package com.panomc.platform.route.api.panel
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
+import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -13,7 +14,7 @@ class PanelNotificationsAPI : PanelApi() {
     override val routes = arrayListOf("/api/panel/notifications")
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie("pano_token").value
+        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
 
         databaseManager.createConnection((this::createConnectionHandler)(handler, token))
     }

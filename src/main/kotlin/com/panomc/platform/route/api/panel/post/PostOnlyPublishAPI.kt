@@ -2,6 +2,7 @@ package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
+import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -15,7 +16,7 @@ class PostOnlyPublishAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        val token = context.getCookie("pano_token").value
+        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(

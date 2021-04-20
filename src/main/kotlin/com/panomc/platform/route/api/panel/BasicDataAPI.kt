@@ -5,6 +5,7 @@ import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
+import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.PlatformCodeManager
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -27,7 +28,7 @@ class BasicDataAPI : PanelApi() {
     lateinit var configManager: ConfigManager
 
     override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val token = context.getCookie("pano_token").value
+        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
 
         databaseManager.createConnection((this::createConnectionHandler)(handler, context, token))
     }

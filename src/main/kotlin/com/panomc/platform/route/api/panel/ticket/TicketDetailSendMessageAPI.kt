@@ -3,6 +3,7 @@ package com.panomc.platform.route.api.panel.ticket
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.TicketMessage
 import com.panomc.platform.model.*
+import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -18,7 +19,7 @@ class TicketDetailSendMessageAPI : PanelApi() {
         val ticketID = data.getInteger("ticket_id")
         val message = data.getString("message")
 
-        val token = context.getCookie("pano_token").value
+        val token = context.getCookie(LoginUtil.COOKIE_NAME).value
 
         databaseManager.createConnection((this::createConnectionHandler)(handler, ticketID, message, token))
     }
