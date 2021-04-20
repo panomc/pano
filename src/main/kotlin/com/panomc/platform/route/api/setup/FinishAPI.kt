@@ -2,7 +2,6 @@ package com.panomc.platform.route.api.setup
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
-import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
 import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.RegisterUtil
@@ -37,10 +36,9 @@ class FinishAPI : SetupApi() {
         RegisterUtil.validateForm(
             username,
             email,
-            email,
             password,
             password,
-            false,
+            true,
             "",
             null,
             (this::validateFormHandler)(handler, context, username, email, password, remoteIP)
@@ -72,7 +70,6 @@ class FinishAPI : SetupApi() {
             )
         )
     }
-
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
@@ -114,9 +111,12 @@ class FinishAPI : SetupApi() {
         RegisterUtil.register(
             databaseManager,
             sqlConnection,
-            User(-1, username, email, password, remoteIP, 0, System.currentTimeMillis()),
+            username,
+            email,
+            password,
+            remoteIP,
             true,
-            (this::registerHandler)(handler, context, sqlConnection, username, password)
+            (this::registerHandler)(handler, context, sqlConnection, username)
         )
     }
 
@@ -125,16 +125,7 @@ class FinishAPI : SetupApi() {
         context: RoutingContext,
         sqlConnection: SqlConnection,
         username: String,
-        password: String,
-    ) = handler@{ result: Result?, _: AsyncResult<*> ->
-        if (result == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_144))
-            }
-
-            return@handler
-        }
-
+    ) = handler@{ result: Result, _: AsyncResult<*>? ->
         if (result is Error) {
             databaseManager.closeConnection(sqlConnection) {
                 handler.invoke(result)
