@@ -6,6 +6,7 @@ import com.panomc.platform.route.api.TestSendNotificationAPI
 import com.panomc.platform.route.api.auth.CredentialsAPI
 import com.panomc.platform.route.api.auth.LoginAPI
 import com.panomc.platform.route.api.auth.LogoutAPI
+import com.panomc.platform.route.api.auth.RegisterAPI
 import com.panomc.platform.route.api.panel.*
 import com.panomc.platform.route.api.panel.dashboard.CloseConnectServerCardAPI
 import com.panomc.platform.route.api.panel.dashboard.CloseGettingStartedCardAPI
@@ -163,7 +164,8 @@ class RouterModule(private val mVertx: Vertx) {
             PostDetailAPI(),
             CategoryPostsAPI(),
 
-            CredentialsAPI()
+            CredentialsAPI(),
+            RegisterAPI()
         )
     }
 

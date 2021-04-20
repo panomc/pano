@@ -6,6 +6,7 @@ import com.panomc.platform.db.DatabaseMigration
 import com.panomc.platform.di.module.*
 import com.panomc.platform.model.Api
 import com.panomc.platform.model.SetupApi
+import com.panomc.platform.route.api.auth.RegisterAPI
 import com.panomc.platform.route.api.panel.BasicDataAPI
 import com.panomc.platform.route.api.panel.platformAuth.RefreshKeyAPI
 import com.panomc.platform.route.api.server.ConnectNewAPI
@@ -61,4 +62,6 @@ interface ApplicationComponent {
     fun inject(databaseMigration: DatabaseMigration)
 
     fun inject(setupApi: SetupApi)
+
+    fun inject(registerAPI: RegisterAPI)
 }
