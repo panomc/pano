@@ -58,7 +58,7 @@ class LoginAPI : Api() {
             return
         }
 
-        if (!password.matches(Regex("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,64}\$"))) {
+        if (password.length < 6 || password.length > 128) {
             handler.invoke(Error(ErrorCode.LOGIN_LOGIN_IS_INVALID))
 
             return
