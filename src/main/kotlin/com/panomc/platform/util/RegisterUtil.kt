@@ -105,6 +105,7 @@ object RegisterUtil {
         password: String,
         remoteIP: String,
         isAdmin: Boolean = false,
+        isSetup: Boolean = false,
         handler: (result: Result, asyncResult: AsyncResult<*>?) -> Unit
     ) {
         databaseManager.getDatabase().userDao.isExistsByUsername(
@@ -118,7 +119,8 @@ object RegisterUtil {
                 email,
                 password,
                 remoteIP,
-                isAdmin
+                isAdmin,
+                isSetup
             )
         )
     }
@@ -131,7 +133,8 @@ object RegisterUtil {
         email: String,
         password: String,
         remoteIP: String,
-        isAdmin: Boolean
+        isAdmin: Boolean,
+        isSetup: Boolean
     ) = handler@{ exists: Boolean?, asyncResult: AsyncResult<*> ->
         if (exists == null) {
             databaseManager.closeConnection(sqlConnection) {
@@ -160,7 +163,8 @@ object RegisterUtil {
                 email,
                 password,
                 remoteIP,
-                isAdmin
+                isAdmin,
+                isSetup
             )
         )
     }
@@ -173,7 +177,8 @@ object RegisterUtil {
         email: String,
         password: String,
         remoteIP: String,
-        isAdmin: Boolean
+        isAdmin: Boolean,
+        isSetup: Boolean
     ) = handler@{ exists: Boolean?, asyncResult: AsyncResult<*> ->
         if (exists == null) {
             handler.invoke(
@@ -193,7 +198,7 @@ object RegisterUtil {
         val user = User(-1, username, email, password, remoteIP, -1, System.currentTimeMillis())
 
         if (!isAdmin) {
-            addUser(user, databaseManager, sqlConnection, handler)
+            addUser(user, databaseManager, sqlConnection, isSetup, handler)
 
             return@handler
         }
@@ -208,7 +213,8 @@ object RegisterUtil {
                 username,
                 email,
                 password,
-                remoteIP
+                remoteIP,
+                isSetup
             )
         )
     }
@@ -220,7 +226,8 @@ object RegisterUtil {
         username: String,
         email: String,
         password: String,
-        remoteIP: String
+        remoteIP: String,
+        isSetup: Boolean
     ) = handler@{ permissionGroupID: Int?, asyncResult: AsyncResult<*> ->
         if (permissionGroupID == null) {
             handler.invoke(
@@ -245,6 +252,7 @@ object RegisterUtil {
             adminUser,
             databaseManager,
             sqlConnection,
+            isSetup,
             (this::addUserHandler)(databaseManager, sqlConnection, handler, username)
         )
     }
@@ -360,9 +368,10 @@ object RegisterUtil {
         user: User,
         databaseManager: DatabaseManager,
         sqlConnection: SqlConnection,
+        isSetup: Boolean,
         handler: (result: Result, asyncResult: AsyncResult<*>) -> Unit
     ) {
-        databaseManager.getDatabase().userDao.add(user, sqlConnection) { isSuccessful, asyncResultOfAdd ->
+        databaseManager.getDatabase().userDao.add(user, sqlConnection, isSetup) { isSuccessful, asyncResultOfAdd ->
             if (isSuccessful == null) {
                 handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_144), asyncResultOfAdd)
 

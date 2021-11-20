@@ -9,7 +9,12 @@ import io.vertx.sqlclient.SqlConnection
 @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
 interface UserDao : Dao<User> {
 
-    fun add(user: User, sqlConnection: SqlConnection, handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit)
+    fun add(
+        user: User,
+        sqlConnection: SqlConnection,
+        isSetup: Boolean,
+        handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
+    )
 
     fun isEmailExists(
         email: String,

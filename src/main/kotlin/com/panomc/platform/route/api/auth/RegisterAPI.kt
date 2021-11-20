@@ -99,8 +99,9 @@ class RegisterAPI : Api() {
             email,
             password,
             remoteIP,
-            false,
-            (this::registerHandler)(handler, sqlConnection)
+            isAdmin = false,
+            isSetup = false,
+            handler = (this::registerHandler)(handler, sqlConnection)
         )
     }
 

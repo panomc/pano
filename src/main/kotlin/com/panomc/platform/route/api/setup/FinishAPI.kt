@@ -115,8 +115,9 @@ class FinishAPI : SetupApi() {
             email,
             password,
             remoteIP,
-            true,
-            (this::registerHandler)(handler, context, sqlConnection, username)
+            isAdmin = true,
+            isSetup = true,
+            handler = (this::registerHandler)(handler, context, sqlConnection, username)
         )
     }
 

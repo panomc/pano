@@ -48,11 +48,12 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
     override fun add(
         user: User,
         sqlConnection: SqlConnection,
+        isSetup: Boolean,
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         val query =
-            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, registered_ip, permission_group_id, secret_key, public_key, register_date) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO `${getTablePrefix() + tableName}` (username, email, password, registered_ip, permission_group_id, secret_key, public_key, register_date, email_verified) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
         val key = Keys.keyPairFor(SignatureAlgorithm.RS256)
 
@@ -67,7 +68,8 @@ class UserDaoImpl(override val tableName: String = "user") : DaoImpl(), UserDao 
                     user.permissionGroupID,
                     Base64.getEncoder().encodeToString(key.private.encoded),
                     Base64.getEncoder().encodeToString(key.public.encoded),
-                    user.registerDate
+                    user.registerDate,
+                    if (isSetup) 1 else 0
                 )
             ) { queryResult ->
                 if (queryResult.succeeded())
