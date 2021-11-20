@@ -33,12 +33,12 @@ class IndexTemplate : Template() {
 
     override fun getHandler() = Handler<RoutingContext> { context ->
         val response = context.response()
-        val normalisedPath = context.normalisedPath()
+        val normalisedPath = context.normalizedPath()
 
-        if (!mHotLinks[normalisedPath.toLowerCase()].isNullOrEmpty())
+        if (!mHotLinks[normalisedPath.lowercase()].isNullOrEmpty())
             response.putHeader(
                 "location",
-                mHotLinks[normalisedPath.toLowerCase()]
+                mHotLinks[normalisedPath.lowercase()]
             ).setStatusCode(302).end()
         else if (normalisedPath.startsWith("/panel") && setupManager.isSetupDone())
             LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->

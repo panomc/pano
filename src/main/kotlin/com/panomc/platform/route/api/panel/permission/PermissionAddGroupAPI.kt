@@ -46,7 +46,7 @@ class PermissionAddGroupAPI : PanelApi() {
         successHandler.invoke()
     }
 
-    private fun getSystematicName(name: String) = name.toLowerCase().replace("\\s+".toRegex(), "-")
+    private fun getSystematicName(name: String) = name.lowercase().replace("\\s+".toRegex(), "-")
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,

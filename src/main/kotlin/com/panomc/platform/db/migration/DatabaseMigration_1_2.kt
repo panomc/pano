@@ -37,8 +37,8 @@ class DatabaseMigration_1_2 : DatabaseMigration() {
                                 if (queryResult.succeeded())
                                     sqlConnection
                                         .preparedQuery("INSERT INTO ${getTablePrefix()}system_property (`option`, `value`) VALUES (?, ?)")
-                                        .execute(Tuple.of("show_connect_server_info", "true")) { queryResult ->
-                                            handler.invoke(queryResult)
+                                        .execute(Tuple.of("show_connect_server_info", "true")) { queryResult2 ->
+                                            handler.invoke(queryResult2)
                                         }
                                 else
                                     handler.invoke(queryResult)

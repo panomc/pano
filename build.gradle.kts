@@ -1,14 +1,14 @@
 plugins {
     java
-    kotlin("jvm") version "1.4.32"
-    kotlin("kapt") version "1.4.32"
-    id("io.vertx.vertx-plugin") version "1.2.0"
+    kotlin("jvm") version "1.6.0"
+    kotlin("kapt") version "1.6.0"
+    id("io.vertx.vertx-plugin") version "1.3.0"
 }
 
 group = "com.panomc.platform"
 version = "1.0"
 
-val vertxVersionVariable = "4.0.3"
+val vertxVersionVariable = "4.2.1"
 
 repositories {
     jcenter()
@@ -41,8 +41,8 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.30")
 
     // dagger 2x
-    implementation("com.google.dagger:dagger:2.33")
-    kapt("com.google.dagger:dagger-compiler:2.33")
+    implementation("com.google.dagger:dagger:2.40.1")
+    kapt("com.google.dagger:dagger-compiler:2.40.1")
 
     // recaptcha v2 1.0.4
     implementation("com.github.triologygmbh:reCAPTCHA-V2-java:1.0.4")

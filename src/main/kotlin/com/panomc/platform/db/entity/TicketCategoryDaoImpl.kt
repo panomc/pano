@@ -10,7 +10,6 @@ import io.vertx.sqlclient.Row
 import io.vertx.sqlclient.RowSet
 import io.vertx.sqlclient.SqlConnection
 import io.vertx.sqlclient.Tuple
-import java.util.*
 
 class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") : DaoImpl(), TicketCategoryDao {
 
@@ -223,13 +222,13 @@ class TicketCategoryDaoImpl(override val tableName: String = "ticket_category") 
     }
 
     override fun getByIDList(
-        ticketCategoryIDList: List<Int>,
+        ticketCategoryIdList: List<Int>,
         sqlConnection: SqlConnection,
         handler: (ticketCategoryList: Map<Int, TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     ) {
         var listText = ""
 
-        ticketCategoryIDList.forEach { id ->
+        ticketCategoryIdList.forEach { id ->
             if (listText == "")
                 listText = "'$id'"
             else

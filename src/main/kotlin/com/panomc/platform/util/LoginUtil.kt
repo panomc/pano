@@ -54,7 +54,7 @@ object LoginUtil {
                     tokenCookie.setMaxAge(age)
                     tokenCookie.path = path
 
-                    routingContext.addCookie(tokenCookie)
+                    routingContext.response().addCookie(tokenCookie)
 
                     handler.invoke(true, asyncResultOfCreateToken)
                 }
@@ -292,12 +292,12 @@ object LoginUtil {
             return
         }
 
-        val cookie = routingContext.getCookie(COOKIE_NAME)
+        val cookie = routingContext.request().getCookie(COOKIE_NAME)
 
         if (cookie != null) {
             val token = cookie.value
 
-            routingContext.removeCookie(COOKIE_NAME)
+            routingContext.response().removeCookie(COOKIE_NAME)
 
             databaseManager.createConnection { sqlConnection, asyncResult ->
                 if (sqlConnection == null) {
@@ -340,7 +340,7 @@ object LoginUtil {
             return session
         }
 
-        val cookie = routingContext.getCookie(COOKIE_NAME) ?: return null
+        val cookie = routingContext.request().getCookie(COOKIE_NAME) ?: return null
 
         if (cookie.value !is String)
             return null

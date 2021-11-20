@@ -45,7 +45,7 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl() {
         else
             "src/main/resources/setup/assets/"
 
-        val normalisedPath = context.normalisedPath()
+        val normalisedPath = context.normalizedPath()
 
         if (normalisedPath.startsWith("/panel/") && hasAccess)
             assetsFolderRoot = "src/main/resources/panel/assets/"

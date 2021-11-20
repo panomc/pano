@@ -37,7 +37,7 @@ interface TicketCategoryDao : Dao<TicketCategory> {
         handler: (result: Result?, asyncResult: AsyncResult<*>) -> Unit
     )
 
-    fun count(SqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
+    fun count(sqlConnection: SqlConnection, handler: (count: Int?, asyncResult: AsyncResult<*>) -> Unit)
 
     fun getByPage(
         page: Int,
@@ -52,7 +52,7 @@ interface TicketCategoryDao : Dao<TicketCategory> {
     )
 
     fun getByIDList(
-        id: List<Int>,
+        ticketCategoryIdList: List<Int>,
         sqlConnection: SqlConnection,
         handler: (ticketCategoryList: Map<Int, TicketCategory>?, asyncResult: AsyncResult<*>) -> Unit
     )

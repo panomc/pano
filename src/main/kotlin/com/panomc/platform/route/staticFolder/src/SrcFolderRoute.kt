@@ -28,7 +28,7 @@ class SrcFolderRoute : Route() {
     lateinit var databaseManager: DatabaseManager
 
     override fun getHandler() = Handler<RoutingContext> { context ->
-        val normalisedPath = context.normalisedPath()
+        val normalisedPath = context.normalizedPath()
 
         if (normalisedPath.startsWith("/panel/"))
             LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
@@ -53,7 +53,7 @@ class SrcFolderRoute : Route() {
             "src/main/resources/setup/"
 
         val response = context.response()
-        val normalisedPath = context.normalisedPath()
+        val normalisedPath = context.normalizedPath()
 
         if (setupManager.isSetupDone())
             if (normalisedPath.startsWith("/panel/") && hasAccess)

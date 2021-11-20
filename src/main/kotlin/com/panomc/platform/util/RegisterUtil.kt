@@ -77,6 +77,7 @@ object RegisterUtil {
 
             return
         }
+
         if (password != passwordRepeat) {
             handler.invoke(Error(ErrorCode.REGISTER_PASSWORD_AND_PASSWORD_REPEAT_NOT_SAME))
 
