@@ -16,7 +16,7 @@ abstract class PanelApi : Api() {
 
         LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
             if (!isLoggedIn) {
-                context.reroute("/")
+                sendResult(Error(ErrorCode.NOT_LOGGED_IN), context)
 
                 return@isLoggedIn
             }
@@ -25,7 +25,7 @@ abstract class PanelApi : Api() {
                 if (isAdmin)
                     getHandler(context)
                 else
-                    context.reroute("/")
+                    sendResult(Error(ErrorCode.NO_PERMISSION), context)
             }
         }
     }
