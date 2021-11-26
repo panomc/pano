@@ -8,7 +8,7 @@ import io.vertx.ext.web.RoutingContext
 abstract class LoggedInApi : Api() {
     override fun getHandler() = Handler<RoutingContext> { context ->
         if (!setupManager.isSetupDone()) {
-            context.reroute("/")
+            sendResult(Error(ErrorCode.INSTALLATION_REQUIRED), context)
 
             return@Handler
         }

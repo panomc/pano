@@ -1,5 +1,6 @@
 package com.panomc.platform.model
 
+import com.panomc.platform.ErrorCode
 import com.panomc.platform.util.LoginUtil
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
@@ -8,7 +9,7 @@ abstract class PanelApi : Api() {
 
     override fun getHandler() = Handler<RoutingContext> { context ->
         if (!setupManager.isSetupDone()) {
-            context.reroute("/")
+            sendResult(Error(ErrorCode.INSTALLATION_REQUIRED), context)
 
             return@Handler
         }
