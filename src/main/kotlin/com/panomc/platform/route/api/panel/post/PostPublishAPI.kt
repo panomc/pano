@@ -13,7 +13,7 @@ class PostPublishAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/post/publish")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getValue("id").toString().toInt()
         val title = data.getString("title")

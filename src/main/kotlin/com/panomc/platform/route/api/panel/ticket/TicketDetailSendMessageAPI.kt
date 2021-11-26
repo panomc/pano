@@ -13,7 +13,7 @@ class TicketDetailSendMessageAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/ticket/detail/message/send")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val ticketID = data.getInteger("ticket_id")

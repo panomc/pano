@@ -13,7 +13,7 @@ class CredentialsAPI : LoggedInApi() {
 
     override val routes = arrayListOf("/api/auth/credentials")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val idOrToken = LoginUtil.getUserIDOrToken(context)
 
         databaseManager.createConnection(

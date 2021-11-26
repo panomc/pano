@@ -11,7 +11,7 @@ class CheckAPI : SetupApi() {
 
     override val routes = arrayListOf("/api/setup/step/check")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         handler.invoke(Successful(setupManager.getCurrentStepData()))
     }
 }

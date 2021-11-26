@@ -20,7 +20,7 @@ class ConnectNewAPI : Api() {
     @Inject
     lateinit var platformCodeManager: PlatformCodeManager
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (!setupManager.isSetupDone()) {
             context.reroute("/")
 

@@ -1,7 +1,7 @@
 package com.panomc.platform.route.api.panel.permission
 
 import com.panomc.platform.ErrorCode
-import com.panomc.platform.db.model.*
+import com.panomc.platform.db.model.PermissionGroup
 import com.panomc.platform.model.*
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -12,7 +12,7 @@ class PermissionGetGroupsAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/permission/groups")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         databaseManager.createConnection((this::createConnectionHandler)(handler))
     }
 

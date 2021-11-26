@@ -21,7 +21,7 @@ abstract class LoggedInApi : Api() {
                 return@isLoggedIn
             }
 
-            getHandler(context)
+            handler(context)
         }
     }
 }

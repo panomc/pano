@@ -21,7 +21,7 @@ class RefreshKeyAPI : PanelApi() {
     @Inject
     lateinit var platformCodeManager: PlatformCodeManager
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         handler.invoke(
             Successful(
                 mapOf(

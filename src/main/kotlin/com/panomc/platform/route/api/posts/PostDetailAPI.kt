@@ -13,7 +13,7 @@ class PostDetailAPI : Api() {
 
     override val routes = arrayListOf("/api/posts/detail")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 

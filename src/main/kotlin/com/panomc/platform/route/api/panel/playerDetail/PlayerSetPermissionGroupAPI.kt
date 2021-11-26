@@ -12,7 +12,7 @@ class PlayerSetPermissionGroupAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/player/set/permissionGroup")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val username = data.getString("username")

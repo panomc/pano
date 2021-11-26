@@ -18,7 +18,7 @@ class FinishAPI : SetupApi() {
         getComponent().inject(this)
     }
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         if (setupManager.getStep() != 3) {
             handler.invoke(Successful(setupManager.getCurrentStepData()))
 

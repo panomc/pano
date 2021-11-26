@@ -12,7 +12,7 @@ class PermissionSetAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/permission/set")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val permissionGroupID = data.getInteger("permission_group_id")

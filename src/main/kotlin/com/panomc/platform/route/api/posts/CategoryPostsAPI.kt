@@ -15,7 +15,7 @@ class CategoryPostsAPI : Api() {
 
     override val routes = arrayListOf("/api/posts/categoryPosts")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val categoryUrl = data.getString("url")
         val page = data.getInteger("page")

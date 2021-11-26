@@ -11,6 +11,6 @@ abstract class SetupApi : Api() {
             return@Handler
         }
 
-        getHandler(context)
+        handler(context)
     }
 }

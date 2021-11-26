@@ -12,7 +12,7 @@ class DBConnectionTestAPI : SetupApi() {
 
     override val routes = arrayListOf("/api/setup/dbConnectionTest")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         var port = 3306

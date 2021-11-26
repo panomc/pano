@@ -21,7 +21,7 @@ class NextStepAPI : SetupApi() {
     @Inject
     lateinit var configManager: ConfigManager
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
 
         val clientStep = data.getInteger("step")
@@ -31,7 +31,9 @@ class NextStepAPI : SetupApi() {
 
             if (clientStep == 0)
                 passStep = true
-            else if (clientStep == 1 && !data.getString("websiteName").isNullOrEmpty() && !data.getString("websiteDescription").isNullOrEmpty()) {
+            else if (clientStep == 1 && !data.getString("websiteName")
+                    .isNullOrEmpty() && !data.getString("websiteDescription").isNullOrEmpty()
+            ) {
                 configManager.getConfig()["website-name"] = data.getString("websiteName")
                 configManager.getConfig()["website-description"] = data.getString("websiteDescription")
 

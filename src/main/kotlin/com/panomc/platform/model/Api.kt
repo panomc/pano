@@ -59,15 +59,15 @@ abstract class Api : Route() {
         }
     }
 
-    fun getHandler(context: RoutingContext) {
-        getHandler(context) { result ->
+    override fun getHandler() = Handler<RoutingContext> { context ->
+        handler(context)
+    }
+
+    fun handler(context: RoutingContext) {
+        handler(context) { result ->
             sendResult(result, context)
         }
     }
 
-    override fun getHandler() = Handler<RoutingContext> { context ->
-        getHandler(context)
-    }
-
-    abstract fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit)
+    abstract fun handler(context: RoutingContext, handler: (result: Result) -> Unit)
 }

@@ -14,7 +14,7 @@ class TicketsPageInitAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/initPage/ticketPage")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val pageType = data.getInteger("page_type")
         val page = data.getInteger("page")

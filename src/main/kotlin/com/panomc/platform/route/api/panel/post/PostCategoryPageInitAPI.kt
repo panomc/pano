@@ -14,7 +14,7 @@ class PostCategoryPageInitAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/initPage/posts/categoryPage")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val page = data.getInteger("page")
 

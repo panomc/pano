@@ -13,7 +13,7 @@ class CloseConnectServerCardAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/dashboard/closeConnectServerCard")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val idOrToken = LoginUtil.getUserIDOrToken(context)
 
         if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {

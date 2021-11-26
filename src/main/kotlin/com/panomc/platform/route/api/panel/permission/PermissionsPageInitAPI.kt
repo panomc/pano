@@ -14,7 +14,7 @@ class PermissionsPageInitAPI : PanelApi() {
 
     override val routes = arrayListOf("/api/panel/initPage/permissionsPage")
 
-    override fun getHandler(context: RoutingContext, handler: (result: Result) -> Unit) {
+    override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         databaseManager.createConnection((this::createConnectionHandler)(handler))
     }
 

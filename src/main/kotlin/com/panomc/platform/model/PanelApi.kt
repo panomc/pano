@@ -23,7 +23,7 @@ abstract class PanelApi : Api() {
 
             LoginUtil.hasAccessPanel(databaseManager, context) { isAdmin, _ ->
                 if (isAdmin)
-                    getHandler(context)
+                    handler(context)
                 else
                     sendResult(Error(ErrorCode.NO_PERMISSION), context)
             }
