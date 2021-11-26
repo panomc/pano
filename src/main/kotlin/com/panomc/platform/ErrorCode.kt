@@ -39,6 +39,8 @@ enum class ErrorCode {
     POST_NOT_FOUND,
 
     NOT_LOGGED_IN,
+    INSTALLATION_REQUIRED,
+    NO_PERMISSION,
 
     UNKNOWN,
 
