@@ -15,7 +15,7 @@ abstract class LoggedInApi : Api() {
 
         LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
             if (!isLoggedIn) {
-                getResultHandler(Error(ErrorCode.NOT_LOGGED_IN), context)
+                sendResult(Error(ErrorCode.NOT_LOGGED_IN), context)
 
 
                 return@isLoggedIn

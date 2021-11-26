@@ -20,7 +20,7 @@ abstract class Api : Route() {
         Main.getComponent().inject(this)
     }
 
-    fun getResultHandler(result: Result, context: RoutingContext) {
+    fun sendResult(result: Result, context: RoutingContext) {
         val response = context.response()
 
         response
@@ -61,7 +61,7 @@ abstract class Api : Route() {
 
     fun getHandler(context: RoutingContext) {
         getHandler(context) { result ->
-            getResultHandler(result, context)
+            sendResult(result, context)
         }
     }
 
