@@ -8,7 +8,6 @@ import io.vertx.core.*
 import io.vertx.core.logging.Logger
 import io.vertx.core.logging.LoggerFactory
 import io.vertx.ext.web.Router
-import java.net.URLClassLoader
 import java.util.jar.Manifest
 import javax.inject.Inject
 
@@ -26,15 +25,15 @@ class Main : AbstractVerticle() {
             Vertx.vertx(mOptions)
         }
 
-        private val mURLClassLoader = Main::class.java.classLoader as URLClassLoader
         private val mMode by lazy {
             try {
-                val manifestUrl = mURLClassLoader.findResource("META-INF/MANIFEST.MF")
-                val manifest = Manifest(manifestUrl.openStream())
+                val urlClassLoader = ClassLoader.getSystemClassLoader()
+                val manifestUrl = urlClassLoader.getResourceAsStream("META-INF/MANIFEST.MF")
+                val manifest = Manifest(manifestUrl)
 
                 manifest.mainAttributes.getValue("MODE").toString()
             } catch (e: Exception) {
-                ""
+                "RELEASE"
             }
         }
 
