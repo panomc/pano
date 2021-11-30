@@ -4,7 +4,7 @@ import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.db.DatabaseManager
 import com.panomc.platform.model.Route
-import com.panomc.platform.util.LoginUtil
+import com.panomc.platform.util.AuthProvider
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
@@ -27,18 +27,21 @@ class SrcFolderRoute : Route() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
+    @Inject
+    lateinit var authProvider: AuthProvider
+
     override fun getHandler() = Handler<RoutingContext> { context ->
         val normalisedPath = context.normalizedPath()
 
         if (normalisedPath.startsWith("/panel/"))
-            LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+            authProvider.isLoggedIn(context) { isLoggedIn ->
                 if (!isLoggedIn) {
                     handle(context, false)
 
                     return@isLoggedIn
                 }
 
-                LoginUtil.hasAccessPanel(databaseManager, context) { hasAccess, _ ->
+                authProvider.hasAccessPanel(context) { hasAccess, _ ->
                     handle(context, hasAccess)
                 }
             }

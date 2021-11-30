@@ -5,7 +5,6 @@ import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.config.ConfigManager
 import com.panomc.platform.db.model.User
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.PlatformCodeManager
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -28,54 +27,18 @@ class BasicDataAPI : PanelApi() {
     lateinit var configManager: ConfigManager
 
     override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
-        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
-
-        databaseManager.createConnection((this::createConnectionHandler)(handler, context, idOrToken))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, context, userID))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         context: RoutingContext,
-        idOrToken: Any
+        userID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-
-            return@handler
-        }
-
-        if (idOrToken is Int) {
-            databaseManager.getDatabase().userDao.getByID(
-                idOrToken,
-                sqlConnection,
-                (this::getByIDHandler)(handler, context, sqlConnection, idOrToken)
-            )
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken as String,
-            sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, context, sqlConnection)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        context: RoutingContext,
-        sqlConnection: SqlConnection
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_8))
-            }
 
             return@handler
         }

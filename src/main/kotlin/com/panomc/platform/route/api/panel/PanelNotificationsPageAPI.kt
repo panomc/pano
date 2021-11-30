@@ -3,7 +3,6 @@ package com.panomc.platform.route.api.panel
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -17,63 +16,18 @@ class PanelNotificationsPageAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
-        if (idOrToken == null) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
-
-        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken, id))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, userID, id))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        idOrToken: Any?,
+        userID: Int,
         lastNotificationID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-
-            return@handler
-        }
-
-        if (idOrToken is Int) {
-            databaseManager.getDatabase().panelNotificationDao.get10ByUserIDAndStartFromID(
-                idOrToken,
-                lastNotificationID,
-                sqlConnection,
-                (this::get10ByUserIDAndStartFromIDHandler)(handler, sqlConnection, idOrToken, lastNotificationID)
-            )
-
-            return@handler
-        }
-
-        if (idOrToken !is String) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-            }
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken,
-            sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection, lastNotificationID)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        lastNotificationID: Int
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_166))
-            }
 
             return@handler
         }

@@ -3,7 +3,6 @@ package com.panomc.platform.route.api.panel.ticket
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.TicketMessage
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -19,22 +18,16 @@ class TicketDetailSendMessageAPI : PanelApi() {
         val ticketID = data.getInteger("ticket_id")
         val message = data.getString("message")
 
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
-        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
-
-        databaseManager.createConnection((this::createConnectionHandler)(handler, ticketID, message, idOrToken))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, ticketID, message, userID))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         ticketID: Int,
         message: String,
-        idOrToken: Any
+        userID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
@@ -42,25 +35,10 @@ class TicketDetailSendMessageAPI : PanelApi() {
             return@handler
         }
 
-        if (idOrToken is Int) {
-            databaseManager.getDatabase().ticketDao.isExistsByID(
-                ticketID,
-                sqlConnection,
-                (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, idOrToken)
-            )
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken as String,
+        databaseManager.getDatabase().ticketDao.isExistsByID(
+            ticketID,
             sqlConnection,
-            (this::getUserIDFromTokenHandler)(
-                handler,
-                sqlConnection,
-                ticketID,
-                message
-            )
+            (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, userID)
         )
     }
 
@@ -91,27 +69,6 @@ class TicketDetailSendMessageAPI : PanelApi() {
             userID,
             sqlConnection,
             (this::getUsernameFromUserIDHandler)(handler, sqlConnection, ticketID, message, userID)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        ticketID: Int,
-        message: String
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_142))
-            }
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().ticketDao.isExistsByID(
-            ticketID,
-            sqlConnection,
-            (this::isExistsByHandler)(handler, ticketID, message, sqlConnection, userID)
         )
     }
 

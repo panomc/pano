@@ -2,7 +2,6 @@ package com.panomc.platform.route.api.panel.post
 
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -16,19 +15,13 @@ class PostOnlyPublishAPI : PanelApi() {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
 
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
-
-        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(
                 handler,
                 id,
-                idOrToken
+                userID
             )
         )
     }
@@ -36,40 +29,10 @@ class PostOnlyPublishAPI : PanelApi() {
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
         id: Int,
-        idOrToken: Any
+        userID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-
-            return@handler
-        }
-
-        if (idOrToken is Int) {
-            databaseManager.getDatabase().postDao.isExistsByID(
-                id,
-                sqlConnection,
-                (this::isExistsByIDHandler)(handler, sqlConnection, id, idOrToken)
-            )
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken as String,
-            sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        id: Int,
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_105))
-            }
 
             return@handler
         }

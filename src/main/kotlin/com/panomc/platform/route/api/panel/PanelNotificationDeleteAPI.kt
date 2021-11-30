@@ -3,7 +3,6 @@ package com.panomc.platform.route.api.panel
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.PanelNotification
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -16,20 +15,14 @@ class PanelNotificationDeleteAPI : PanelApi() {
     override fun handler(context: RoutingContext, handler: (result: Result) -> Unit) {
         val data = context.bodyAsJson
         val id = data.getInteger("id")
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
-        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
-
-        databaseManager.createConnection((this::createConnectionHandler)(handler, idOrToken, id))
+        databaseManager.createConnection((this::createConnectionHandler)(handler, userID, id))
     }
 
     private fun createConnectionHandler(
         handler: (result: Result) -> Unit,
-        idOrToken: Any,
+        userID: Int,
         id: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
@@ -38,20 +31,10 @@ class PanelNotificationDeleteAPI : PanelApi() {
             return@handler
         }
 
-        if (idOrToken is Int) {
-            databaseManager.getDatabase().panelNotificationDao.existsByID(
-                id,
-                sqlConnection,
-                (this::existsByIDHandler)(handler, sqlConnection, id, idOrToken)
-            )
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken as String,
+        databaseManager.getDatabase().panelNotificationDao.existsByID(
+            id,
             sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id)
+            (this::existsByIDHandler)(handler, sqlConnection, id, userID)
         )
     }
 
@@ -81,26 +64,6 @@ class PanelNotificationDeleteAPI : PanelApi() {
             id,
             sqlConnection,
             (this::getByIDHandler)(handler, sqlConnection, userID)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        id: Int
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(Error(ErrorCode.UNKNOWN_ERROR_170))
-            }
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().panelNotificationDao.existsByID(
-            id,
-            sqlConnection,
-            (this::existsByIDHandler)(handler, sqlConnection, id, userID)
         )
     }
 

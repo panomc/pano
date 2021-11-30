@@ -1,6 +1,9 @@
 package com.panomc.platform.config
 
 import com.panomc.platform.config.migration.ConfigMigration_1_2
+import com.panomc.platform.config.migration.ConfigMigration_2_3
+import com.panomc.platform.util.KeyGeneratorUtil
+import io.jsonwebtoken.io.Encoders
 import io.vertx.config.ConfigRetriever
 import io.vertx.config.ConfigRetrieverOptions
 import io.vertx.config.ConfigStoreOptions
@@ -13,8 +16,9 @@ import java.io.File
 
 class ConfigManager(mLogger: Logger, mVertx: Vertx) {
 
-    private val mMigrations = listOf<ConfigMigration>(
-        ConfigMigration_1_2()
+    private val mMigrations = listOf(
+        ConfigMigration_1_2(),
+        ConfigMigration_2_3()
     )
 
     private val mConfig = com.beust.klaxon.JsonObject()
@@ -32,9 +36,11 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
     }
 
     companion object {
-        private const val CONFIG_VERSION = 2
+        private const val CONFIG_VERSION = 3
 
         private val DEFAULT_CONFIG by lazy {
+            val key = KeyGeneratorUtil.generateJWTKeys()
+
             JsonObject(
                 mapOf(
                     "config-version" to CONFIG_VERSION,
@@ -70,6 +76,11 @@ class ConfigManager(mLogger: Logger, mVertx: Vertx) {
                         "username" to "",
                         "password" to "",
                         "SSL" to true
+                    ),
+
+                    "jwt-keys" to mapOf(
+                        "private" to Encoders.BASE64.encode(key.private.encoded),
+                        "public" to Encoders.BASE64.encode(key.public.encoded)
                     )
                 )
             )

@@ -31,7 +31,8 @@ import javax.inject.Singleton
         (SetupManagerModule::class),
         (DatabaseManagerModule::class),
         (PlatformCodeManagerModule::class),
-        (MailClientModule::class)
+        (MailClientModule::class),
+        (AuthProviderModule::class)
     ]
 )
 interface ApplicationComponent {

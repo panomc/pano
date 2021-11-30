@@ -3,7 +3,6 @@ package com.panomc.platform.route.api.setup
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.Main.Companion.getComponent
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import com.panomc.platform.util.RegisterUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
@@ -135,11 +134,8 @@ class FinishAPI : SetupApi() {
             return@handler
         }
 
-        LoginUtil.login(
+        authProvider.login(
             username,
-            true,
-            context,
-            databaseManager,
             sqlConnection,
             (this::loginHandler)(handler, sqlConnection)
         )
@@ -148,7 +144,7 @@ class FinishAPI : SetupApi() {
     private fun loginHandler(
         handler: (result: Result) -> Unit,
         sqlConnection: SqlConnection
-    ) = handler@{ isLoggedIn: Any, _: AsyncResult<*> ->
+    ) = handler@{ isLoggedIn: Any ->
         databaseManager.closeConnection(sqlConnection) {
             if (isLoggedIn is Error) {
                 handler.invoke(isLoggedIn)

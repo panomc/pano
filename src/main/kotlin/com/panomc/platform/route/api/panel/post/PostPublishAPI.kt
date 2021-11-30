@@ -3,7 +3,6 @@ package com.panomc.platform.route.api.panel.post
 import com.panomc.platform.ErrorCode
 import com.panomc.platform.db.model.Post
 import com.panomc.platform.model.*
-import com.panomc.platform.util.LoginUtil
 import io.vertx.core.AsyncResult
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
@@ -21,13 +20,7 @@ class PostPublishAPI : PanelApi() {
         val text = data.getString("text")
         val imageCode = data.getString("imageCode") ?: ""
 
-        val idOrToken = LoginUtil.getUserIDOrToken(context)
-
-        if (idOrToken == null || (idOrToken !is Int && idOrToken !is String)) {
-            handler.invoke(Error(ErrorCode.NOT_LOGGED_IN))
-
-            return
-        }
+        val userID = authProvider.getUserIDFromRoutingContext(context)
 
         databaseManager.createConnection(
             (this::createConnectionHandler)(
@@ -37,7 +30,7 @@ class PostPublishAPI : PanelApi() {
                 categoryID,
                 text,
                 imageCode,
-                idOrToken
+                userID
             )
         )
     }
@@ -49,44 +42,10 @@ class PostPublishAPI : PanelApi() {
         categoryID: Int,
         text: String,
         imageCode: String,
-        idOrToken: Any
+        userID: Int
     ) = handler@{ sqlConnection: SqlConnection?, _: AsyncResult<SqlConnection> ->
         if (sqlConnection == null) {
             handler.invoke(Error(ErrorCode.CANT_CONNECT_DATABASE))
-
-            return@handler
-        }
-
-        if (idOrToken is Int) {
-            updateOrInsert(handler, sqlConnection, id, title, categoryID, text, imageCode, idOrToken)
-
-            return@handler
-        }
-
-        databaseManager.getDatabase().tokenDao.getUserIDFromToken(
-            idOrToken as String,
-            sqlConnection,
-            (this::getUserIDFromTokenHandler)(handler, sqlConnection, id, title, categoryID, text, imageCode)
-        )
-    }
-
-    private fun getUserIDFromTokenHandler(
-        handler: (result: Result) -> Unit,
-        sqlConnection: SqlConnection,
-        id: Int,
-        title: String,
-        categoryID: Int,
-        text: String,
-        imageCode: String,
-    ) = handler@{ userID: Int?, _: AsyncResult<*> ->
-        if (userID == null) {
-            databaseManager.closeConnection(sqlConnection) {
-                handler.invoke(
-                    Error(
-                        ErrorCode.UNKNOWN_ERROR_116
-                    )
-                )
-            }
 
             return@handler
         }

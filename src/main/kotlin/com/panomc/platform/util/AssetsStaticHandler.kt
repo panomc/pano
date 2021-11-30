@@ -18,20 +18,23 @@ class AssetsStaticHandler(private val mRoot: String) : StaticHandlerImpl() {
     @Inject
     lateinit var databaseManager: DatabaseManager
 
+    @Inject
+    lateinit var authProvider: AuthProvider
+
     init {
         getComponent().inject(this)
     }
 
     override fun handle(context: RoutingContext) {
         if (context.normalizedPath().startsWith("/panel/"))
-            LoginUtil.isLoggedIn(databaseManager, context) { isLoggedIn, _ ->
+            authProvider.isLoggedIn(context) { isLoggedIn ->
                 if (!isLoggedIn) {
                     handle(context, false)
 
                     return@isLoggedIn
                 }
 
-                LoginUtil.hasAccessPanel(databaseManager, context) { hasAccess, _ ->
+                authProvider.hasAccessPanel(context) { hasAccess, _ ->
                     handle(context, hasAccess)
                 }
             }

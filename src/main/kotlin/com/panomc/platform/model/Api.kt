@@ -3,6 +3,7 @@ package com.panomc.platform.model
 import com.beust.klaxon.JsonObject
 import com.panomc.platform.Main
 import com.panomc.platform.db.DatabaseManager
+import com.panomc.platform.util.AuthProvider
 import com.panomc.platform.util.SetupManager
 import io.vertx.core.Handler
 import io.vertx.ext.web.RoutingContext
@@ -14,6 +15,9 @@ abstract class Api : Route() {
 
     @Inject
     lateinit var databaseManager: DatabaseManager
+
+    @Inject
+    lateinit var authProvider: AuthProvider
 
     init {
         @Suppress("LeakingThis")
