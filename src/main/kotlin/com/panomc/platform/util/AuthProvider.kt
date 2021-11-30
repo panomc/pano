@@ -123,7 +123,7 @@ class AuthProvider(
                     .signWith(
                         Keys.hmacShaKeyFor(
                             Decoders.BASE64.decode(
-                                (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["secret"] as String
+                                (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["private"] as String
                             )
                         )
                     )
