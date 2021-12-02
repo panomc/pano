@@ -12,7 +12,6 @@ import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.vertx.core.AsyncResult
-import io.vertx.core.Vertx
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
 import java.security.KeyFactory
@@ -20,7 +19,6 @@ import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 
 class AuthProvider(
-    private val mVertx: Vertx,
     private val mDatabaseManager: DatabaseManager,
     private val mConfigManager: ConfigManager
 ) {
