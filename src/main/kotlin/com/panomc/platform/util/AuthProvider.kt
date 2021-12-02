@@ -11,11 +11,13 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
-import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
+import java.security.KeyFactory
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 
 class AuthProvider(
     private val mVertx: Vertx,
@@ -109,16 +111,17 @@ class AuthProvider(
                     return@getUserIDFromUsernameOrEmailHandler
                 }
 
-                val csrfToken = VertxContextPRNG.current(mVertx).nextString(32)
+                val privateKeySpec = PKCS8EncodedKeySpec(
+                    Decoders.BASE64.decode(
+                        (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["private"] as String
+                    )
+                )
+                val keyFactory = KeyFactory.getInstance("RSA")
 
                 val token = Jwts.builder()
                     .setSubject(userID.toString())
                     .signWith(
-                        Keys.hmacShaKeyFor(
-                            Decoders.BASE64.decode(
-                                (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["private"] as String
-                            )
-                        )
+                        keyFactory.generatePrivate(privateKeySpec)
                     )
                     .compact()
 
@@ -381,15 +384,19 @@ class AuthProvider(
     }
 
     @Throws(JwtException::class)
-    fun parseToken(token: String): Jws<Claims> =
-        Jwts.parserBuilder()
+    fun parseToken(token: String): Jws<Claims> {
+        val publicKeySpec = X509EncodedKeySpec(
+            Decoders.BASE64.decode(
+                (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["public"] as String
+            )
+        )
+        val keyFactory = KeyFactory.getInstance("RSA")
+
+        return Jwts.parserBuilder()
             .setSigningKey(
-                Keys.hmacShaKeyFor(
-                    Decoders.BASE64.decode(
-                        (mConfigManager.getConfig()["jwt-keys"] as Map<*, *>)["public"] as String
-                    )
-                )
+                keyFactory.generatePublic(publicKeySpec)
             )
             .build()
             .parseClaimsJws(token)
+    }
 }
