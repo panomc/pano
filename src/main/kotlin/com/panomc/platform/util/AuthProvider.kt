@@ -14,10 +14,8 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import io.vertx.core.AsyncResult
 import io.vertx.core.Vertx
-import io.vertx.ext.auth.VertxContextPRNG
 import io.vertx.ext.web.RoutingContext
 import io.vertx.sqlclient.SqlConnection
-import org.apache.commons.codec.digest.DigestUtils
 
 class AuthProvider(
     private val mVertx: Vertx,
@@ -115,11 +113,6 @@ class AuthProvider(
 
                 val token = Jwts.builder()
                     .setSubject(userID.toString())
-                    .setClaims(
-                        mapOf(
-                            "hashed-csrf" to DigestUtils.sha512(csrfToken)
-                        )
-                    )
                     .signWith(
                         Keys.hmacShaKeyFor(
                             Decoders.BASE64.decode(
@@ -132,8 +125,7 @@ class AuthProvider(
                 handler.invoke(
                     Successful(
                         mapOf(
-                            "jwt" to token,
-                            "csrf-token" to csrfToken
+                            "jwt" to token
                         )
                     )
                 )
